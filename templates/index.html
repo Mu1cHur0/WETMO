@@ -69,7 +69,7 @@
         {% for u in all_users %}
         <div style="display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid #111;">
             <span>{{ u.username|upper }} {% if u.is_verified %}<span class="kick-badge"></span>{% endif %}</span>
-            <a href="/admin/verify/{{ u.id }}" class="btn-header">ГАЛКА</a>
+            <a href="/admin/verify/{{ u.id }}" class="btn-header">ВЫДАТЬ ГАЛОЧКУ</a>
         </div>
         {% endfor %}
         <br><a href="/" class="btn-header">НАЗАД</a>
