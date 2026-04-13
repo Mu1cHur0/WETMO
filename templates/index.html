@@ -53,7 +53,7 @@
         <a href="/" class="logo">WETMO</a>
         {% if user %}
         <div style="margin-left: auto; display: flex; align-items: center;">
-            {% if user.is_admin %}<a href="/admin" class="btn-header">ПАНЕЛЬ</a>{% endif %}
+            {% if user.is_admin %}<a href="/admin" class="btn-header">P</a>{% endif %}
             {% if target %}
             <a href="/delete_chat/{{ target.username }}" class="btn-header btn-danger" onclick="return confirm('Удалить чат?')">УДАЛИТЬ ЧАТ</a>
             {% endif %}
