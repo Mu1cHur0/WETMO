@@ -2,19 +2,17 @@ import os
 from flask import Flask, render_template, request, session, redirect, url_for, abort
 from flask_socketio import SocketIO, emit, join_room
 from flask_sqlalchemy import SQLAlchemy
-from flask_seasurf import SeaSurf
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'wetmo_pwa_ultra_2026'
+app.config['SECRET_KEY'] = 'wetmo_ultra_clean_v1'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'database.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
-csrf = SeaSurf(app)
 socketio = SocketIO(app, cors_allowed_origins="*")
 
 class User(db.Model):
@@ -37,22 +35,38 @@ with app.app_context():
 def get_chat_id(u1, u2):
     return "-".join(sorted([str(u1).lower(), str(u2).lower()]))
 
+def get_my_contacts(username):
+    all_chats = Message.query.filter(Message.chat_id.contains(username.lower())).all()
+    contact_names = set()
+    for m in all_chats:
+        parts = m.chat_id.split('-')
+        for p in parts:
+            if p != username.lower(): contact_names.add(p)
+    return User.query.filter(User.username.in_(list(contact_names))).all()
+
 @app.route('/')
 def index():
     if 'user' not in session: return redirect(url_for('auth'))
     u = User.query.filter_by(username=session['user']).first()
-    return render_template('index.html', user=u, mode='chat')
+    contacts = get_my_contacts(u.username)
+    return render_template('index.html', user=u, contacts=contacts, mode='chat')
 
 @app.route('/im/<target_user>')
 def direct_chat(target_user):
     if 'user' not in session: return redirect(url_for('auth'))
     me = User.query.filter_by(username=session['user']).first()
     target = User.query.filter_by(username=target_user.lower()).first()
-    if not target: abort(404)
-    if me.username.lower() == target.username.lower(): return redirect(url_for('index'))
+    if not target or me.username.lower() == target.username.lower(): 
+        return redirect(url_for('index'))
+    
     cid = get_chat_id(me.username, target.username)
     msgs = Message.query.filter_by(chat_id=cid).order_by(Message.timestamp.asc()).all()
-    return render_template('index.html', user=me, target=target, messages=msgs, chat_id=cid, mode='chat')
+    contacts = get_my_contacts(me.username)
+    
+    if target.username.lower() not in [c.username.lower() for c in contacts]:
+        contacts.append(target)
+
+    return render_template('index.html', user=me, target=target, messages=msgs, contacts=contacts, chat_id=cid, mode='chat')
 
 @app.route('/auth', methods=['GET', 'POST'])
 def auth():
@@ -65,10 +79,11 @@ def auth():
             if u and check_password_hash(u.password, password):
                 session['user'] = username
                 return redirect(url_for('index'))
-            return "ОШИБКА: Неверные данные", 401
+            return "Ошибка входа", 401
         else:
-            if u: return "ОШИБКА: Юзер существует", 400
-            new_u = User(username=username, password=generate_password_hash(password))
+            if u: return "Ник занят", 400
+            is_first = User.query.count() == 0
+            new_u = User(username=username, password=generate_password_hash(password), is_admin=is_first)
             db.session.add(new_u); db.session.commit()
             session['user'] = username
             return redirect(url_for('index'))
@@ -94,43 +109,19 @@ def logout():
 
 @socketio.on('join')
 def on_join(data):
-    if isinstance(data, dict):
-        if 'chat_id' in data: join_room(str(data['chat_id']))
-        if 'user' in data: join_room(f"user_{str(data['user']).lower()}")
+    if 'chat_id' in data: join_room(str(data['chat_id']))
 
-@socketio.on('send_direct')
+@socketio.on('send_msg')
 def handle_msg(data):
     if 'user' not in session: return
-    me_name = session['user'].lower()
     target = str(data.get('target', '')).lower()
-    content = str(data.get('message', '')).strip()[:2000]
+    content = str(data.get('message', '')).strip()
     if not content or not target: return
-    cid = get_chat_id(me_name, target)
+    cid = get_chat_id(session['user'], target)
     db.session.add(Message(chat_id=cid, sender=session['user'], content=content))
     db.session.commit()
     u = User.query.filter_by(username=session['user']).first()
-    payload = {'chat_id': cid, 'sender': u.username, 'message': content, 'verified': u.is_verified}
-    emit('receive_direct', payload, room=cid)
-    emit('new_chat_notification', {'from': u.username}, room=f"user_{target}")
-
-@socketio.on('typing_start')
-def typing_start(data):
-    target = data.get('target', '').lower()
-    emit('is_typing', {'from': session['user']}, room=f"user_{target}")
-
-@socketio.on('typing_stop')
-def typing_stop(data):
-    target = data.get('target', '').lower()
-    emit('stop_typing', room=f"user_{target}")
-
-@socketio.on('delete_chat')
-def handle_delete(data):
-    if 'user' not in session: return
-    cid = data.get('chat_id')
-    if cid and session['user'].lower() in cid.split('-'):
-        Message.query.filter_by(chat_id=cid).delete()
-        db.session.commit()
-        emit('chat_deleted_globally', {'chat_id': cid}, room=cid)
+    emit('receive_msg', {'sender': u.username, 'message': content, 'verified': u.is_verified}, room=cid)
 
 if __name__ == '__main__':
-    socketio.run(app, host='0.0.0.0', port=5000, debug=True)
+    socketio.run(app, host='0.0.0.0', port=5000)
