@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>WETMO</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.0.2/marked.min.js"></script>
@@ -16,9 +16,7 @@
             --border: rgba(255, 255, 255, 0.1); 
         }
 
-        /* Тот самый ползунок */
         ::-webkit-scrollbar { width: 5px; height: 5px; }
-        ::-webkit-scrollbar-track { background: #000; }
         ::-webkit-scrollbar-thumb { background: #222; border-radius: 10px; }
         ::-webkit-scrollbar-thumb:hover { background: var(--kick); }
 
@@ -29,36 +27,58 @@
             height: 100vh; overflow: hidden; 
         }
         
-        .header { background: #0a0a0a; padding: 15px 25px; display: flex; align-items: center; border-bottom: 1px solid var(--border); }
+        /* ШАПКА */
+        .header { background: #0a0a0a; padding: 15px 25px; display: flex; align-items: center; border-bottom: 1px solid var(--border); z-index: 10; }
         .logo { font-weight: 900; color: var(--accent); letter-spacing: 2px; text-decoration: none; font-size: 20px; }
         
+        .header-btns { margin-left: auto; display: flex; gap: 10px; align-items: center; }
+        .btn-main { background: var(--accent); color: #000; border: none; padding: 10px 15px; border-radius: 8px; font-weight: 900; cursor: pointer; font-size: 10px; text-decoration: none; white-space: nowrap; transition: 0.2s; }
+        .btn-main:hover { transform: scale(1.05); box-shadow: 0 0 15px rgba(0, 255, 136, 0.3); }
+
         .badge {
             display: inline-flex; align-items: center; justify-content: center;
-            width: 14px; height: 14px;
-            background: linear-gradient(135deg, #53fc18 0%, #3db311 100%);
-            color: #000; border-radius: 50%; font-size: 9px;
-            margin-left: 6px; font-weight: 900; vertical-align: middle;
-            box-shadow: 0 0 8px rgba(83, 252, 24, 0.4);
+            width: 14px; height: 14px; background: linear-gradient(135deg, #53fc18 0%, #3db311 100%);
+            color: #000; border-radius: 50%; font-size: 9px; margin-left: 6px; font-weight: 900;
         }
 
-        .btn-main { background: var(--accent); color: #000; border: none; padding: 10px 15px; border-radius: 8px; font-weight: 900; cursor: pointer; font-size: 10px; text-decoration: none; }
-
-        .tabs-container { display: flex; background: #000; padding: 10px 15px 0; gap: 5px; border-bottom: 1px solid var(--border); overflow-x: auto; min-height: 45px; }
+        /* ТАБЫ */
+        .tabs-container { display: flex; background: #000; padding: 10px 15px 0; gap: 5px; border-bottom: 1px solid var(--border); overflow-x: auto; }
         .tab-wrapper { position: relative; display: flex; align-items: center; }
         .tab { padding: 10px 35px 10px 15px; background: #111; border-radius: 8px 8px 0 0; font-size: 11px; color: #555; text-decoration: none; font-weight: 700; white-space: nowrap; border: 1px solid transparent; }
         .tab.active { background: rgba(25, 25, 25, 0.8); color: var(--accent); border: 1px solid var(--border); border-bottom: none; }
         .close-chat { position: absolute; right: 10px; color: #444; cursor: pointer; font-size: 16px; font-weight: 900; }
 
+        /* ОКНО ЧАТА */
         #chat-window { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 10px; }
-        .msg { background: rgba(255, 255, 255, 0.03); padding: 10px 15px; border-radius: 12px; max-width: 80%; border: 1px solid var(--border); }
+        .msg { background: rgba(255, 255, 255, 0.03); padding: 10px 15px; border-radius: 12px; max-width: 70%; border: 1px solid var(--border); animation: fadeIn 0.3s ease; }
         .msg.me { align-self: flex-end; background: rgba(0, 255, 136, 0.05); border-color: rgba(0, 255, 136, 0.2); }
-        .sender { font-size: 9px; color: var(--accent); font-weight: 900; margin-bottom: 4px; text-transform: uppercase; display: flex; align-items: center; }
+        .sender { font-size: 9px; color: var(--accent); font-weight: 900; margin-bottom: 4px; text-transform: uppercase; }
 
+        /* ВВОД */
         .input-area { background: #0a0a0a; padding: 20px; display: flex; gap: 10px; border-top: 1px solid var(--border); }
-        .input-area input { flex: 1; background: #111; border: 1px solid var(--border); color: #fff; padding: 12px; border-radius: 10px; outline: none; }
+        .input-area input { flex: 1; background: #111; border: 1px solid var(--border); color: #fff; padding: 15px; border-radius: 12px; outline: none; font-size: 14px; }
 
-        .auth-card { background: rgba(25,25,25,0.8); padding: 40px; border-radius: 20px; width: 320px; text-align: center; border: 1px solid var(--border); margin: auto; }
-        .auth-card input { width: 100%; padding: 12px; background: #111; border: 1px solid var(--border); color: #fff; border-radius: 8px; margin-bottom: 15px; outline: none; box-sizing: border-box; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* АДАПТИВ ПОД ТЕЛЕФОН */
+        @media (max-width: 768px) {
+            .header { padding: 10px 15px; }
+            .logo { font-size: 16px; }
+            .header-btns { gap: 5px; }
+            
+            /* Сокращаем текст кнопок на мобилках, чтобы влезли */
+            .btn-main { padding: 8px 10px; font-size: 9px; }
+            .btn-share-text { display: none; } /* Прячем текст "ПОДЕЛИТЬСЯ" */
+            .btn-share-icon::before { content: "🔗"; font-size: 14px; }
+
+            .msg { max-width: 85%; padding: 8px 12px; }
+            .input-area { padding: 10px; padding-bottom: 25px; } /* Отступ под челку/полоску */
+            .input-area input { font-size: 16px; } /* Чтобы iOS не зумил при клике */
+        }
+
+        /* АВТОРИЗАЦИЯ */
+        .auth-card { background: rgba(25,25,25,0.8); padding: 40px; border-radius: 24px; width: 100%; max-width: 320px; text-align: center; border: 1px solid var(--border); margin: auto; }
+        .auth-card input { width: 100%; padding: 15px; background: #111; border: 1px solid var(--border); color: #fff; border-radius: 10px; margin-bottom: 15px; outline: none; box-sizing: border-box; }
     </style>
 </head>
 <body>
@@ -66,36 +86,27 @@
     <div class="header">
         <a href="/" class="logo">WETMO</a>
         {% if user %}
-        <div style="margin-left: auto; display: flex; gap: 10px; align-items: center;">
-            <button onclick="copyMyLink()" class="btn-main">ПОДЕЛИТЬСЯ</button>
-            {% if user.is_admin %}<a href="/admin" class="btn-main" style="background:#333; color:#fff;">АДМИН</a>{% endif %}
-            <a href="/logout" style="color:#ff4444; text-decoration:none; font-size:11px; font-weight:900;">ВЫХОД</a>
+        <div class="header-btns">
+            <button onclick="copyMyLink()" class="btn-main">
+                <span class="btn-share-icon"></span><span class="btn-share-text">ПОДЕЛИТЬСЯ</span>
+            </button>
+            {% if user.is_admin %}<a href="/admin" class="btn-main" style="background:#222; color:#fff;">ADM</a>{% endif %}
+            <a href="/logout" style="color:#ff4444; text-decoration:none; font-size:10px; font-weight:900; margin-left:5px;">ВЫХОД</a>
         </div>
         {% endif %}
     </div>
 
     {% if mode == 'auth' %}
-        <div style="display:flex; flex:1;">
+        <div style="display:flex; flex:1; padding: 20px;">
             <div class="auth-card">
-                <h2>{{ 'ВХОД' if auth_type == 'login' else 'РЕГИСТРАЦИЯ' }}</h2>
+                <h2 style="font-weight:900;">{{ 'ВХОД' if auth_type == 'login' else 'РЕГИСТРАЦИЯ' }}</h2>
                 <form method="POST">
                     <input type="text" name="username" placeholder="НИКНЕЙМ" required autocomplete="off">
                     <input type="password" name="password" placeholder="ПАРОЛЬ" required>
-                    <button type="submit" class="btn-main" style="width:100%; padding:15px;">{{ 'ВОЙТИ' if auth_type == 'login' else 'СОЗДАТЬ' }}</button>
+                    <button type="submit" class="btn-main" style="width:100%; padding:15px; font-size:14px;">{{ 'ВОЙТИ' if auth_type == 'login' else 'СОЗДАТЬ' }}</button>
                 </form>
+                <a href="{{ '/register' if auth_type == 'login' else '/login' }}" style="display:block; margin-top:20px; color:#444; font-size:10px; text-decoration:none;">{{ 'ЕЩЕ НЕТ АККАУНТА?' if auth_type == 'login' else 'УЖЕ ЕСТЬ АККАУНТ' }}</a>
             </div>
-        </div>
-
-    {% elif mode == 'admin' %}
-        <div style="padding: 40px; overflow-y: auto; flex: 1;">
-            <h1>ADMIN PANEL</h1>
-            {% for u in all_users %}
-            <div style="margin-bottom:10px; display:flex; gap:10px; align-items:center;">
-                <span>{{ u.username }}</span>
-                <a href="/admin/verify/{{ u.id }}" class="btn-main">ГАЛОЧКА</a>
-            </div>
-            {% endfor %}
-            <br><a href="/" class="btn-main">НАЗАД</a>
         </div>
 
     {% elif mode == 'chat' %}
@@ -104,19 +115,24 @@
             {% if target %}
                 {% for msg in messages %}
                 <div class="msg {% if msg.sender.lower() == user.username.lower() %}me{% endif %}">
-                    <div class="sender">{{ msg.sender }}</div>
+                    <div class="sender">
+                        {{ msg.sender }}
+                        {% if msg.sender == "admin" %}<span class="badge">✔</span>{% endif %}
+                    </div>
                     <div class="content">{{ msg.content }}</div>
                 </div>
                 {% endfor %}
             {% else %}
-                <div style="margin:auto; text-align:center; opacity:0.1;"><h1>WETMO</h1></div>
+                <div style="margin:auto; text-align:center; opacity:0.05; pointer-events:none;">
+                    <h1 style="font-size:15vw; margin:0; font-weight:900;">WETMO</h1>
+                </div>
             {% endif %}
         </div>
 
         {% if target %}
         <div class="input-area">
-            <input type="text" id="msg-input" placeholder="Сообщение..." autocomplete="off">
-            <button onclick="send()" class="btn-main">-></button>
+            <input type="text" id="msg-input" placeholder="Написать {{ target.username }}..." autocomplete="off">
+            <button onclick="send()" class="btn-main" style="width:50px; height:50px; font-size:18px;">→</button>
         </div>
         {% endif %}
 
@@ -126,15 +142,10 @@
             const targetUser = "{{ target.username if target else '' }}".toLowerCase();
             const chatId = "{{ chat_id or '' }}";
 
-            // --- УВЕДОМЛЕНИЯ ---
-            if (Notification.permission !== "granted") {
-                Notification.requestPermission();
-            }
-
+            // УВЕДОМЛЕНИЯ
+            if (Notification.permission !== "granted") Notification.requestPermission();
             function notify(title, text) {
-                if (Notification.permission === "granted") {
-                    new Notification(title, { body: text });
-                }
+                if (Notification.permission === "granted") new Notification(title, { body: text });
             }
 
             socket.on('connect', () => {
@@ -151,33 +162,19 @@
             }
 
             socket.on('receive_direct', (data) => {
-                // Добавляем сообщение только если мы в правильном чате
                 if (chatId === data.chat_id || (data.sender.toLowerCase() === targetUser)) {
                     const win = document.getElementById('chat-window');
                     const div = document.createElement('div');
                     div.className = `msg ${data.sender.toLowerCase() === myUser ? 'me' : ''}`;
-                    div.innerHTML = `<div class="sender">${data.sender}</div><div class="content">${marked.parse(data.message)}</div>`;
+                    const badge = data.verified ? '<span class="badge">✔</span>' : '';
+                    div.innerHTML = `<div class="sender">${data.sender}${badge}</div><div class="content">${marked.parse(data.message)}</div>`;
                     win.appendChild(div);
                     win.scrollTop = win.scrollHeight;
                 }
-                
-                // Пуш-уведомление, если пишет не сам себе
-                if (data.sender.toLowerCase() !== myUser) {
-                    notify(data.sender, data.message);
-                }
+                if (data.sender.toLowerCase() !== myUser) notify(data.sender, data.message);
             });
 
-            socket.on('new_chat_notification', (data) => {
-                let contacts = JSON.parse(localStorage.getItem('wetmo_contacts') || '[]');
-                if (!contacts.includes(data.from.toLowerCase())) {
-                    contacts.push(data.from.toLowerCase());
-                    localStorage.setItem('wetmo_contacts', JSON.stringify(contacts));
-                    renderTabs();
-                }
-                notify("Новое сообщение", "От " + data.from);
-            });
-
-            // Логика табов
+            // Логика списка чатов (табы)
             let contacts = JSON.parse(localStorage.getItem('wetmo_contacts') || '[]');
             if (targetUser && !contacts.includes(targetUser)) {
                 contacts.push(targetUser);
@@ -206,8 +203,7 @@
 
             function copyMyLink() {
                 const link = window.location.origin + '/im/' + myUser;
-                navigator.clipboard.writeText(link);
-                alert("Ссылка скопирована!");
+                navigator.clipboard.writeText(link).then(() => alert("Ссылка скопирована!"));
             }
 
             renderTabs();
