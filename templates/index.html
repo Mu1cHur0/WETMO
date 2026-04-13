@@ -1,178 +1,174 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WETMO</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
-    <style>
-        :root { --bg: #050505; --kick: #53fc18; --border: #111; --danger: #ff4444; }
-        body { font-family: 'Montserrat', sans-serif; background: var(--bg); color: #fff; margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+import os
+from flask import Flask, render_template, request, session, redirect, url_for, abort
+from flask_socketio import SocketIO, emit, join_room
+from flask_sqlalchemy import SQLAlchemy
+from werkzeug.security import generate_password_hash, check_password_hash
+from datetime import datetime
+
+basedir = os.path.abspath(os.path.dirname(__file__))
+
+app = Flask(__name__)
+app.config['SECRET_KEY'] = 'wetmo_exclusive_admin_v4'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'database.db')
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+db = SQLAlchemy(app)
+socketio = SocketIO(app, cors_allowed_origins="*")
+
+class User(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(50), unique=True, nullable=False)
+    password = db.Column(db.String(200), nullable=False)
+    is_verified = db.Column(db.Boolean, default=False)
+    is_admin = db.Column(db.Boolean, default=False)
+
+class Message(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    chat_id = db.Column(db.String(100), nullable=False)
+    sender = db.Column(db.String(50), nullable=False)
+    content = db.Column(db.Text, nullable=False)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+
+# СОЗДАНИЕ ЕДИНСТВЕННОГО АДМИНА ПРИ ЗАПУСКЕ
+with app.app_context():
+    db.create_all()
+    admin_nick = "wetmo"
+    admin_pass = "13681368"
+    
+    # Проверяем, существует ли этот конкретный аккаунт
+    u_admin = User.query.filter_by(username=admin_nick).first()
+    
+    if not u_admin:
+        # Если его нет (база новая), создаем
+        new_admin = User(
+            username=admin_nick, 
+            password=generate_password_hash(admin_pass),
+            is_admin=True,
+            is_verified=True
+        )
+        db.session.add(new_admin)
+        db.session.commit()
+    else:
+        # Если он есть, на всякий случай подтверждаем его права
+        u_admin.is_admin = True
+        u_admin.is_verified = True
+        db.session.commit()
+
+def get_chat_id(u1, u2):
+    return "-".join(sorted([str(u1).lower(), str(u2).lower()]))
+
+def get_my_contacts(username):
+    all_chats = Message.query.filter(Message.chat_id.contains(username.lower())).all()
+    contact_names = set()
+    for m in all_chats:
+        parts = m.chat_id.split('-')
+        for p in parts:
+            if p != username.lower(): contact_names.add(p)
+    return User.query.filter(User.username.in_(list(contact_names))).all()
+
+@app.route('/')
+def index():
+    if 'user' not in session: return redirect(url_for('auth'))
+    u = User.query.filter_by(username=session['user']).first()
+    if not u:
+        session.pop('user', None)
+        return redirect(url_for('auth'))
+    contacts = get_my_contacts(u.username)
+    return render_template('index.html', user=u, contacts=contacts, mode='chat')
+
+@app.route('/im/<target_user>')
+def direct_chat(target_user):
+    if 'user' not in session: return redirect(url_for('auth'))
+    me = User.query.filter_by(username=session['user']).first()
+    if not me:
+        session.pop('user', None)
+        return redirect(url_for('auth'))
+    
+    target = User.query.filter_by(username=target_user.lower()).first()
+    if not target or me.username.lower() == target.username.lower(): 
+        return redirect(url_for('index'))
+    
+    cid = get_chat_id(me.username, target.username)
+    msgs = Message.query.filter_by(chat_id=cid).order_by(Message.timestamp.asc()).all()
+    contacts = get_my_contacts(me.username)
+    
+    if target.username.lower() not in [c.username.lower() for c in contacts]:
+        contacts.append(target)
+
+    return render_template('index.html', user=me, target=target, messages=msgs, contacts=contacts, chat_id=cid, mode='chat')
+
+@app.route('/delete_chat/<target_user>')
+def delete_chat(target_user):
+    if 'user' not in session: return redirect(url_for('auth'))
+    me = session['user'].lower()
+    target = target_user.lower()
+    cid = get_chat_id(me, target)
+    Message.query.filter_by(chat_id=cid).delete()
+    db.session.commit()
+    return redirect(url_for('index'))
+
+@app.route('/auth', methods=['GET', 'POST'])
+def auth():
+    auth_type = request.args.get('type', 'login')
+    if request.method == 'POST':
+        username = request.form.get('username', '').strip().lower()
+        password = request.form.get('password')
+        u = User.query.filter_by(username=username).first()
         
-        .kick-badge { display: inline-flex; align-items: center; justify-content: center; width: 14px; height: 14px; background-color: var(--kick); border-radius: 50%; margin-left: 5px; position: relative; flex-shrink: 0; }
-        .kick-badge::after { content: ''; width: 3px; height: 6px; border: solid #000; border-width: 0 2px 2px 0; transform: rotate(45deg); margin-bottom: 2px; }
+        if auth_type == 'login':
+            if u and check_password_hash(u.password, password):
+                session['user'] = username
+                return redirect(url_for('index'))
+            return "Ошибка входа", 401
+        else:
+            if u: return "Ник занят", 400
+            # ТЕПЕРЬ ТУТ НЕТ ПРОВЕРКИ НА ПЕРВОГО ЮЗЕРА. ВСЕ НОВЫЕ - ОБЫЧНЫЕ ЮЗЕРЫ.
+            new_u = User(username=username, password=generate_password_hash(password), is_admin=False)
+            db.session.add(new_u); db.session.commit()
+            session['user'] = username
+            return redirect(url_for('index'))
+    return render_template('index.html', mode='auth', auth_type=auth_type)
 
-        .header { background: #000; padding: 12px 20px; display: flex; align-items: center; border-bottom: 1px solid var(--border); z-index: 10; }
-        .logo { font-weight: 900; color: var(--kick); text-decoration: none; font-size: 20px; letter-spacing: -1px; }
-        
-        .btn-header { background: #111; color: #fff; padding: 8px 14px; border-radius: 6px; font-size: 11px; font-weight: 900; text-decoration: none; margin-left: 10px; border: 1px solid #222; cursor: pointer; transition: 0.2s; }
-        .btn-header:hover { border-color: var(--kick); background: #1a1a1a; }
-        .btn-danger { background: var(--danger) !important; border: none !important; }
+@app.route('/admin')
+def admin_panel():
+    if 'user' not in session: return redirect(url_for('auth'))
+    u = User.query.filter_by(username=session['user']).first()
+    # ЖЕСТКАЯ ПРОВЕРКА: Если не wetmo или нет флага админа - пошел вон
+    if not u or not u.is_admin or u.username != 'wetmo': abort(403)
+    return render_template('index.html', user=u, all_users=User.query.all(), mode='admin')
 
-        .tabs-bar { display: flex; background: #000; border-bottom: 1px solid var(--border); overflow-x: auto; white-space: nowrap; scrollbar-width: none; }
-        .tabs-bar::-webkit-scrollbar { display: none; }
-        .tab { display: inline-flex; align-items: center; padding: 12px 20px; color: #666; text-decoration: none; font-size: 11px; font-weight: 800; border-right: 1px solid var(--border); background: #0a0a0a; }
-        .tab.active { background: var(--bg); color: var(--kick); border-bottom: 2px solid var(--kick); }
+@app.route('/admin/verify/<int:uid>')
+def verify(uid):
+    me = User.query.filter_by(username=session.get('user')).first()
+    if not me or not me.is_admin: abort(403)
+    u = User.query.get(uid)
+    if u: u.is_verified = not u.is_verified; db.session.commit()
+    return redirect(url_for('admin_panel'))
 
-        .chat-area { flex: 1; display: flex; flex-direction: column; overflow: hidden; position: relative; }
-        #messages { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 8px; }
-        
-        /* Стили для Markdown внутри сообщений */
-        .msg { background: #0a0a0a; padding: 12px 16px; border-radius: 12px; border: 1px solid #111; max-width: 80%; align-self: flex-start; word-wrap: break-word; }
-        .msg.me { align-self: flex-end; border-color: #1a1a1a; background: #080808; }
-        .msg p { margin: 5px 0; }
-        .msg code { background: #222; padding: 2px 4px; border-radius: 4px; font-family: monospace; }
-        .msg pre { background: #111; padding: 10px; border-radius: 8px; overflow-x: auto; }
-        
-        .sender { font-size: 10px; color: var(--kick); font-weight: 900; margin-bottom: 4px; display: flex; align-items: center; text-transform: uppercase; }
-        
-        .input-wrap { padding: 20px; border-top: 1px solid var(--border); display: flex; gap: 12px; background: #000; }
-        .input-wrap input { flex: 1; background: #0a0a0a; border: 1px solid #222; color: #fff; padding: 14px; border-radius: 10px; outline: none; }
-        .input-wrap button { background: var(--kick); border: none; width: 50px; height: 50px; border-radius: 10px; cursor: pointer; font-weight: 900; font-size: 20px; }
+@app.route('/logout')
+def logout():
+    session.pop('user', None)
+    return redirect(url_for('auth'))
 
-        .auth-container { display: flex; flex: 1; justify-content: center; align-items: center; background: #000; }
-        .auth-card { background: #080808; padding: 40px; border-radius: 15px; border: 1px solid #111; width: 320px; text-align: center; }
-        .auth-card input { width: 100%; padding: 14px; background: #000; border: 1px solid #222; color: #fff; border-radius: 8px; margin-bottom: 15px; outline: none; box-sizing: border-box; }
-        .auth-card button { width: 100%; padding: 14px; background: var(--kick); border: none; font-weight: 900; border-radius: 8px; cursor: pointer; }
-    </style>
-</head>
-<body>
-    <div class="header">
-        <a href="/" class="logo">WETMO</a>
-        {% if user %}
-        <div style="margin-left: auto; display: flex; align-items: center;">
-            {% if user.is_admin %}<a href="/admin" class="btn-header">P</a>{% endif %}
-            {% if target %}
-            <a href="/delete_chat/{{ target.username }}" class="btn-header btn-danger" onclick="return confirm('Удалить чат?')">УДАЛИТЬ ЧАТ</a>
-            {% endif %}
-            <button onclick="copyLink()" class="btn-header" style="background: var(--kick); color: #000; border: none;">ПОДЕЛИТЬСЯ</button>
-            <a href="/logout" class="btn-header" style="color: var(--danger);">ВЫХОД</a>
-        </div>
-        {% endif %}
-    </div>
+@socketio.on('join')
+def on_join(data):
+    if 'chat_id' in data: join_room(str(data['chat_id']))
 
-    {% if mode == 'auth' %}
-    <div class="auth-container">
-        <div class="auth-card">
-            <h2 style="color: var(--kick);">{{ 'ВХОД' if auth_type == 'login' else 'РЕГИСТРАЦИЯ' }}</h2>
-            <form method="POST">
-                <input type="text" name="username" placeholder="НИКНЕЙМ" required autocomplete="off">
-                <input type="password" name="password" placeholder="ПАРОЛЬ" required>
-                <button type="submit">ПОГНАЛИ</button>
-            </form>
-            <a href="/auth?type={{ 'register' if auth_type == 'login' else 'login' }}" style="display:block; margin-top:20px; font-size:10px; color:#444; text-decoration:none;">{{ 'РЕГИСТРАЦИЯ' if auth_type == 'login' else 'ВХОД' }}</a>
-        </div>
-    </div>
-    {% elif mode == 'admin' %}
-    <div style="padding: 30px; flex: 1; max-width: 600px; margin: 0 auto; width: 100%;">
-        <h2 style="color: var(--kick);">УПРАВЛЕНИЕ</h2>
-        {% for u in all_users %}
-        <div style="display: flex; justify-content: space-between; padding: 15px; border-bottom: 1px solid #111; align-items: center;">
-            <span style="font-weight: 800;">{{ u.username|upper }} {% if u.is_verified %}<span class="kick-badge"></span>{% endif %}</span>
-            <a href="/admin/verify/{{ u.id }}" class="btn-header" style="margin:0;">{{ 'СНЯТЬ ГАЛКУ' if u.is_verified else 'ДАТЬ ГАЛКУ' }}</a>
-        </div>
-        {% endfor %}
-        <br><a href="/" class="btn-header" style="margin-left:0;">← НАЗАД</a>
-    </div>
-    {% else %}
-    <div class="tabs-bar">
-        {% for c in contacts %}
-        <a href="/im/{{ c.username }}" class="tab {% if target and target.username == c.username %}active{% endif %}">
-            {{ c.username|upper }} {% if c.is_verified %}<span class="kick-badge"></span>{% endif %}
-        </a>
-        {% endfor %}
-    </div>
+@socketio.on('send_msg')
+def handle_msg(data):
+    if 'user' not in session: return
+    u = User.query.filter_by(username=session['user']).first()
+    if not u: return
+    
+    target = str(data.get('target', '')).lower()
+    content = str(data.get('message', '')).strip()
+    if not content or not target: return
+    
+    cid = get_chat_id(session['user'], target)
+    db.session.add(Message(chat_id=cid, sender=session['user'], content=content))
+    db.session.commit()
+    
+    emit('receive_msg', {'sender': u.username, 'message': content, 'verified': u.is_verified}, room=cid)
 
-    <div class="chat-area">
-        <div id="messages">
-            {% if target %}
-                {% for msg in messages %}
-                <div class="msg {% if msg.sender.lower() == user.username.lower() %}me{% endif %}">
-                    <div class="sender">
-                        {{ msg.sender }}
-                        {% set sender_obj = [] %}
-                        {% for u in contacts if u.username.lower() == msg.sender.lower() %}{% set _ = sender_obj.append(u) %}{% endfor %}
-                        {% if (sender_obj and sender_obj[0].is_verified) or (msg.sender.lower() == user.username.lower() and user.is_verified) %}
-                            <span class="kick-badge"></span>
-                        {% endif %}
-                    </div>
-                    <div class="msg-content" data-raw="{{ msg.content }}"></div>
-                </div>
-                {% endfor %}
-            {% else %}
-                <div style="margin: auto; text-align: center;">
-                    <div style="color: #111; font-weight: 900; font-size: 60px;">WETMO</div>
-                </div>
-            {% endif %}
-        </div>
-        {% if target %}
-        <div class="input-wrap">
-            <input type="text" id="m-in" placeholder="Сообщение (поддерживает **Markdown**)..." autocomplete="off">
-            <button onclick="send()">→</button>
-        </div>
-        {% endif %}
-    </div>
-
-    <script>
-        const socket = io();
-        const me = "{{ user.username if user else '' }}";
-
-        // Функция рендера Markdown
-        function renderMarkdown() {
-            document.querySelectorAll('.msg-content[data-raw]').forEach(el => {
-                el.innerHTML = marked.parse(el.getAttribute('data-raw'));
-                el.removeAttribute('data-raw'); // Убираем, чтобы не рендерить дважды
-            });
-        }
-
-        if ("{{ chat_id }}") socket.emit('join', { chat_id: "{{ chat_id }}" });
-
-        function send() {
-            const inp = document.getElementById('m-in');
-            if (inp.value.trim()) {
-                socket.emit('send_msg', { target: "{{ target.username if target else '' }}", message: inp.value });
-                inp.value = '';
-            }
-        }
-
-        socket.on('receive_msg', (data) => {
-            const div = document.createElement('div');
-            div.className = 'msg' + (data.sender.toLowerCase() === me.toLowerCase() ? ' me' : '');
-            const badge = data.verified ? '<span class="kick-badge"></span>' : '';
-            
-            // Рендерим Markdown для нового сообщения
-            const htmlContent = marked.parse(data.message);
-            
-            div.innerHTML = `<div class="sender">${data.sender}${badge}</div><div class="msg-content">${htmlContent}</div>`;
-            const box = document.getElementById('messages');
-            box.appendChild(div);
-            box.scrollTop = box.scrollHeight;
-        });
-
-        function copyLink() {
-            const url = window.location.origin + '/im/' + me;
-            navigator.clipboard.writeText(url).then(() => alert("Ссылка скопирована!"));
-        }
-
-        document.getElementById('m-in')?.addEventListener('keypress', (e) => { if(e.key === 'Enter') send(); });
-        
-        // Рендерим старые сообщения при загрузке
-        renderMarkdown();
-        const box = document.getElementById('messages');
-        if(box) box.scrollTop = box.scrollHeight;
-    </script>
-    {% endif %}
-</body>
-</html>
+if __name__ == '__main__':
+    socketio.run(app, host='0.0.0.0', port=5000)
