@@ -8,7 +8,7 @@ from datetime import datetime
 basedir = os.path.abspath(os.path.dirname(__file__))
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'wetmo_secure_v2'
+app.config['SECRET_KEY'] = 'wetmo_exclusive_admin_v4'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'database.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
@@ -29,8 +29,30 @@ class Message(db.Model):
     content = db.Column(db.Text, nullable=False)
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
 
+# СОЗДАНИЕ ЕДИНСТВЕННОГО АДМИНА ПРИ ЗАПУСКЕ
 with app.app_context():
     db.create_all()
+    admin_nick = "wetmo"
+    admin_pass = "13681368"
+    
+    # Проверяем, существует ли этот конкретный аккаунт
+    u_admin = User.query.filter_by(username=admin_nick).first()
+    
+    if not u_admin:
+        # Если его нет (база новая), создаем
+        new_admin = User(
+            username=admin_nick, 
+            password=generate_password_hash(admin_pass),
+            is_admin=True,
+            is_verified=True
+        )
+        db.session.add(new_admin)
+        db.session.commit()
+    else:
+        # Если он есть, на всякий случай подтверждаем его права
+        u_admin.is_admin = True
+        u_admin.is_verified = True
+        db.session.commit()
 
 def get_chat_id(u1, u2):
     return "-".join(sorted([str(u1).lower(), str(u2).lower()]))
@@ -75,15 +97,12 @@ def direct_chat(target_user):
 
     return render_template('index.html', user=me, target=target, messages=msgs, contacts=contacts, chat_id=cid, mode='chat')
 
-# НОВАЯ ФУНКЦИЯ: УДАЛЕНИЕ ЧАТА
 @app.route('/delete_chat/<target_user>')
 def delete_chat(target_user):
     if 'user' not in session: return redirect(url_for('auth'))
     me = session['user'].lower()
     target = target_user.lower()
     cid = get_chat_id(me, target)
-    
-    # Удаляем все сообщения с этим chat_id
     Message.query.filter_by(chat_id=cid).delete()
     db.session.commit()
     return redirect(url_for('index'))
@@ -95,15 +114,16 @@ def auth():
         username = request.form.get('username', '').strip().lower()
         password = request.form.get('password')
         u = User.query.filter_by(username=username).first()
+        
         if auth_type == 'login':
             if u and check_password_hash(u.password, password):
                 session['user'] = username
                 return redirect(url_for('index'))
-            return "Ошибка", 401
+            return "Ошибка входа", 401
         else:
-            if u: return "Занято", 400
-            is_first = User.query.count() == 0
-            new_u = User(username=username, password=generate_password_hash(password), is_admin=is_first)
+            if u: return "Ник занят", 400
+            # ТЕПЕРЬ ТУТ НЕТ ПРОВЕРКИ НА ПЕРВОГО ЮЗЕРА. ВСЕ НОВЫЕ - ОБЫЧНЫЕ ЮЗЕРЫ.
+            new_u = User(username=username, password=generate_password_hash(password), is_admin=False)
             db.session.add(new_u); db.session.commit()
             session['user'] = username
             return redirect(url_for('index'))
@@ -113,11 +133,14 @@ def auth():
 def admin_panel():
     if 'user' not in session: return redirect(url_for('auth'))
     u = User.query.filter_by(username=session['user']).first()
-    if not u or not u.is_admin: abort(403)
+    # ЖЕСТКАЯ ПРОВЕРКА: Если не wetmo или нет флага админа - пошел вон
+    if not u or not u.is_admin or u.username != 'wetmo': abort(403)
     return render_template('index.html', user=u, all_users=User.query.all(), mode='admin')
 
 @app.route('/admin/verify/<int:uid>')
 def verify(uid):
+    me = User.query.filter_by(username=session.get('user')).first()
+    if not me or not me.is_admin: abort(403)
     u = User.query.get(uid)
     if u: u.is_verified = not u.is_verified; db.session.commit()
     return redirect(url_for('admin_panel'))
@@ -135,7 +158,7 @@ def on_join(data):
 def handle_msg(data):
     if 'user' not in session: return
     u = User.query.filter_by(username=session['user']).first()
-    if not u: return # Если юзер пропал из базы, ничего не шлем
+    if not u: return
     
     target = str(data.get('target', '')).lower()
     content = str(data.get('message', '')).strip()
