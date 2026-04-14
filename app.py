@@ -6,14 +6,14 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime, timedelta
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'wetmo_ultra_core_2026'
+app.config['SECRET_KEY'] = 'wetmo_core_clean_v1'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
 socketio = SocketIO(app, cors_allowed_origins="*")
 
-# --- КОНФИГУРАЦИЯ ЭМБЛЕМ (50 ШТУК) ---
+# --- КОНФИГУРАЦИЯ ЭМБЛЕМ ---
 ALL_BADGES = [
     {"id": "novice", "name": "НОВИЧОК", "req": 1, "icon": "shield"},
     {"id": "talker", "name": "ГОВОРУН", "req": 20, "icon": "chat"},
@@ -27,7 +27,6 @@ ALL_BADGES = [
     {"id": "god", "name": "БОЖЕСТВО", "req": 5000, "icon": "god"},
 ] + [{"id": f"lvl{i}", "name": f"LVL {i}", "req": i*150, "icon": "star"} for i in range(11, 51)]
 
-# --- МОДЕЛИ ДАННЫХ ---
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(50), unique=True, nullable=False)
@@ -44,7 +43,7 @@ class Message(db.Model):
     sender = db.Column(db.String(50), nullable=False)
     content = db.Column(db.Text, nullable=False)
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
-    read = db.Column(db.Boolean, default=False)
+    # Поле read удалено
 
 with app.app_context():
     db.create_all()
@@ -81,7 +80,6 @@ def generate_badge(badge_id):
     </svg>'''
     return make_response(svg, 200, {'Content-Type': 'image/svg+xml', 'Cache-Control': 'public, max-age=86400'})
 
-# --- BRANDING ---
 @app.route('/icon.svg')
 def icon():
     return make_response('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" rx="22" fill="#53fc18"/><text x="50" y="72" font-size="55" text-anchor="middle" fill="#000" font-weight="900">W</text></svg>', 200, {'Content-Type': 'image/svg+xml'})
@@ -96,7 +94,6 @@ def sw():
     res.mimetype = 'application/javascript'
     return res
 
-# --- CORE LOGIC ---
 def send_system_msg(target, text):
     cid = "-".join(sorted(["wetmo_auth", target.lower()]))
     db.session.add(Message(chat_id=cid, sender="wetmo_auth", content=text))
@@ -174,7 +171,6 @@ def admin_v(uid):
 def set_badge():
     u = User.query.filter_by(username=session.get('user')).first()
     badge_url = request.json.get('badge_url')
-    # Ищем требование для этого badge_id
     badge_id = badge_url.split('/')[-1].replace('.svg', '')
     badge_data = next((b for b in ALL_BADGES if b['id'] == badge_id), None)
     if u and badge_data and u.msg_count >= badge_data['req']:
@@ -197,7 +193,6 @@ def api_send_code():
 @app.route('/logout')
 def logout(): session.clear(); return redirect(url_for('auth'))
 
-# --- SOCKETS ---
 @socketio.on('join')
 def on_join(data): join_room(str(data['chat_id']))
 
@@ -221,13 +216,6 @@ def t_start(data):
 def t_stop(data):
     u, target = session.get('user'), data.get('target', '').lower()
     if u and target: emit('stop_typing', room="-".join(sorted([u, target])))
-
-@socketio.on('mark_read')
-def m_read(data):
-    cid, sender, u = data.get('chat_id'), data.get('sender'), session.get('user')
-    if u and sender and u.lower() != sender.lower():
-        Message.query.filter_by(chat_id=cid, sender=sender, read=False).update({'read': True})
-        db.session.commit(); emit('read_receipt', {'chat_id': cid, 'sender': sender}, room=cid)
 
 if __name__ == '__main__':
     socketio.run(app, host='0.0.0.0', port=5000)
