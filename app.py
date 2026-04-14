@@ -28,7 +28,7 @@ class User(db.Model):
     password = db.Column(db.String(200), nullable=False)
     is_verified = db.Column(db.Boolean, default=False)
     auth_code = db.Column(db.String(10))
-    auth_code_expires = db.Column(db.DateTime) # Срок жизни кода
+    auth_code_expires = db.Column(db.DateTime)
     status_icon = db.Column(db.String(500), default="")
     msg_count = db.Column(db.Integer, default=0)
 
@@ -42,10 +42,8 @@ class Message(db.Model):
 
 with app.app_context():
     db.create_all()
-    # Админ
     if not User.query.filter_by(username="wetmo").first():
         db.session.add(User(username="wetmo", password=generate_password_hash("13681368"), is_verified=True, msg_count=1000))
-    # Бот авторизации
     if not User.query.filter_by(username="wetmo_auth").first():
         db.session.add(User(username="wetmo_auth", password=generate_password_hash("internal_pass"), is_verified=True, msg_count=10000))
     db.session.commit()
@@ -55,7 +53,6 @@ def send_system_msg(target_username, text):
     msg = Message(chat_id=cid, sender="wetmo_auth", content=text)
     db.session.add(msg)
     db.session.commit()
-    # Отправляем через сокет для мгновенного обновления у пользователя
     socketio.emit('receive_msg', {
         'sender': 'wetmo_auth',
         'message': text,
@@ -63,22 +60,24 @@ def send_system_msg(target_username, text):
         'badge': ""
     }, room=cid)
 
-# --- PWA ---
+# --- БРЕНДИНГ И PWA ---
+@app.route('/icon.svg')
+def icon():
+    svg = '''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+        <rect width="100" height="100" fill="#53fc18" rx="22"/>
+        <text x="50" y="72" font-size="55" text-anchor="middle" fill="#000000" font-weight="900" font-family="Arial, sans-serif">W</text>
+    </svg>'''
+    return make_response(svg, 200, {'Content-Type': 'image/svg+xml'})
+
 @app.route('/manifest.json')
 def manifest():
     return {
-        "name": "WETMO", "short_name": "WETMO", "start_url": "/", "display": "standalone",
+        "name": "WETMO MESSENGER", "short_name": "WETMO", "start_url": "/", "display": "standalone",
         "background_color": "#050505", "theme_color": "#53fc18",
-        "icons": [{"src": "https://cdn-icons-png.flaticon.com/512/5968/5968756.png", "sizes": "512x512", "type": "image/png"}]
+        "icons": [{"src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable"}]
     }
 
-@app.route('/sw.js')
-def sw():
-    response = make_response("self.addEventListener('fetch', e => e.respondWith(fetch(e.request)));")
-    response.mimetype = 'application/javascript'
-    return response
-
-# --- API ДЛЯ СЕРВИСОВ ---
+# --- API ---
 @app.route('/api/send_code', methods=['POST'])
 def api_send_code():
     data = request.json
@@ -105,11 +104,10 @@ def api_verify_code():
     
     if user and user.auth_code == code:
         if user.auth_code_expires and user.auth_code_expires > datetime.utcnow():
-            user.auth_code = None # Одноразовый код
+            user.auth_code = None
             db.session.commit()
-            return jsonify({"status": "success", "message": "Verified"}), 200
-        return jsonify({"status": "error", "message": "Code expired"}), 401
-    return jsonify({"status": "error", "message": "Invalid code"}), 401
+            return jsonify({"status": "success"}), 200
+    return jsonify({"status": "error", "message": "Invalid or expired code"}), 401
 
 # --- МАРШРУТЫ ---
 @app.route('/')
@@ -149,7 +147,7 @@ def auth():
             session['user'] = name
             return redirect(url_for('index'))
         else:
-            if not u or not check_password_hash(u.password, pw): return "Ошибка данных", 401
+            if not u or not check_password_hash(u.password, pw): return "Ошибка", 401
             if u.username == 'wetmo':
                 session['user'] = 'wetmo'; return redirect(url_for('index'))
             code = f"{random.randint(100,999)}-{random.randint(100,999)}"
@@ -170,34 +168,12 @@ def verify():
         if request.form.get('code') == u.auth_code and u.auth_code_expires > datetime.utcnow():
             session['user'] = name; session.pop('temp_user')
             return redirect(url_for('index'))
-        return "Неверный или просроченный код", 400
+        return "Неверный код", 400
     return render_template('index.html', mode='verify')
-
-@app.route('/admin')
-def admin():
-    u = User.query.filter_by(username=session.get('user')).first()
-    if not u or u.username != 'wetmo': abort(403)
-    return render_template('index.html', user=u, all_users=User.query.all(), mode='admin')
-
-@app.route('/admin/verify/<int:uid>')
-def admin_v(uid):
-    u = User.query.filter_by(username=session.get('user')).first()
-    if u and u.username == 'wetmo':
-        t = User.query.get(uid); t.is_verified = not t.is_verified; db.session.commit()
-    return redirect(url_for('admin'))
-
-@app.route('/set_badge', methods=['POST'])
-def set_badge():
-    u = User.query.filter_by(username=session.get('user')).first()
-    if u and u.msg_count >= 1000:
-        u.status_icon = request.json.get('badge_url'); db.session.commit()
-        return jsonify({"status": "ok"})
-    return jsonify({"status": "error"}), 403
 
 @app.route('/logout')
 def logout(): session.clear(); return redirect(url_for('auth'))
 
-# --- SOCKETS ---
 @socketio.on('join')
 def on_join(data): join_room(str(data['chat_id']))
 
@@ -205,35 +181,13 @@ def on_join(data): join_room(str(data['chat_id']))
 def handle_msg(data):
     u = User.query.filter_by(username=session.get('user')).first()
     target = data.get('target', '').lower()
-    if u and data.get('message') and target: # Исправлено: можно писать боту
-        u.msg_count += 1; cid = "-".join(sorted([u.username, target]))
+    # ИСПРАВЛЕНО: Убрано условие target != "wetmo_auth"
+    if u and data.get('message') and target:
+        u.msg_count += 1
+        cid = "-".join(sorted([u.username, target]))
         db.session.add(Message(chat_id=cid, sender=u.username, content=data['message']))
         db.session.commit()
         emit('receive_msg', {'sender': u.username, 'message': data['message'], 'verified': u.is_verified, 'badge': u.status_icon}, room=cid)
-
-@socketio.on('typing_start')
-def typing_start(data):
-    u = session.get('user')
-    target = data.get('target', '').lower()
-    if u and target:
-        cid = "-".join(sorted([u, target]))
-        emit('is_typing', {'from': u}, room=cid)
-
-@socketio.on('typing_stop')
-def typing_stop(data):
-    u = session.get('user')
-    target = data.get('target', '').lower()
-    if u and target:
-        cid = "-".join(sorted([u, target]))
-        emit('stop_typing', room=cid)
-
-@socketio.on('mark_read')
-def mark_read(data):
-    chat_id = data.get('chat_id'); sender = data.get('sender'); u = session.get('user')
-    if u and sender and u.lower() != sender.lower():
-        Message.query.filter_by(chat_id=chat_id, sender=sender, read=False).update({'read': True})
-        db.session.commit()
-        emit('read_receipt', {'chat_id': chat_id, 'sender': sender}, room=chat_id)
 
 if __name__ == '__main__':
     socketio.run(app, host='0.0.0.0', port=5000)
