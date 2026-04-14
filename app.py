@@ -1,5 +1,5 @@
 import os
-from flask import Flask, render_template, request, session, redirect, url_for, abort
+from flask import Flask, render_template, request, session, redirect, url_for, abort, jsonify
 from flask_socketio import SocketIO, emit, join_room
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -8,8 +8,9 @@ from datetime import datetime
 basedir = os.path.abspath(os.path.dirname(__file__))
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'wetmo_exclusive_admin_v4'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'database.db')
+app.config['SECRET_KEY'] = 'wetmo_final_v5'
+# Если добавишь базу PostgreSQL на Render, она подцепится сама
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///' + os.path.join(basedir, 'database.db'))
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
@@ -29,29 +30,12 @@ class Message(db.Model):
     content = db.Column(db.Text, nullable=False)
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
 
-# СОЗДАНИЕ ЕДИНСТВЕННОГО АДМИНА ПРИ ЗАПУСКЕ
 with app.app_context():
     db.create_all()
+    # Авто-создание твоего админа
     admin_nick = "wetmo"
-    admin_pass = "13681368"
-    
-    # Проверяем, существует ли этот конкретный аккаунт
-    u_admin = User.query.filter_by(username=admin_nick).first()
-    
-    if not u_admin:
-        # Если его нет (база новая), создаем
-        new_admin = User(
-            username=admin_nick, 
-            password=generate_password_hash(admin_pass),
-            is_admin=True,
-            is_verified=True
-        )
-        db.session.add(new_admin)
-        db.session.commit()
-    else:
-        # Если он есть, на всякий случай подтверждаем его права
-        u_admin.is_admin = True
-        u_admin.is_verified = True
+    if not User.query.filter_by(username=admin_nick).first():
+        db.session.add(User(username=admin_nick, password=generate_password_hash("13681368"), is_admin=True, is_verified=True))
         db.session.commit()
 
 def get_chat_id(u1, u2):
@@ -61,48 +45,50 @@ def get_my_contacts(username):
     all_chats = Message.query.filter(Message.chat_id.contains(username.lower())).all()
     contact_names = set()
     for m in all_chats:
-        parts = m.chat_id.split('-')
-        for p in parts:
+        for p in m.chat_id.split('-'):
             if p != username.lower(): contact_names.add(p)
     return User.query.filter(User.username.in_(list(contact_names))).all()
+
+# МАРШРУТЫ ДЛЯ ПРИЛОЖЕНИЯ (PWA)
+@app.route('/manifest.json')
+def manifest():
+    return jsonify({
+        "name": "WETMO Messenger",
+        "short_name": "WETMO",
+        "start_url": "/",
+        "display": "standalone",
+        "background_color": "#050505",
+        "theme_color": "#53fc18",
+        "icons": [{"src": "https://cdn-icons-png.flaticon.com/512/5968/5968756.png", "sizes": "512x512", "type": "image/png"}]
+    })
+
+@app.route('/sw.js')
+def sw():
+    return "self.addEventListener('fetch', (e) => {});", 200, {'Content-Type': 'application/javascript'}
 
 @app.route('/')
 def index():
     if 'user' not in session: return redirect(url_for('auth'))
     u = User.query.filter_by(username=session['user']).first()
-    if not u:
-        session.pop('user', None)
-        return redirect(url_for('auth'))
-    contacts = get_my_contacts(u.username)
-    return render_template('index.html', user=u, contacts=contacts, mode='chat')
+    if not u: session.pop('user', None); return redirect(url_for('auth'))
+    return render_template('index.html', user=u, contacts=get_my_contacts(u.username), mode='chat')
 
 @app.route('/im/<target_user>')
 def direct_chat(target_user):
     if 'user' not in session: return redirect(url_for('auth'))
     me = User.query.filter_by(username=session['user']).first()
-    if not me:
-        session.pop('user', None)
-        return redirect(url_for('auth'))
-    
     target = User.query.filter_by(username=target_user.lower()).first()
-    if not target or me.username.lower() == target.username.lower(): 
-        return redirect(url_for('index'))
-    
+    if not target or not me or me.username.lower() == target.username.lower(): return redirect(url_for('index'))
     cid = get_chat_id(me.username, target.username)
     msgs = Message.query.filter_by(chat_id=cid).order_by(Message.timestamp.asc()).all()
     contacts = get_my_contacts(me.username)
-    
-    if target.username.lower() not in [c.username.lower() for c in contacts]:
-        contacts.append(target)
-
+    if target.username.lower() not in [c.username.lower() for c in contacts]: contacts.append(target)
     return render_template('index.html', user=me, target=target, messages=msgs, contacts=contacts, chat_id=cid, mode='chat')
 
 @app.route('/delete_chat/<target_user>')
 def delete_chat(target_user):
     if 'user' not in session: return redirect(url_for('auth'))
-    me = session['user'].lower()
-    target = target_user.lower()
-    cid = get_chat_id(me, target)
+    cid = get_chat_id(session['user'], target_user)
     Message.query.filter_by(chat_id=cid).delete()
     db.session.commit()
     return redirect(url_for('index'))
@@ -114,41 +100,35 @@ def auth():
         username = request.form.get('username', '').strip().lower()
         password = request.form.get('password')
         u = User.query.filter_by(username=username).first()
-        
         if auth_type == 'login':
             if u and check_password_hash(u.password, password):
                 session['user'] = username
                 return redirect(url_for('index'))
-            return "Ошибка входа", 401
+            return "Ошибка", 401
         else:
-            if u: return "Ник занят", 400
-            # ТЕПЕРЬ ТУТ НЕТ ПРОВЕРКИ НА ПЕРВОГО ЮЗЕРА. ВСЕ НОВЫЕ - ОБЫЧНЫЕ ЮЗЕРЫ.
-            new_u = User(username=username, password=generate_password_hash(password), is_admin=False)
-            db.session.add(new_u); db.session.commit()
+            if u: return "Занято", 400
+            db.session.add(User(username=username, password=generate_password_hash(password)))
+            db.session.commit()
             session['user'] = username
             return redirect(url_for('index'))
     return render_template('index.html', mode='auth', auth_type=auth_type)
 
 @app.route('/admin')
 def admin_panel():
-    if 'user' not in session: return redirect(url_for('auth'))
-    u = User.query.filter_by(username=session['user']).first()
-    # ЖЕСТКАЯ ПРОВЕРКА: Если не wetmo или нет флага админа - пошел вон
-    if not u or not u.is_admin or u.username != 'wetmo': abort(403)
+    u = User.query.filter_by(username=session.get('user')).first()
+    if not u or u.username != 'wetmo': abort(403)
     return render_template('index.html', user=u, all_users=User.query.all(), mode='admin')
 
 @app.route('/admin/verify/<int:uid>')
 def verify(uid):
-    me = User.query.filter_by(username=session.get('user')).first()
-    if not me or not me.is_admin: abort(403)
+    if session.get('user') != 'wetmo': abort(403)
     u = User.query.get(uid)
     if u: u.is_verified = not u.is_verified; db.session.commit()
     return redirect(url_for('admin_panel'))
 
 @app.route('/logout')
 def logout():
-    session.pop('user', None)
-    return redirect(url_for('auth'))
+    session.pop('user', None); return redirect(url_for('auth'))
 
 @socketio.on('join')
 def on_join(data):
@@ -156,19 +136,15 @@ def on_join(data):
 
 @socketio.on('send_msg')
 def handle_msg(data):
-    if 'user' not in session: return
-    u = User.query.filter_by(username=session['user']).first()
+    u = User.query.filter_by(username=session.get('user')).first()
     if not u: return
-    
     target = str(data.get('target', '')).lower()
     content = str(data.get('message', '')).strip()
-    if not content or not target: return
-    
-    cid = get_chat_id(session['user'], target)
-    db.session.add(Message(chat_id=cid, sender=session['user'], content=content))
-    db.session.commit()
-    
-    emit('receive_msg', {'sender': u.username, 'message': content, 'verified': u.is_verified}, room=cid)
+    if content and target:
+        cid = get_chat_id(u.username, target)
+        db.session.add(Message(chat_id=cid, sender=u.username, content=content))
+        db.session.commit()
+        emit('receive_msg', {'sender': u.username, 'message': content, 'verified': u.is_verified}, room=cid)
 
 if __name__ == '__main__':
     socketio.run(app, host='0.0.0.0', port=5000)
