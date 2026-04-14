@@ -137,6 +137,11 @@ def admin_v(uid):
         t = User.query.get(uid); t.is_verified = not t.is_verified; db.session.commit()
     return redirect(url_for('admin'))
 
+@app.route('/logout')
+def logout():
+    session.clear()
+    return redirect(url_for('auth'))
+
 @socketio.on('join')
 def on_join(data): join_room(str(data['chat_id']))
 
