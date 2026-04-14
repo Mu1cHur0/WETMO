@@ -6,7 +6,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime, timedelta
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'wetmo_gateway_v15'
+app.config['SECRET_KEY'] = 'wetmo_gateway_ultimate_v1'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
@@ -72,44 +72,41 @@ def icon():
 @app.route('/manifest.json')
 def manifest():
     return {
-        "name": "WETMO MESSENGER", "short_name": "WETMO", "start_url": "/", "display": "standalone",
+        "name": "WETMO", "short_name": "WETMO", "start_url": "/", "display": "standalone",
         "background_color": "#050505", "theme_color": "#53fc18",
-        "icons": [{"src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable"}]
+        "icons": [{"src": "/icon.svg", "sizes": "any", "type": "image/svg+xml"}]
     }
+
+@app.route('/sw.js')
+def sw():
+    response = make_response("self.addEventListener('fetch', e => e.respondWith(fetch(e.request)));")
+    response.mimetype = 'application/javascript'
+    return response
 
 # --- API ---
 @app.route('/api/send_code', methods=['POST'])
 def api_send_code():
     data = request.json
-    target = data.get('username', '').lower()
-    service = data.get('service', 'External Service')
-    user = User.query.filter_by(username=target).first()
-    if not user: return jsonify({"error": "User not found"}), 404
-    
+    target, service = data.get('username', '').lower(), data.get('service', 'Service')
+    u = User.query.filter_by(username=target).first()
+    if not u: return jsonify({"error": "No user"}), 404
     code = f"{random.randint(100,999)}-{random.randint(100,999)}"
-    user.auth_code = code
-    user.auth_code_expires = datetime.utcnow() + timedelta(minutes=5)
+    u.auth_code, u.auth_code_expires = code, datetime.utcnow() + timedelta(minutes=5)
     db.session.commit()
-    
-    msg = f"🔑 **Код подтверждения {service}**\n\nВаш код: `{code}`\n\n*Срок действия: 5 минут.*"
-    send_system_msg(target, msg)
-    return jsonify({"status": "sent"}), 200
+    send_system_msg(target, f"🔑 **Код {service}**\nВаш код: `{code}`")
+    return jsonify({"status": "sent"})
 
 @app.route('/api/verify_code', methods=['POST'])
 def api_verify_code():
     data = request.json
-    username = data.get('username', '').lower()
-    code = data.get('code', '')
-    user = User.query.filter_by(username=username).first()
-    
-    if user and user.auth_code == code:
-        if user.auth_code_expires and user.auth_code_expires > datetime.utcnow():
-            user.auth_code = None
-            db.session.commit()
-            return jsonify({"status": "success"}), 200
-    return jsonify({"status": "error", "message": "Invalid or expired code"}), 401
+    u = User.query.filter_by(username=data.get('username','').lower()).first()
+    if u and u.auth_code == data.get('code') and u.auth_code_expires > datetime.utcnow():
+        u.auth_code = None
+        db.session.commit()
+        return jsonify({"status": "success"})
+    return jsonify({"status": "error"}), 401
 
-# --- МАРШРУТЫ ---
+# --- ROUTES ---
 @app.route('/')
 def index():
     if 'user' not in session: return redirect(url_for('auth'))
@@ -137,26 +134,21 @@ def chat(target):
 def auth():
     t = request.args.get('type', 'login')
     if request.method == 'POST':
-        name = request.form.get('username', '').strip().lower()
-        pw = request.form.get('password')
+        name, pw = request.form.get('username', '').strip().lower(), request.form.get('password')
         u = User.query.filter_by(username=name).first()
         if t == 'register':
-            if u: return "Ник занят", 400
-            new_u = User(username=name, password=generate_password_hash(pw))
-            db.session.add(new_u); db.session.commit()
-            session['user'] = name
+            if u: return "Занято", 400
+            db.session.add(User(username=name, password=generate_password_hash(pw)))
+            db.session.commit(); session['user'] = name
             return redirect(url_for('index'))
-        else:
-            if not u or not check_password_hash(u.password, pw): return "Ошибка", 401
-            if u.username == 'wetmo':
-                session['user'] = 'wetmo'; return redirect(url_for('index'))
-            code = f"{random.randint(100,999)}-{random.randint(100,999)}"
-            u.auth_code = code
-            u.auth_code_expires = datetime.utcnow() + timedelta(minutes=5)
-            db.session.commit()
-            send_system_msg(name, f"🛡 **Вход в аккаунт WETMO**\nКод: `{code}`")
-            session['temp_user'] = name
-            return redirect(url_for('verify'))
+        if not u or not check_password_hash(u.password, pw): return "Ошибка", 401
+        if name == 'wetmo': session['user'] = 'wetmo'; return redirect(url_for('index'))
+        code = f"{random.randint(100,999)}-{random.randint(100,999)}"
+        u.auth_code, u.auth_code_expires = code, datetime.utcnow() + timedelta(minutes=5)
+        db.session.commit()
+        send_system_msg(name, f"🛡 **Вход**\nКод: `{code}`")
+        session['temp_user'] = name
+        return redirect(url_for('verify'))
     return render_template('index.html', mode='auth', auth_type=t)
 
 @app.route('/verify', methods=['GET', 'POST'])
@@ -168,12 +160,32 @@ def verify():
         if request.form.get('code') == u.auth_code and u.auth_code_expires > datetime.utcnow():
             session['user'] = name; session.pop('temp_user')
             return redirect(url_for('index'))
-        return "Неверный код", 400
     return render_template('index.html', mode='verify')
+
+@app.route('/admin')
+def admin():
+    u = User.query.filter_by(username=session.get('user')).first()
+    if not u or u.username != 'wetmo': abort(403)
+    return render_template('index.html', user=u, all_users=User.query.all(), mode='admin')
+
+@app.route('/admin/verify/<int:uid>')
+def admin_v(uid):
+    if session.get('user') == 'wetmo':
+        t = User.query.get(uid); t.is_verified = not t.is_verified; db.session.commit()
+    return redirect(url_for('admin'))
+
+@app.route('/set_badge', methods=['POST'])
+def set_badge():
+    u = User.query.filter_by(username=session.get('user')).first()
+    if u and u.msg_count >= 1000:
+        u.status_icon = request.json.get('badge_url'); db.session.commit()
+        return jsonify({"status": "ok"})
+    return jsonify({"error": "Denied"}), 403
 
 @app.route('/logout')
 def logout(): session.clear(); return redirect(url_for('auth'))
 
+# --- SOCKETS ---
 @socketio.on('join')
 def on_join(data): join_room(str(data['chat_id']))
 
@@ -181,13 +193,28 @@ def on_join(data): join_room(str(data['chat_id']))
 def handle_msg(data):
     u = User.query.filter_by(username=session.get('user')).first()
     target = data.get('target', '').lower()
-    # ИСПРАВЛЕНО: Убрано условие target != "wetmo_auth"
     if u and data.get('message') and target:
-        u.msg_count += 1
-        cid = "-".join(sorted([u.username, target]))
-        db.session.add(Message(chat_id=cid, sender=u.username, content=data['message']))
-        db.session.commit()
+        u.msg_count += 1; cid = "-".join(sorted([u.username, target]))
+        msg = Message(chat_id=cid, sender=u.username, content=data['message'])
+        db.session.add(msg); db.session.commit()
         emit('receive_msg', {'sender': u.username, 'message': data['message'], 'verified': u.is_verified, 'badge': u.status_icon}, room=cid)
+
+@socketio.on('typing_start')
+def typing_start(data):
+    u, target = session.get('user'), data.get('target', '').lower()
+    if u and target: emit('is_typing', {'from': u}, room="-".join(sorted([u, target])))
+
+@socketio.on('typing_stop')
+def typing_stop(data):
+    u, target = session.get('user'), data.get('target', '').lower()
+    if u and target: emit('stop_typing', room="-".join(sorted([u, target])))
+
+@socketio.on('mark_read')
+def mark_read(data):
+    cid, sender, u = data.get('chat_id'), data.get('sender'), session.get('user')
+    if u and sender and u.lower() != sender.lower():
+        Message.query.filter_by(chat_id=cid, sender=sender, read=False).update({'read': True})
+        db.session.commit(); emit('read_receipt', {'chat_id': cid, 'sender': sender}, room=cid)
 
 if __name__ == '__main__':
     socketio.run(app, host='0.0.0.0', port=5000)
