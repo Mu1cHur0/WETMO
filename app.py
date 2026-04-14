@@ -1,27 +1,35 @@
-import os
+import os, random
 from flask import Flask, render_template, request, session, redirect, url_for, abort, jsonify
 from flask_socketio import SocketIO, emit, join_room
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
 
-basedir = os.path.abspath(os.path.dirname(__file__))
-
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'wetmo_final_v5'
-# Если добавишь базу PostgreSQL на Render, она подцепится сама
-app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///' + os.path.join(basedir, 'database.db'))
+app.config['SECRET_KEY'] = 'wetmo_gateway_v14'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
 socketio = SocketIO(app, cors_allowed_origins="*")
+
+EVENT_BADGES = [
+    "https://img.icons8.com/ios-filled/100/53fc18/crown.png",
+    "https://img.icons8.com/ios-filled/100/53fc18/shield.png",
+    "https://img.icons8.com/ios-filled/100/53fc18/sword.png",
+    "https://img.icons8.com/ios-filled/100/53fc18/diamond.png",
+    "https://img.icons8.com/ios-filled/100/53fc18/christmas-star.png",
+    "https://img.icons8.com/ios-filled/100/53fc18/skull.png"
+]
 
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(50), unique=True, nullable=False)
     password = db.Column(db.String(200), nullable=False)
     is_verified = db.Column(db.Boolean, default=False)
-    is_admin = db.Column(db.Boolean, default=False)
+    auth_code = db.Column(db.String(10))
+    status_icon = db.Column(db.String(500), default="")
+    msg_count = db.Column(db.Integer, default=0)
 
 class Message(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -32,119 +40,126 @@ class Message(db.Model):
 
 with app.app_context():
     db.create_all()
-    # Авто-создание твоего админа
-    admin_nick = "wetmo"
-    if not User.query.filter_by(username=admin_nick).first():
-        db.session.add(User(username=admin_nick, password=generate_password_hash("13681368"), is_admin=True, is_verified=True))
-        db.session.commit()
+    if not User.query.filter_by(username="wetmo").first():
+        db.session.add(User(username="wetmo", password=generate_password_hash("13681368"), is_verified=True, msg_count=1000))
+    if not User.query.filter_by(username="wetmo_auth").first():
+        db.session.add(User(username="wetmo_auth", password=generate_password_hash("internal_pass"), is_verified=True))
+    db.session.commit()
 
-def get_chat_id(u1, u2):
-    return "-".join(sorted([str(u1).lower(), str(u2).lower()]))
+def send_system_msg(target_username, text):
+    cid = "-".join(sorted(["wetmo_auth", target_username.lower()]))
+    db.session.add(Message(chat_id=cid, sender="wetmo_auth", content=text))
+    db.session.commit()
 
-def get_my_contacts(username):
-    all_chats = Message.query.filter(Message.chat_id.contains(username.lower())).all()
-    contact_names = set()
-    for m in all_chats:
-        for p in m.chat_id.split('-'):
-            if p != username.lower(): contact_names.add(p)
-    return User.query.filter(User.username.in_(list(contact_names))).all()
-
-# МАРШРУТЫ ДЛЯ ПРИЛОЖЕНИЯ (PWA)
-@app.route('/manifest.json')
-def manifest():
-    return jsonify({
-        "name": "WETMO Messenger",
-        "short_name": "WETMO",
-        "start_url": "/",
-        "display": "standalone",
-        "background_color": "#050505",
-        "theme_color": "#53fc18",
-        "icons": [{"src": "https://cdn-icons-png.flaticon.com/512/5968/5968756.png", "sizes": "512x512", "type": "image/png"}]
-    })
-
-@app.route('/sw.js')
-def sw():
-    return "self.addEventListener('fetch', (e) => {});", 200, {'Content-Type': 'application/javascript'}
+@app.route('/api/send_code', methods=['POST'])
+def api_send_code():
+    data = request.json
+    target = data.get('username')
+    service = data.get('service', 'Unknown Service')
+    user = User.query.filter_by(username=target.lower()).first()
+    if not user: return jsonify({"error": "User not found"}), 404
+    code = f"{random.randint(100,999)}-{random.randint(100,999)}"
+    user.auth_code = code; db.session.commit()
+    msg = f"🔑 **Код подтверждения {service}**\n\nВаш код: `{code}`"
+    send_system_msg(target, msg)
+    return jsonify({"status": "sent"}), 200
 
 @app.route('/')
 def index():
     if 'user' not in session: return redirect(url_for('auth'))
     u = User.query.filter_by(username=session['user']).first()
-    if not u: session.pop('user', None); return redirect(url_for('auth'))
-    return render_template('index.html', user=u, contacts=get_my_contacts(u.username), mode='chat')
+    all_m = Message.query.filter(Message.chat_id.contains(u.username)).all()
+    names = {p for m in all_m for p in m.chat_id.split('-') if p != u.username}
+    contacts = User.query.filter(User.username.in_(list(names))).all()
+    return render_template('index.html', user=u, contacts=contacts, mode='chat', event_badges=EVENT_BADGES)
 
-@app.route('/im/<target_user>')
-def direct_chat(target_user):
+@app.route('/im/<target>')
+def chat(target):
     if 'user' not in session: return redirect(url_for('auth'))
-    me = User.query.filter_by(username=session['user']).first()
-    target = User.query.filter_by(username=target_user.lower()).first()
-    if not target or not me or me.username.lower() == target.username.lower(): return redirect(url_for('index'))
-    cid = get_chat_id(me.username, target.username)
+    u = User.query.filter_by(username=session['user']).first()
+    t = User.query.filter_by(username=target.lower()).first()
+    if not t or u.username == t.username: return redirect(url_for('index'))
+    cid = "-".join(sorted([u.username, t.username]))
     msgs = Message.query.filter_by(chat_id=cid).order_by(Message.timestamp.asc()).all()
-    contacts = get_my_contacts(me.username)
-    if target.username.lower() not in [c.username.lower() for c in contacts]: contacts.append(target)
-    return render_template('index.html', user=me, target=target, messages=msgs, contacts=contacts, chat_id=cid, mode='chat')
-
-@app.route('/delete_chat/<target_user>')
-def delete_chat(target_user):
-    if 'user' not in session: return redirect(url_for('auth'))
-    cid = get_chat_id(session['user'], target_user)
-    Message.query.filter_by(chat_id=cid).delete()
-    db.session.commit()
-    return redirect(url_for('index'))
+    all_m = Message.query.filter(Message.chat_id.contains(u.username)).all()
+    names = {p for m in all_m for p in m.chat_id.split('-') if p != u.username}
+    names.add(t.username)
+    contacts = User.query.filter(User.username.in_(list(names))).all()
+    return render_template('index.html', user=u, target=t, messages=msgs, contacts=contacts, chat_id=cid, mode='chat', event_badges=EVENT_BADGES)
 
 @app.route('/auth', methods=['GET', 'POST'])
 def auth():
-    auth_type = request.args.get('type', 'login')
+    if 'user' in session: return redirect(url_for('index'))
+    t = request.args.get('type', 'login')
     if request.method == 'POST':
-        username = request.form.get('username', '').strip().lower()
-        password = request.form.get('password')
-        u = User.query.filter_by(username=username).first()
-        if auth_type == 'login':
-            if u and check_password_hash(u.password, password):
-                session['user'] = username
-                return redirect(url_for('index'))
-            return "Ошибка", 401
-        else:
-            if u: return "Занято", 400
-            db.session.add(User(username=username, password=generate_password_hash(password)))
-            db.session.commit()
-            session['user'] = username
+        name = request.form.get('username', '').strip().lower()
+        pw = request.form.get('password')
+        u = User.query.filter_by(username=name).first()
+        if t == 'register':
+            if u: return "Ник занят", 400
+            new_u = User(username=name, password=generate_password_hash(pw))
+            db.session.add(new_u); db.session.commit()
+            session['user'] = name
             return redirect(url_for('index'))
-    return render_template('index.html', mode='auth', auth_type=auth_type)
+        else:
+            if not u or not check_password_hash(u.password, pw): return "Ошибка", 401
+            if u.username == 'wetmo':
+                session['user'] = 'wetmo'; return redirect(url_for('index'))
+            code = f"{random.randint(100,999)}-{random.randint(100,999)}"
+            u.auth_code = code; db.session.commit()
+            send_system_msg(name, f"🛡 **Вход WETMO**: `{code}`")
+            session['temp_user'] = name
+            return redirect(url_for('verify'))
+    return render_template('index.html', mode='auth', auth_type=t)
+
+@app.route('/verify', methods=['GET', 'POST'])
+def verify():
+    name = session.get('temp_user')
+    if not name: return redirect(url_for('auth'))
+    if request.method == 'POST':
+        u = User.query.filter_by(username=name).first()
+        if request.form.get('code') == u.auth_code:
+            session['user'] = name; session.pop('temp_user')
+            return redirect(url_for('index'))
+        return "Неверно", 400
+    return render_template('index.html', mode='verify')
 
 @app.route('/admin')
-def admin_panel():
+def admin():
     u = User.query.filter_by(username=session.get('user')).first()
     if not u or u.username != 'wetmo': abort(403)
     return render_template('index.html', user=u, all_users=User.query.all(), mode='admin')
 
 @app.route('/admin/verify/<int:uid>')
-def verify(uid):
-    if session.get('user') != 'wetmo': abort(403)
-    u = User.query.get(uid)
-    if u: u.is_verified = not u.is_verified; db.session.commit()
-    return redirect(url_for('admin_panel'))
-
-@app.route('/logout')
-def logout():
-    session.pop('user', None); return redirect(url_for('auth'))
+def admin_v(uid):
+    u = User.query.filter_by(username=session.get('user')).first()
+    if u and u.username == 'wetmo':
+        t = User.query.get(uid); t.is_verified = not t.is_verified; db.session.commit()
+    return redirect(url_for('admin'))
 
 @socketio.on('join')
-def on_join(data):
-    if 'chat_id' in data: join_room(str(data['chat_id']))
+def on_join(data): join_room(str(data['chat_id']))
 
 @socketio.on('send_msg')
 def handle_msg(data):
     u = User.query.filter_by(username=session.get('user')).first()
-    if not u: return
-    target = str(data.get('target', '')).lower()
-    content = str(data.get('message', '')).strip()
-    if content and target:
-        cid = get_chat_id(u.username, target)
-        db.session.add(Message(chat_id=cid, sender=u.username, content=content))
+    target = data.get('target', '').lower()
+    t_user = User.query.filter_by(username=target).first()
+    if u and t_user and data.get('message') and target != "wetmo_auth":
+        u.msg_count += 1; cid = "-".join(sorted([u.username, target]))
+        db.session.add(Message(chat_id=cid, sender=u.username, content=data['message']))
         db.session.commit()
-        emit('receive_msg', {'sender': u.username, 'message': content, 'verified': u.is_verified}, room=cid)
+        emit('receive_msg', {'sender': u.username, 'message': data['message'], 'verified': u.is_verified, 'badge': u.status_icon}, room=cid)
+
+@app.route('/set_badge', methods=['POST'])
+def set_badge():
+    if 'user' not in session: return jsonify({"status": "error"}), 401
+    u = User.query.filter_by(username=session['user']).first()
+    if u and u.msg_count >= 1000:
+        u.status_icon = request.json.get('badge_url', '')
+        db.session.commit()
+        return jsonify({"status": "ok"})
+    return jsonify({"status": "error"}), 403
 
 if __name__ == '__main__':
     socketio.run(app, host='0.0.0.0', port=5000)
