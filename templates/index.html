@@ -3,118 +3,99 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <link rel="icon" type="image/svg+xml" href="/icon.svg">
-    <link rel="apple-touch-icon" href="/icon.svg">
-    <link rel="manifest" href="/manifest.json">
     <title>WETMO</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
-        :root { --bg: #050505; --kick: #53fc18; --border: #111; --danger: #ff4444; }
+        :root { --bg: #050505; --kick: #53fc18; --border: #111; }
         body { font-family: 'Montserrat', sans-serif; background: var(--bg); color: #fff; margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
         
-        .badge-box { display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; background: var(--kick); border-radius: 4px; margin-right: 8px; flex-shrink: 0; }
-        .badge-icon { width: 16px; height: 16px; filter: brightness(0); }
-        .kick-badge { display: inline-flex; align-items: center; justify-content: center; width: 14px; height: 14px; background: var(--kick); border-radius: 50%; margin-left: 6px; }
-        .kick-badge::after { content: ''; width: 3px; height: 6px; border: solid #000; border-width: 0 2px 2px 0; transform: rotate(45deg); margin-bottom: 2px; }
+        /* ГАЛОЧКА ВЕРИФИКАЦИИ - ИСПРАВЛЕНО */
+        .verified-badge {
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 14px; height: 14px; background: var(--kick); border-radius: 50%;
+            margin-left: 6px; flex-shrink: 0; position: relative;
+        }
+        .verified-badge::after {
+            content: ''; width: 3px; height: 6px; border: solid #000;
+            border-width: 0 2px 2px 0; transform: rotate(45deg);
+            margin-bottom: 2px;
+        }
 
         .header { background: #000; padding: 12px 20px; display: flex; align-items: center; border-bottom: 1px solid var(--border); }
         .logo { font-weight: 900; color: var(--kick); text-decoration: none; font-size: 20px; }
-        .btn-header { background: #111; color: #fff; padding: 8px 14px; border-radius: 6px; font-size: 11px; font-weight: 900; text-decoration: none; margin-left: 10px; border: 1px solid #222; cursor: pointer; }
+        .btn-header { background: #111; color: #fff; padding: 8px 14px; border-radius: 6px; font-size: 11px; font-weight: 900; border: 1px solid #222; cursor: pointer; margin-left: 8px; }
 
         .tabs-bar { display: flex; background: #000; border-bottom: 1px solid var(--border); overflow-x: auto; scrollbar-width: none; }
-        .tab { padding: 14px 20px; color: #666; text-decoration: none; font-size: 11px; font-weight: 800; border-right: 1px solid var(--border); white-space: nowrap; }
-        .tab.active { background: var(--bg); color: var(--kick); border-bottom: 2px solid var(--kick); }
+        .tab { padding: 14px 20px; color: #666; text-decoration: none; font-size: 11px; font-weight: 800; border-right: 1px solid var(--border); white-space: nowrap; display: flex; align-items: center; }
+        .tab.active { background: var(--bg); color: var(--kick); }
 
         #messages { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 12px; }
-        .msg { background: #0a0a0a; padding: 12px 16px; border-radius: 15px; border: 1px solid #111; max-width: 80%; }
+        .msg { background: #0a0a0a; padding: 12px 16px; border-radius: 15px; border: 1px solid #111; max-width: 80%; position: relative; }
         .msg.me { align-self: flex-end; border-color: #1a1a1a; }
         .sender { font-size: 10px; color: var(--kick); font-weight: 900; margin-bottom: 5px; display: flex; align-items: center; }
+        .badge-img { width: 18px; height: 18px; margin-right: 6px; border-radius: 4px; }
 
         .input-wrap { padding: 20px; border-top: 1px solid var(--border); display: flex; gap: 10px; background: #000; }
         .input-wrap input { flex: 1; background: #0a0a0a; border: 1px solid #222; color: #fff; padding: 15px; border-radius: 12px; outline: none; }
         .input-wrap button { background: var(--kick); border: none; width: 55px; border-radius: 12px; font-weight: 900; cursor: pointer; }
 
-        .typing-indicator { font-size: 10px; color: #444; padding: 5px 20px; min-height: 20px; }
-
-        #event-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.9); display: none; align-items: center; justify-content: center; z-index: 1000; }
-        .badges-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; padding: 10px; max-height: 400px; overflow-y: auto; }
-        .badge-card { background: #0a0a0a; border: 1px solid #1a1a1a; border-radius: 12px; padding: 8px; text-align: center; cursor: pointer; position: relative; }
-        .badge-card.locked { opacity: 0.1; filter: grayscale(1); cursor: default; }
-        .badge-card img { width: 100%; height: auto; border-radius: 8px; }
-        .badge-name { font-size: 7px; font-weight: 900; color: #444; margin-top: 5px; display: block; }
-        @media (max-width: 600px) { .badges-grid { grid-template-columns: repeat(3, 1fr); } }
+        /* МОДАЛКА КВЕСТОВ */
+        #event-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.9); display: none; align-items: center; justify-content: center; z-index: 1000; padding: 20px; }
+        .modal-content { background: #080808; border: 1px solid #222; border-radius: 24px; padding: 25px; width: 100%; max-width: 450px; max-height: 80vh; overflow-y: auto; }
+        .quest-item { background: #111; padding: 15px; border-radius: 12px; margin-bottom: 10px; border: 1px solid #222; }
+        .quest-name { font-weight: 900; font-size: 13px; color: var(--kick); }
+        .quest-progress { font-size: 11px; color: #666; margin: 5px 0; }
+        .badges-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 20px; }
+        .badge-card { background: #111; padding: 10px; border-radius: 12px; text-align: center; cursor: pointer; }
+        .badge-card img { width: 100%; height: auto; }
     </style>
 </head>
 <body>
-    <script>if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js');}</script>
-    
     <div class="header">
         <a href="/" class="logo">WETMO</a>
         {% if mode == 'chat' %}
-        <button class="btn-header" onclick="document.getElementById('event-modal').style.display='flex'">КВЕСТ</button>
         <div style="margin-left:auto; display:flex;">
-            {% if user.username == 'wetmo' %}<a href="/admin" class="btn-header">АДМИН</a>{% endif %}
+            <button class="btn-header" onclick="document.getElementById('event-modal').style.display='flex'">КВЕСТ</button>
             <button class="btn-header" onclick="shareProfile()">ПОДЕЛИТЬСЯ</button>
-            <a href="/logout" class="btn-header" style="color:var(--danger)">ВЫХОД</a>
         </div>
         {% endif %}
     </div>
 
     {% if mode == 'auth' %}
-    <div style="display:flex; flex:1; align-items:center; justify-content:center;">
-        <div style="background:#080808; padding:40px; border-radius:20px; border:1px solid #111; width:280px; text-align:center;">
-            <h1 style="color:var(--kick);">WETMO</h1>
-            <form method="POST">
-                <input type="text" name="username" placeholder="НИК" required style="width:100%; padding:14px; background:#000; border:1px solid #222; color:#fff; margin-bottom:12px; border-radius:10px;">
-                <input type="password" name="password" placeholder="ПАРОЛЬ" required style="width:100%; padding:14px; background:#000; border:1px solid #222; color:#fff; margin-bottom:20px; border-radius:10px;">
-                <button type="submit" style="width:100%; padding:14px; background:var(--kick); border:none; font-weight:900; border-radius:10px;">{{ 'ВОЙТИ' if auth_type == 'login' else 'РЕГИСТРАЦИЯ' }}</button>
-                <button type="button" onclick="requestCode()" class="btn-header" style="width:100%; margin:15px 0 0 0; background:#000;">API КОД</button>
-            </form>
-            <a href="/auth?type={{ 'register' if auth_type == 'login' else 'login' }}" style="display:block; margin-top:20px; font-size:11px; color:#444;">{{ 'НЕТ АККАУНТА?' if auth_type == 'login' else 'ЕСТЬ АККАУНТ' }}</a>
-        </div>
+    <div style="flex:1; display:flex; align-items:center; justify-content:center;">
+        <form method="POST" style="text-align:center;">
+            <input type="text" name="username" placeholder="НИК" required style="padding:15px; background:#111; border:1px solid #222; color:#fff; border-radius:12px;">
+            <button type="submit" class="btn-header" style="padding:15px 30px;">ВХОД</button>
+        </form>
     </div>
-
-    {% elif mode == 'verify' %}
-    <div style="display:flex; flex:1; align-items:center; justify-content:center; text-align:center;">
-        <div><h2 style="color:var(--kick);">ПРОВЕРКА</h2>
-        <form method="POST">
-            <input type="text" name="code" placeholder="000-000" required style="padding:14px; background:#000; border:1px solid #222; color:#fff; border-radius:10px; text-align:center; font-size:20px; width:200px; display:block; margin-bottom:15px;">
-            <button type="submit" style="padding:14px; background:var(--kick); border:none; font-weight:900; border-radius:10px; width:100%;">ПОДТВЕРДИТЬ</button>
-        </form></div>
-    </div>
-
-    {% elif mode == 'admin' %}
-    <div style="padding:20px;">
-        <h2>УПРАВЛЕНИЕ</h2>
-        {% for u in all_users %}
-        <div style="display:flex; justify-content:space-between; padding:10px; border-bottom:1px solid #111;">
-            <span>{{ u.username }} {% if u.is_verified %}<span class="kick-badge"></span>{% endif %}</span>
-            <a href="/admin/verify/{{ u.id }}" style="color:var(--kick)">[ ГАЛОЧКА ]</a>
-        </div>
-        {% endfor %}
-        <a href="/" class="btn-header" style="margin-top:20px; display:inline-block;">НАЗАД</a>
-    </div>
-
     {% else %}
     <div class="tabs-bar">
-        {% for c in contacts %}<a href="/im/{{ c.username }}" class="tab {% if target and target.username == c.username %}active{% endif %}">{{ c.username|upper }}</a>{% endfor %}
+        {% for c in contacts %}
+        <a href="/im/{{ c.username }}" class="tab {% if target and target.username == c.username %}active{% endif %}">
+            {{ c.username|upper }}
+            {% if c.is_verified %}<span class="verified-badge"></span>{% endif %}
+        </a>
+        {% endfor %}
     </div>
+
     <div id="messages">
         {% if target %}
             {% for m in messages %}
-            <div class="msg {% if m.sender.lower() == user.username.lower() %}me{% endif %}" data-sender="{{ m.sender }}">
+            <div class="msg {% if m.sender == user.username %}me{% endif %}">
                 <div class="sender">
-                    {% if m.sender == 'wetmo_auth' %}🤖{% endif %}
                     {{ m.sender }}
+                    {% if (m.sender == user.username and user.is_verified) or (m.sender == target.username and target.is_verified) %}
+                        <span class="verified-badge"></span>
+                    {% endif %}
                 </div>
-                <div class="msg-content" data-raw="{{ m.content }}" data-sys="{% if m.sender == 'wetmo_auth' %}1{% else %}0{% endif %}"></div>
+                <div class="msg-content">{{ m.content }}</div>
             </div>
             {% endfor %}
         {% endif %}
     </div>
-    <div class="typing-indicator" id="typingIndicator"></div>
+
     {% if target %}
     <div class="input-wrap">
         <input type="text" id="m-in" placeholder="Сообщение...">
@@ -123,18 +104,25 @@
     {% endif %}
 
     <div id="event-modal">
-        <div style="background:#080808; padding:25px; border-radius:24px; border:1px solid #222; width:95%; max-width:450px;">
-            <h2 style="color:var(--kick); margin:0 0 15px 0; text-align:center;">WETMO ACHIEVEMENTS</h2>
+        <div class="modal-content">
+            <h2 style="color:var(--kick); margin-top:0;">ЗАДАНИЯ WETMO</h2>
+            {% for q in quests %}
+            <div class="quest-item">
+                <div class="quest-name">{{ q.name|upper }}</div>
+                <div class="quest-progress">ПРОГРЕСС: {{ q.progress }}/{{ q.target }}</div>
+                <div style="font-size:10px; color:var(--kick);">🎁 {{ q.reward }}</div>
+            </div>
+            {% endfor %}
+
+            <h3 style="margin-top:20px; font-size:14px;">ЭМБЛЕМЫ</h3>
             <div class="badges-grid">
                 {% for b in all_badges %}
-                <div class="badge-card {% if user.msg_count < b.req %}locked{% endif %}" 
-                     onclick="{% if user.msg_count >= b.req %}setBadge('/badge/{{ b.id }}.svg'){% endif %}">
-                    <img src="/badge/{{ b.id }}.svg" loading="lazy">
-                    <span class="badge-name">{{ b.name }}</span>
+                <div class="badge-card" onclick="setBadge('/badge/{{ b.id }}.svg')">
+                    <img src="/badge/{{ b.id }}.svg">
                 </div>
                 {% endfor %}
             </div>
-            <button class="btn-header" style="width:100%; margin:20px 0 0 0; padding:15px;" onclick="document.getElementById('event-modal').style.display='none'">ЗАКРЫТЬ</button>
+            <button class="btn-header" style="width:100%; margin-top:20px; padding:15px;" onclick="document.getElementById('event-modal').style.display='none'">ЗАКРЫТЬ</button>
         </div>
     </div>
 
@@ -142,45 +130,22 @@
         const socket = io();
         const me = "{{ user.username }}";
         const targetUser = "{{ target.username if target else '' }}";
-        const chatId = "{{ chat_id if chat_id else '' }}";
-        const KEY = "wetmo_secret_2026";
 
-        function encrypt(t) {
-            let utf8 = unescape(encodeURIComponent(t)), r = '';
-            for(let i=0; i<utf8.length; i++) r += String.fromCharCode(utf8.charCodeAt(i) ^ KEY.charCodeAt(i % KEY.length));
-            return btoa(r);
-        }
-        function decrypt(e) {
-            try {
-                let t = atob(e), r = '';
-                for(let i=0; i<t.length; i++) r += String.fromCharCode(t.charCodeAt(i) ^ KEY.charCodeAt(i % KEY.length));
-                return decodeURIComponent(escape(r));
-            } catch { return e; }
-        }
-
-        function shareProfile() { navigator.clipboard.writeText(window.location.origin + '/im/' + me); alert("Ссылка скопирована!"); }
-        function requestCode() {
-            let u = document.querySelector('input[name="username"]').value;
-            let s = prompt("Сервис:", "WETMO_AUTH");
-            if(u && s) fetch('/api/send_code', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({username:u, service:s})}).then(()=>alert("Код отправлен ботом"));
+        function shareProfile() {
+            const link = window.location.origin + '/im/' + me;
+            navigator.clipboard.writeText(link);
+            alert("Ссылка скопирована!");
         }
 
         function setBadge(url) {
-            fetch('/set_badge', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({badge_url:url})}).then(r => r.ok ? location.reload() : alert("Недостаточно сообщений!"));
+            fetch('/set_badge', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({badge_url:url})})
+            .then(() => location.reload());
         }
 
-        document.querySelectorAll('.msg-content').forEach(el => {
-            let t = el.dataset.raw;
-            if(el.dataset.sys !== "1") t = decrypt(t);
-            el.innerHTML = marked.parse(t);
-        });
-
-        if(chatId) socket.emit('join', {chat_id: chatId});
-
         function send() {
-            let i = document.getElementById('m-in');
+            const i = document.getElementById('m-in');
             if(i.value.trim()) {
-                socket.emit('send_msg', {target: targetUser, message: encrypt(i.value)});
+                socket.emit('send_msg', {target: targetUser, message: i.value});
                 i.value = '';
             }
         }
@@ -188,22 +153,14 @@
         socket.on('receive_msg', (d) => {
             const div = document.createElement('div');
             div.className = 'msg' + (d.sender.toLowerCase() === me.toLowerCase() ? ' me' : '');
-            let t = (d.sender === 'wetmo_auth') ? d.message : decrypt(d.message);
-            div.innerHTML = `<div class="sender">${d.sender}</div><div class="msg-content">${marked.parse(t)}</div>`;
+            const v = d.verified ? '<span class="verified-badge"></span>' : '';
+            const b = d.badge ? `<img src="${d.badge}" class="badge-img">` : '';
+            div.innerHTML = `<div class="sender">${b}${d.sender}${v}</div><div class="msg-content">${d.message}</div>`;
             document.getElementById('messages').appendChild(div);
             document.getElementById('messages').scrollTop = document.getElementById('messages').scrollHeight;
         });
 
-        let tT;
-        document.getElementById('m-in')?.addEventListener('input', () => {
-            socket.emit('typing_start', {target: targetUser});
-            clearTimeout(tT); tT = setTimeout(() => socket.emit('typing_stop', {target: targetUser}), 1000);
-        });
-
-        socket.on('is_typing', d => { if(d.from.toLowerCase() === targetUser.toLowerCase()) document.getElementById('typingIndicator').innerText = d.from + ' печатает...'; });
-        socket.on('stop_typing', () => document.getElementById('typingIndicator').innerText = '');
-        
-        document.getElementById('m-in')?.addEventListener('keypress', e => { if(e.key==='Enter') send(); });
+        {% if chat_id %} socket.emit('join', {chat_id: "{{ chat_id }}"}); {% endif %}
         document.getElementById('messages').scrollTop = document.getElementById('messages').scrollHeight;
     </script>
     {% endif %}
