@@ -53,6 +53,29 @@ def send_system_msg(target_username, text):
     db.session.add(Message(chat_id=cid, sender="wetmo_auth", content=text))
     db.session.commit()
 
+# --- API ДЛЯ ПОИСКА ПОЛЬЗОВАТЕЛЕЙ ---
+@app.route('/api/search_users')
+def search_users():
+    if 'user' not in session:
+        return jsonify([])
+    
+    query = request.args.get('q', '').strip().lower()
+    if len(query) < 1:
+        return jsonify([])
+    
+    current_user = session['user']
+    # Ищем пользователей, исключая себя и системных ботов
+    users = User.query.filter(
+        User.username.contains(query),
+        User.username != current_user,
+        ~User.username.in_(['wetmo_auth'])
+    ).limit(10).all()
+    
+    return jsonify([{
+        'username': u.username,
+        'is_verified': u.is_verified
+    } for u in users])
+
 # --- API ДЛЯ ВНЕШНИХ СЕРВИСОВ (OZON и др.) ---
 @app.route('/api/send_code', methods=['POST'])
 def api_send_code():
@@ -180,3 +203,4 @@ def handle_msg(data):
 
 if __name__ == '__main__':
     socketio.run(app, host='0.0.0.0', port=5000)
+
