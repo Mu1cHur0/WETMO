@@ -20,30 +20,9 @@
         .kick-badge::after { content: ''; width: 3px; height: 6px; border: solid #000; border-width: 0 2px 2px 0; transform: rotate(45deg); margin-bottom: 2px; }
         .header { background: #000; padding: 12px 20px; display: flex; align-items: center; border-bottom: 1px solid var(--border); }
         
-        /* НОВЫЙ ЛОГОТИП С ИКОНКОЙ */
-        .logo { 
-            display: flex; 
-            align-items: center; 
-            gap: 8px; 
-            font-weight: 900; 
-            color: var(--kick); 
-            text-decoration: none; 
-            font-size: 20px; 
-        }
-        .logo-icon {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 28px;
-            height: 28px;
-            background: var(--kick);
-            border-radius: 8px;
-        }
-        .logo-icon span {
-            color: #000;
-            font-size: 18px;
-            font-weight: 900;
-        }
+        .logo { display: flex; align-items: center; gap: 8px; font-weight: 900; color: var(--kick); text-decoration: none; font-size: 20px; }
+        .logo-icon { display: flex; align-items: center; justify-content: center; width: 28px; height: 28px; background: var(--kick); border-radius: 8px; }
+        .logo-icon span { color: #000; font-size: 18px; font-weight: 900; }
         
         .btn-header { background: #111; color: #fff; padding: 8px 14px; border-radius: 6px; font-size: 11px; font-weight: 900; text-decoration: none; margin-left: 10px; border: 1px solid #222; cursor: pointer; }
         .search-container { position: relative; margin-left: 15px; margin-right: auto; }
@@ -65,27 +44,28 @@
         .msg { background: #0a0a0a; padding: 12px 16px; border-radius: 15px; border: 1px solid #111; max-width: 80%; }
         .msg.me { align-self: flex-end; border-color: #1a1a1a; }
         .msg-content code { background: #222; padding: 2px 5px; border-radius: 5px; color: var(--kick); font-family: monospace; }
+        /* 🔥 ФИКС ЦВЕТА ССЫЛОК В MARKDOWN */
+        .msg-content a { color: var(--kick); text-decoration: underline; }
+        .msg-content a:hover { color: #7aff3d; }
         .sender { font-size: 10px; color: var(--kick); font-weight: 900; margin-bottom: 5px; display: flex; align-items: center; }
         .input-wrap { padding: 20px; border-top: 1px solid var(--border); display: flex; gap: 10px; background: #000; }
         .input-wrap input { flex: 1; background: #0a0a0a; border: 1px solid #222; color: #fff; padding: 15px; border-radius: 12px; outline: none; }
         .input-wrap button { background: var(--kick); border: none; width: 55px; border-radius: 12px; font-weight: 900; cursor: pointer; }
         .header-actions { display: flex; align-items: center; margin-left: auto; }
+        .delete-btn { color: var(--danger); margin-left: 10px; text-decoration: none; font-size: 10px; padding: 4px 8px; background: #1a1a1a; border-radius: 4px; }
+        .delete-btn:hover { background: var(--danger); color: #fff; }
     </style>
 </head>
 <body>
     <div class="header">
-        <!-- ОБНОВЛЁННЫЙ ЛОГОТИП -->
         <a href="/" class="logo">
-            <div class="logo-icon">
-                <span>W</span>
-            </div>
+            <div class="logo-icon"><span>W</span></div>
             WETMO
         </a>
         
         {% if mode == 'chat' %}
         <button class="btn-header" onclick="document.getElementById('event-modal').style.display='flex'">КВЕСТ</button>
         
-        <!-- ПОИСК ПОЛЬЗОВАТЕЛЕЙ -->
         <div class="search-container">
             <input type="text" class="search-input" id="user-search" placeholder="🔍 Поиск пользователя..." autocomplete="off">
             <div class="search-results" id="search-results"></div>
@@ -101,7 +81,6 @@
     {% if mode == 'auth' %}
     <div style="display:flex; flex:1; align-items:center; justify-content:center;">
         <div style="background:#080808; padding:40px; border-radius:20px; border:1px solid #111; width:280px; text-align:center;">
-            <!-- ЛОГОТИП НА СТРАНИЦЕ АВТОРИЗАЦИИ -->
             <div style="display:flex; align-items:center; justify-content:center; gap:8px; margin-bottom:25px;">
                 <div style="display:flex; align-items:center; justify-content:center; width:36px; height:36px; background:var(--kick); border-radius:10px;">
                     <span style="color:#000; font-size:24px; font-weight:900;">W</span>
@@ -136,12 +115,19 @@
 
     {% elif mode == 'admin' %}
     <div style="padding:25px; flex:1; overflow-y:auto;">
-        <h2 style="color:var(--kick)">УПРАВЛЕНИЕ ГАЛКАМИ</h2>
+        <h2 style="color:var(--kick)">УПРАВЛЕНИЕ ПОЛЬЗОВАТЕЛЯМИ</h2>
         {% for u in all_users %}
-        <div style="display:flex; justify-content:space-between; background:#080808; padding:15px; margin-bottom:10px; border-radius:10px; border: 1px solid #111;">
+        {% if u.username not in ['Аутентификация'] %}
+        <div style="display:flex; justify-content:space-between; align-items:center; background:#080808; padding:15px; margin-bottom:10px; border-radius:10px; border: 1px solid #111;">
             <span>{{ u.username|upper }} {% if u.is_verified %}<span class="kick-badge"></span>{% endif %}</span>
-            <a href="/admin/verify/{{ u.id }}" style="color:{{ 'var(--danger)' if u.is_verified else 'var(--kick)' }}; font-weight:900; text-decoration:none;">[ {{ 'СНЯТЬ' if u.is_verified else 'ДАТЬ' }} ]</a>
+            <div>
+                <a href="/admin/verify/{{ u.id }}" style="color:{{ 'var(--danger)' if u.is_verified else 'var(--kick)' }}; font-weight:900; text-decoration:none; margin-right:15px;">[ {{ 'СНЯТЬ' if u.is_verified else 'ДАТЬ' }} ]</a>
+                {% if u.username != 'wetmo' %}
+                <a href="/admin/delete/{{ u.id }}" class="delete-btn" onclick="return confirm('Удалить пользователя {{ u.username }}? Все его сообщения будут удалены!')">🗑️ УДАЛИТЬ</a>
+                {% endif %}
+            </div>
         </div>
+        {% endif %}
         {% endfor %}
         <a href="/" class="btn-header" style="display:inline-block; margin-top:20px;">НАЗАД В ЧАТ</a>
     </div>
@@ -234,7 +220,7 @@
         const messagesDiv = document.getElementById('messages');
         if (messagesDiv) messagesDiv.scrollTop = messagesDiv.scrollHeight;
 
-        // ============ ПОИСК ПОЛЬЗОВАТЕЛЕЙ ============
+        // Поиск пользователей
         const searchInput = document.getElementById('user-search');
         const searchResults = document.getElementById('search-results');
         let searchTimeout;
