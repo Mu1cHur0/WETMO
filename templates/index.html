@@ -17,6 +17,18 @@
         .header { background: #000; padding: 12px 20px; display: flex; align-items: center; border-bottom: 1px solid var(--border); }
         .logo { font-weight: 900; color: var(--kick); text-decoration: none; font-size: 20px; }
         .btn-header { background: #111; color: #fff; padding: 8px 14px; border-radius: 6px; font-size: 11px; font-weight: 900; text-decoration: none; margin-left: 10px; border: 1px solid #222; cursor: pointer; }
+        .search-container { position: relative; margin-left: 15px; margin-right: auto; }
+        .search-input { background: #0a0a0a; border: 1px solid #222; color: #fff; padding: 8px 12px; border-radius: 6px; font-size: 11px; width: 180px; outline: none; transition: all 0.2s; }
+        .search-input:focus { border-color: var(--kick); width: 220px; }
+        .search-input::placeholder { color: #444; }
+        .search-results { position: absolute; top: 100%; left: 0; right: 0; background: #0a0a0a; border: 1px solid #222; border-radius: 6px; margin-top: 5px; max-height: 300px; overflow-y: auto; z-index: 100; display: none; }
+        .search-result-item { padding: 10px 12px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; border-bottom: 1px solid #111; }
+        .search-result-item:hover { background: #111; }
+        .search-result-item:last-child { border-bottom: none; }
+        .search-result-name { display: flex; align-items: center; gap: 6px; }
+        .search-result-link { color: var(--kick); text-decoration: none; font-size: 10px; padding: 4px 8px; background: #1a1a1a; border-radius: 4px; }
+        .search-result-link:hover { background: var(--kick); color: #000; }
+        .no-results { padding: 12px; text-align: center; color: #444; font-size: 11px; }
         .tabs-bar { display: flex; background: #000; border-bottom: 1px solid var(--border); overflow-x: auto; }
         .tab { padding: 14px 20px; color: #666; text-decoration: none; font-size: 11px; font-weight: 800; border-right: 1px solid var(--border); white-space: nowrap; }
         .tab.active { background: var(--bg); color: var(--kick); border-bottom: 2px solid var(--kick); }
@@ -28,6 +40,7 @@
         .input-wrap { padding: 20px; border-top: 1px solid var(--border); display: flex; gap: 10px; background: #000; }
         .input-wrap input { flex: 1; background: #0a0a0a; border: 1px solid #222; color: #fff; padding: 15px; border-radius: 12px; outline: none; }
         .input-wrap button { background: var(--kick); border: none; width: 55px; border-radius: 12px; font-weight: 900; cursor: pointer; }
+        .header-actions { display: flex; align-items: center; margin-left: auto; }
     </style>
 </head>
 <body>
@@ -35,7 +48,14 @@
         <a href="/" class="logo">WETMO</a>
         {% if mode == 'chat' %}
         <button class="btn-header" onclick="document.getElementById('event-modal').style.display='flex'">КВЕСТ</button>
-        <div style="margin-left:auto; display:flex;">
+        
+        <!-- ПОИСК ПОЛЬЗОВАТЕЛЕЙ -->
+        <div class="search-container">
+            <input type="text" class="search-input" id="user-search" placeholder="🔍 Поиск пользователя..." autocomplete="off">
+            <div class="search-results" id="search-results"></div>
+        </div>
+        
+        <div class="header-actions">
             {% if user.username == 'wetmo' %}<a href="/admin" class="btn-header">АДМИНКА</a>{% endif %}
             <a href="/logout" class="btn-header" style="color:var(--danger)">ВЫХОД</a>
         </div>
@@ -116,7 +136,7 @@
         <div style="background:#0a0a0a; border:1px solid var(--border); padding:30px; border-radius:20px; width:280px; text-align:center;">
             <h2 style="color:var(--kick)">ЭМБЛЕМЫ</h2>
             <div style="background:#000; height:8px; border-radius:4px; margin: 15px 0;">
-                <div style="background:var(--kick); height:100%; width: {{ (user.msg_count / 1000 * 100) }}%; border-radius:4px;"></div>
+                <div style="background:var(--kick); height:100%; width: {{ (user.msg_count / 1000 * 100) if user.msg_count <= 1000 else 100 }}%; border-radius:4px;"></div>
             </div>
             <p style="font-size:10px; color:#444; margin-bottom:20px;">Прогресс: {{ user.msg_count }}/1000</p>
             <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:10px;" class="{% if user.msg_count < 1000 %}locked{% endif %}">
@@ -163,8 +183,63 @@
         });
 
         document.getElementById('m-in')?.addEventListener('keypress', (e) => { if(e.key === 'Enter') send(); });
-        document.getElementById('messages').scrollTop = document.getElementById('messages').scrollHeight;
+        
+        const messagesDiv = document.getElementById('messages');
+        if (messagesDiv) messagesDiv.scrollTop = messagesDiv.scrollHeight;
+
+        // ============ ПОИСК ПОЛЬЗОВАТЕЛЕЙ ============
+        const searchInput = document.getElementById('user-search');
+        const searchResults = document.getElementById('search-results');
+        let searchTimeout;
+
+        if (searchInput) {
+            searchInput.addEventListener('input', function() {
+                clearTimeout(searchTimeout);
+                const query = this.value.trim();
+                
+                if (query.length < 1) {
+                    searchResults.style.display = 'none';
+                    return;
+                }
+                
+                searchTimeout = setTimeout(() => {
+                    fetch(`/api/search_users?q=${encodeURIComponent(query)}`)
+                        .then(r => r.json())
+                        .then(users => {
+                            if (users.length === 0) {
+                                searchResults.innerHTML = '<div class="no-results">Пользователи не найдены</div>';
+                            } else {
+                                searchResults.innerHTML = users.map(u => `
+                                    <div class="search-result-item">
+                                        <div class="search-result-name">
+                                            ${u.username} 
+                                            ${u.is_verified ? '<span class="kick-badge"></span>' : ''}
+                                        </div>
+                                        <a href="/im/${u.username}" class="search-result-link">➔</a>
+                                    </div>
+                                `).join('');
+                            }
+                            searchResults.style.display = 'block';
+                        });
+                }, 300);
+            });
+
+            // Закрытие результатов при клике вне
+            document.addEventListener('click', function(e) {
+                if (!searchInput.contains(e.target) && !searchResults.contains(e.target)) {
+                    searchResults.style.display = 'none';
+                }
+            });
+
+            // Повторное открытие при фокусе если есть текст
+            searchInput.addEventListener('focus', function() {
+                if (this.value.trim().length >= 1) {
+                    searchResults.style.display = 'block';
+                }
+            });
+        }
     </script>
     {% endif %}
 </body>
 </html>
+
