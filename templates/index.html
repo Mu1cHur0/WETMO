@@ -2,7 +2,12 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#53fc18">
+    <link rel="manifest" href="/manifest.json">
+    <link rel="apple-touch-icon" href="https://img.icons8.com/ios-filled/192/53fc18/chat.png">
     <title>WETMO</title>
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%2353fc18'/%3E%3Ctext x='50' y='72' font-family='Montserrat, sans-serif' font-size='60' font-weight='900' fill='%23000000' text-anchor='middle'%3EW%3C/text%3E%3C/svg%3E">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
@@ -11,6 +16,49 @@
     <style>
         :root { --bg: #050505; --kick: #53fc18; --border: #111; --danger: #ff4444; --gold: #ffd700; }
         body { font-family: 'Montserrat', sans-serif; background: var(--bg); color: #fff; margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+        
+        /* Адаптивность */
+        .mobile-menu-btn { display: none; }
+        .mobile-menu { display: none; }
+        
+        @media (max-width: 768px) {
+            .header { padding: 10px 15px; }
+            .logo span { display: none; }
+            .logo { font-size: 18px; }
+            .btn-header { padding: 6px 10px; font-size: 10px; }
+            .search-container { margin-left: 8px; }
+            .search-input { width: 140px; padding: 6px 10px; }
+            .search-input:focus { width: 160px; }
+            .header-actions .btn-header { display: none; }
+            .header-actions .btn-header:last-child { display: block; }
+            
+            .mobile-menu-btn { display: block; background: #111; border: 1px solid #222; color: #fff; padding: 8px 12px; border-radius: 6px; font-size: 16px; cursor: pointer; margin-left: 8px; }
+            .mobile-menu { display: none; position: fixed; bottom: 0; left: 0; right: 0; background: #0a0a0a; border-top: 1px solid var(--border); padding: 15px; z-index: 500; }
+            .mobile-menu.active { display: flex; gap: 10px; flex-wrap: wrap; }
+            .mobile-menu .btn-header { margin: 0; flex: 1; text-align: center; }
+            
+            .tabs-bar { padding: 0; }
+            .tab { padding: 12px 15px; font-size: 10px; }
+            #messages { padding: 15px; }
+            .msg { max-width: 90%; }
+            .input-wrap { padding: 15px; }
+            .input-wrap input { padding: 12px; }
+            
+            ::-webkit-scrollbar { width: 4px; height: 4px; }
+            ::-webkit-scrollbar-track { background: #0a0a0a; }
+            ::-webkit-scrollbar-thumb { background: var(--kick); border-radius: 4px; }
+        }
+        
+        @media (min-width: 769px) {
+            ::-webkit-scrollbar { width: 6px; height: 6px; }
+            ::-webkit-scrollbar-track { background: #0a0a0a; }
+            ::-webkit-scrollbar-thumb { background: #333; border-radius: 6px; }
+            ::-webkit-scrollbar-thumb:hover { background: var(--kick); }
+        }
+        
+        * { scrollbar-width: thin; scrollbar-color: var(--kick) #0a0a0a; }
+        
+        /* Основные стили */
         .badge-box { display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; background: var(--kick); border-radius: 4px; margin-right: 8px; }
         .badge-icon { width: 16px; height: 16px; filter: brightness(0); }
         .kick-badge { display: inline-flex; align-items: center; justify-content: center; width: 14px; height: 14px; background: var(--kick); border-radius: 50%; margin-left: 6px; cursor: pointer; }
@@ -24,12 +72,13 @@
         .btn-header { background: #111; color: #fff; padding: 8px 14px; border-radius: 6px; font-size: 11px; font-weight: 900; text-decoration: none; margin-left: 10px; border: 1px solid #222; cursor: pointer; }
         .btn-gold { background: var(--gold); color: #000; border-color: var(--gold); }
         .search-container { position: relative; margin-left: 15px; margin-right: auto; }
-        .search-input { background: #0a0a0a; border: 1px solid #222; color: #fff; padding: 8px 12px; border-radius: 6px; font-size: 11px; width: 180px; outline: none; }
-        .search-input:focus { border-color: var(--kick); width: 220px; }
-        .search-results { position: absolute; top: 100%; left: 0; right: 0; background: #0a0a0a; border: 1px solid #222; border-radius: 6px; margin-top: 5px; max-height: 300px; overflow-y: auto; z-index: 100; display: none; }
+        .search-input { background: #0a0a0a; border: 1px solid #222; color: #fff; padding: 8px 12px; border-radius: 6px; font-size: 11px; width: 200px; outline: none; }
+        .search-input:focus { border-color: var(--kick); width: 250px; }
+        .search-results { position: absolute; top: 100%; left: 0; right: 0; background: #0a0a0a; border: 1px solid #222; border-radius: 6px; margin-top: 5px; max-height: 400px; overflow-y: auto; z-index: 100; display: none; }
         .search-result-item { padding: 10px 12px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; border-bottom: 1px solid #111; }
         .search-result-item:hover { background: #111; }
         .search-result-link { color: var(--kick); text-decoration: none; font-size: 10px; padding: 4px 8px; background: #1a1a1a; border-radius: 4px; }
+        .search-section-title { padding: 8px 12px; color: var(--gold); font-size: 9px; font-weight: 900; text-transform: uppercase; background: #050505; border-bottom: 1px solid #111; }
         .tabs-bar { display: flex; background: #000; border-bottom: 1px solid var(--border); overflow-x: auto; }
         .tab { padding: 14px 20px; color: #666; text-decoration: none; font-size: 11px; font-weight: 800; border-right: 1px solid var(--border); white-space: nowrap; display: flex; align-items: center; gap: 6px; }
         .tab.active { background: var(--bg); color: var(--kick); border-bottom: 2px solid var(--kick); }
@@ -54,11 +103,10 @@
         .input-wrap input { flex: 1; background: #0a0a0a; border: 1px solid #222; color: #fff; padding: 15px; border-radius: 12px; outline: none; }
         .input-wrap button { background: var(--kick); border: none; width: 55px; border-radius: 12px; font-weight: 900; cursor: pointer; }
         .header-actions { display: flex; align-items: center; margin-left: auto; }
-        .delete-btn { color: var(--danger); margin-left: 10px; text-decoration: none; font-size: 10px; padding: 4px 8px; background: #1a1a1a; border-radius: 4px; }
         .subscribe-btn { flex: 1; padding: 15px; background: var(--gold); color: #000; border: none; border-radius: 12px; font-weight: 900; cursor: pointer; font-size: 14px; }
         .subscribe-btn.subscribed { background: var(--kick); }
         .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 1000; align-items: center; justify-content: center; }
-        .modal-content { background: #0a0a0a; border: 1px solid var(--border); padding: 30px; border-radius: 20px; width: 350px; }
+        .modal-content { background: #0a0a0a; border: 1px solid var(--border); padding: 30px; border-radius: 20px; width: 350px; max-width: 90%; }
         .form-input { width: 100%; padding: 12px; background: #000; border: 1px solid #222; color: #fff; border-radius: 8px; margin-bottom: 12px; }
         .modal-buttons { display: flex; gap: 10px; margin-top: 20px; }
         .modal-btn { flex: 1; padding: 12px; border: none; border-radius: 8px; font-weight: 900; cursor: pointer; }
@@ -74,28 +122,41 @@
         .comment-sender { color: var(--gold); font-size: 12px; font-weight: 900; }
         .comment-time { color: #666; font-size: 10px; }
         .comment-content { color: #ccc; font-size: 13px; }
+        .badge-selector { display: flex; gap: 8px; margin-top: 8px; }
+        .badge-option { padding: 6px 10px; background: #111; border-radius: 6px; cursor: pointer; border: 2px solid transparent; }
+        .badge-option.selected { border-color: var(--gold); }
+        .badge-option img { width: 20px; height: 20px; }
         .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: #1a1a1a; border: 1px solid var(--kick); padding: 12px 24px; border-radius: 8px; color: #fff; font-size: 13px; font-weight: 600; z-index: 2000; animation: fadeInOut 2s; }
         @keyframes fadeInOut { 0% { opacity: 0; transform: translateX(-50%) translateY(20px); } 10% { opacity: 1; transform: translateX(-50%) translateY(0); } 90% { opacity: 1; } 100% { opacity: 0; } }
     </style>
 </head>
 <body>
     <div class="header">
-        <a href="/" class="logo"><div class="logo-icon"><span>W</span></div>WETMO</a>
+        <a href="/" class="logo"><div class="logo-icon"><span>W</span></div><span>WETMO</span></a>
         
         {% if mode in ['chat', 'channel', 'post'] %}
         <button class="btn-header" onclick="showEventModal()">КВЕСТ</button>
         
         <div class="search-container">
-            <input type="text" class="search-input" id="user-search" placeholder="🔍 Поиск пользователя..." autocomplete="off">
+            <input type="text" class="search-input" id="user-search" placeholder="🔍 Поиск..." autocomplete="off">
             <div class="search-results" id="search-results"></div>
         </div>
         
-        <div class="header-actions">
-            <button class="btn-header btn-gold" onclick="showCreateChannelModal()" style="margin-right:10px;">📢 СОЗДАТЬ КАНАЛ</button>
+        <div class="header-actions" id="desktop-actions">
+            <button class="btn-header btn-gold" onclick="showCreateChannelModal()">📢 СОЗДАТЬ КАНАЛ</button>
             {% if user and user.username == 'wetmo' %}<a href="/admin" class="btn-header">АДМИНКА</a>{% endif %}
             <a href="/logout" class="btn-header" style="color:var(--danger)">ВЫХОД</a>
         </div>
+        
+        <button class="mobile-menu-btn" onclick="toggleMobileMenu()">☰</button>
         {% endif %}
+    </div>
+    
+    <div class="mobile-menu" id="mobile-menu">
+        <button class="btn-header btn-gold" onclick="showCreateChannelModal()">📢 СОЗДАТЬ КАНАЛ</button>
+        {% if user and user.username == 'wetmo' %}<a href="/admin" class="btn-header">АДМИНКА</a>{% endif %}
+        <button class="btn-header" onclick="showEventModal()">КВЕСТ</button>
+        <a href="/logout" class="btn-header" style="color:var(--danger)">ВЫХОД</a>
     </div>
 
     <!-- МОДАЛКА КВЕСТА -->
@@ -200,13 +261,13 @@
                     {% if c.is_verified %}<span class="channel-badge" onclick="showToast('Канал верифицирован WETMO')"></span>{% endif %}
                 </div>
                 <div style="font-size:11px; color:#666;">{{ c.description or 'Без описания' }} • Владелец: {{ c.created_by }}</div>
-                <div class="badge-selector" style="display:flex; gap:8px; margin-top:8px;">
+                <div class="badge-selector">
                     {% for b in channel_badges %}
-                    <div style="padding:6px 10px; background:#111; border-radius:6px; cursor:pointer; border:2px solid {{ '#ffd700' if c.badge == b.url else 'transparent' }};" onclick="setChannelBadge({{ c.id }}, '{{ b.url }}')">
-                        <img src="{{ b.url }}" style="width:20px; height:20px;">
+                    <div class="badge-option {% if c.badge == b.url %}selected{% endif %}" onclick="setChannelBadge({{ c.id }}, '{{ b.url }}')">
+                        <img src="{{ b.url }}" title="{{ b.name }}">
                     </div>
                     {% endfor %}
-                    <div style="padding:6px 10px; background:#111; border-radius:6px; cursor:pointer; border:2px solid {{ 'transparent' if c.badge else '#ffd700' }};" onclick="setChannelBadge({{ c.id }}, '')">🚫</div>
+                    <div class="badge-option {% if not c.badge %}selected{% endif %}" onclick="setChannelBadge({{ c.id }}, '')">🚫</div>
                 </div>
             </div>
             <div>
@@ -585,6 +646,10 @@
 
     <script>
         // Общие функции
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/sw.js');
+        }
+        
         const socket = io();
         const me = "{{ user.username if user else '' }}";
         marked.setOptions({ breaks: true, gfm: true });
@@ -597,13 +662,29 @@
             setTimeout(() => toast.remove(), 2000);
         }
         
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobile-menu');
+            menu.classList.toggle('active');
+        }
+        
+        document.addEventListener('click', (e) => {
+            const menu = document.getElementById('mobile-menu');
+            const btn = document.querySelector('.mobile-menu-btn');
+            if (menu && btn && !menu.contains(e.target) && !btn.contains(e.target)) {
+                menu.classList.remove('active');
+            }
+        });
+        
         function parseMsgs() { document.querySelectorAll('.msg-content').forEach(el => { if (el.dataset.raw) { el.innerHTML = marked.parse(el.dataset.raw); delete el.dataset.raw; } }); }
         parseMsgs();
         
         function selectBadge(url) { fetch('/set_badge', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({badge_url: url}) }).then(r => window.location.reload()); }
         function showEventModal() { document.getElementById('event-modal').style.display = 'flex'; }
         function closeEventModal() { document.getElementById('event-modal').style.display = 'none'; }
-        function showCreateChannelModal() { document.getElementById('create-channel-modal').style.display = 'flex'; }
+        function showCreateChannelModal() { 
+            document.getElementById('create-channel-modal').style.display = 'flex'; 
+            document.getElementById('mobile-menu')?.classList.remove('active');
+        }
         function closeCreateChannelModal() { document.getElementById('create-channel-modal').style.display = 'none'; }
         
         function createUserChannel() {
@@ -637,25 +718,58 @@
         });
         document.getElementById('m-in')?.addEventListener('keypress', (e) => { if(e.key === 'Enter') send(); });
         
-        // Поиск
+        // Поиск (пользователи + каналы)
         const searchInput = document.getElementById('user-search');
         const searchResults = document.getElementById('search-results');
         let searchTimeout;
+        
         if (searchInput) {
             searchInput.addEventListener('input', function() {
                 clearTimeout(searchTimeout);
                 const query = this.value.trim();
                 if (query.length < 1) { searchResults.style.display = 'none'; return; }
+                
                 searchTimeout = setTimeout(() => {
-                    fetch(`/api/search_users?q=${encodeURIComponent(query)}`)
+                    fetch(`/api/search_all?q=${encodeURIComponent(query)}`)
                         .then(r => r.json())
-                        .then(users => {
-                            searchResults.innerHTML = users.length === 0 ? '<div class="no-results">Пользователи не найдены</div>' : users.map(u => `<div class="search-result-item"><div class="search-result-name">${u.username} ${u.is_verified ? '<span class="kick-badge"></span>' : ''}</div><a href="/im/${u.username}" class="search-result-link">➔</a></div>`).join('');
+                        .then(data => {
+                            let html = '';
+                            
+                            if (data.users && data.users.length > 0) {
+                                html += '<div class="search-section-title">👤 ПОЛЬЗОВАТЕЛИ</div>';
+                                html += data.users.map(u => `
+                                    <div class="search-result-item">
+                                        <div class="search-result-name">${u.username} ${u.is_verified ? '<span class="kick-badge"></span>' : ''}</div>
+                                        <a href="/im/${u.username}" class="search-result-link">➔</a>
+                                    </div>
+                                `).join('');
+                            }
+                            
+                            if (data.channels && data.channels.length > 0) {
+                                html += '<div class="search-section-title">📢 КАНАЛЫ</div>';
+                                html += data.channels.map(c => `
+                                    <div class="search-result-item">
+                                        <div class="search-result-name">@${c.name} ${c.is_verified ? '<span class="channel-badge"></span>' : ''}</div>
+                                        <a href="/channel/${c.name}" class="search-result-link">➔</a>
+                                    </div>
+                                `).join('');
+                            }
+                            
+                            if (!html) {
+                                html = '<div class="search-result-item" style="color:#666;">Ничего не найдено</div>';
+                            }
+                            
+                            searchResults.innerHTML = html;
                             searchResults.style.display = 'block';
                         });
                 }, 300);
             });
-            document.addEventListener('click', (e) => { if (!searchInput.contains(e.target) && !searchResults.contains(e.target)) searchResults.style.display = 'none'; });
+            
+            document.addEventListener('click', (e) => {
+                if (!searchInput.contains(e.target) && !searchResults.contains(e.target)) {
+                    searchResults.style.display = 'none';
+                }
+            });
         }
         
         function removeChannel(name, id, owner) {
