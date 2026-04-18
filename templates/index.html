@@ -17,36 +17,146 @@
         :root { --bg: #050505; --kick: #53fc18; --border: #111; --danger: #ff4444; --gold: #ffd700; }
         body { font-family: 'Montserrat', sans-serif; background: var(--bg); color: #fff; margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
         
-        /* Адаптивность */
+        /* Мобильная адаптация */
         .mobile-menu-btn { display: none; }
         .mobile-menu { display: none; }
         
         @media (max-width: 768px) {
-            .header { padding: 10px 15px; }
-            .logo span { display: none; }
-            .logo { font-size: 18px; }
-            .btn-header { padding: 6px 10px; font-size: 10px; }
-            .search-container { margin-left: 8px; }
-            .search-input { width: 140px; padding: 6px 10px; }
-            .search-input:focus { width: 160px; }
-            .header-actions .btn-header { display: none; }
-            .header-actions .btn-header:last-child { display: block; }
+            .header { 
+                padding: 8px 12px; 
+                flex-wrap: wrap;
+            }
             
-            .mobile-menu-btn { display: block; background: #111; border: 1px solid #222; color: #fff; padding: 8px 12px; border-radius: 6px; font-size: 16px; cursor: pointer; margin-left: 8px; }
-            .mobile-menu { display: none; position: fixed; bottom: 0; left: 0; right: 0; background: #0a0a0a; border-top: 1px solid var(--border); padding: 15px; z-index: 500; }
-            .mobile-menu.active { display: flex; gap: 10px; flex-wrap: wrap; }
-            .mobile-menu .btn-header { margin: 0; flex: 1; text-align: center; }
+            .logo span { 
+                display: inline; 
+                font-size: 16px;
+            }
+            .logo { 
+                font-size: 16px; 
+                margin-right: 8px;
+            }
+            .logo-icon { 
+                width: 24px; 
+                height: 24px; 
+            }
             
-            .tabs-bar { padding: 0; }
-            .tab { padding: 12px 15px; font-size: 10px; }
-            #messages { padding: 15px; }
-            .msg { max-width: 90%; }
-            .input-wrap { padding: 15px; }
-            .input-wrap input { padding: 12px; }
+            .btn-header { 
+                padding: 6px 8px; 
+                font-size: 9px; 
+                margin-left: 5px;
+            }
             
-            ::-webkit-scrollbar { width: 4px; height: 4px; }
-            ::-webkit-scrollbar-track { background: #0a0a0a; }
-            ::-webkit-scrollbar-thumb { background: var(--kick); border-radius: 4px; }
+            .search-container { 
+                margin-left: 0; 
+                margin-right: 0;
+                flex: 1;
+                order: 1;
+                width: 100%;
+                margin-top: 8px;
+            }
+            
+            .search-input { 
+                width: 100%; 
+                padding: 10px 12px;
+                font-size: 13px;
+                border-radius: 20px;
+            }
+            .search-input:focus { 
+                width: 100%; 
+            }
+            
+            .header-actions .btn-header { 
+                display: none; 
+            }
+            .header-actions .btn-header:last-child { 
+                display: block; 
+            }
+            
+            .mobile-menu-btn { 
+                display: block; 
+                background: #111; 
+                border: 1px solid #222; 
+                color: #fff; 
+                padding: 8px 12px; 
+                border-radius: 6px; 
+                font-size: 16px; 
+                cursor: pointer; 
+                margin-left: 8px; 
+            }
+            
+            .mobile-menu { 
+                display: none; 
+                position: fixed; 
+                bottom: 0; 
+                left: 0; 
+                right: 0; 
+                background: #0a0a0a; 
+                border-top: 1px solid var(--border); 
+                padding: 15px; 
+                z-index: 500; 
+            }
+            .mobile-menu.active { 
+                display: flex; 
+                gap: 8px; 
+                flex-wrap: wrap; 
+                justify-content: center;
+            }
+            .mobile-menu .btn-header { 
+                margin: 0; 
+                flex: 0 1 auto;
+                padding: 10px 16px;
+                font-size: 12px;
+            }
+            
+            .tabs-bar { 
+                padding: 0; 
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+            .tab { 
+                padding: 12px 15px; 
+                font-size: 11px; 
+                white-space: nowrap;
+            }
+            
+            #messages { 
+                padding: 12px; 
+            }
+            .msg { 
+                max-width: 95%; 
+                padding: 10px 12px;
+            }
+            
+            .input-wrap { 
+                padding: 12px; 
+            }
+            .input-wrap input { 
+                padding: 12px; 
+                font-size: 14px;
+            }
+            
+            .modal-content {
+                width: 90%;
+                padding: 20px;
+                margin: 20px;
+            }
+            
+            ::-webkit-scrollbar { 
+                width: 3px; 
+                height: 3px; 
+            }
+            ::-webkit-scrollbar-thumb { 
+                background: var(--kick); 
+            }
+            
+            .search-results {
+                max-height: 300px;
+                position: fixed;
+                top: 100px;
+                left: 12px;
+                right: 12px;
+                width: auto;
+            }
         }
         
         @media (min-width: 769px) {
@@ -132,13 +242,18 @@
 </head>
 <body>
     <div class="header">
-        <a href="/" class="logo"><div class="logo-icon"><span>W</span></div><span>WETMO</span></a>
+        <a href="/" class="logo">
+            <div class="logo-icon"><span>W</span></div>
+            <span>WETMO</span>
+        </a>
         
         {% if mode in ['chat', 'channel', 'post'] %}
         <button class="btn-header" onclick="showEventModal()">КВЕСТ</button>
         
+        <button class="mobile-menu-btn" onclick="toggleMobileMenu()">☰</button>
+        
         <div class="search-container">
-            <input type="text" class="search-input" id="user-search" placeholder="🔍 Поиск..." autocomplete="off">
+            <input type="text" class="search-input" id="user-search" placeholder="🔍 Поиск пользователей и каналов..." autocomplete="off">
             <div class="search-results" id="search-results"></div>
         </div>
         
@@ -147,8 +262,6 @@
             {% if user and user.username == 'wetmo' %}<a href="/admin" class="btn-header">АДМИНКА</a>{% endif %}
             <a href="/logout" class="btn-header" style="color:var(--danger)">ВЫХОД</a>
         </div>
-        
-        <button class="mobile-menu-btn" onclick="toggleMobileMenu()">☰</button>
         {% endif %}
     </div>
     
@@ -679,7 +792,10 @@
         parseMsgs();
         
         function selectBadge(url) { fetch('/set_badge', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({badge_url: url}) }).then(r => window.location.reload()); }
-        function showEventModal() { document.getElementById('event-modal').style.display = 'flex'; }
+        function showEventModal() { 
+            document.getElementById('event-modal').style.display = 'flex'; 
+            document.getElementById('mobile-menu')?.classList.remove('active');
+        }
         function closeEventModal() { document.getElementById('event-modal').style.display = 'none'; }
         function showCreateChannelModal() { 
             document.getElementById('create-channel-modal').style.display = 'flex'; 
