@@ -1,11 +1,12 @@
 import os, random
-from flask import Flask, render_template, request, session, redirect, url_for, abort, jsonify
+from flask import Flask, render_template, request, session, redirect, url_for, abort, jsonify, send_from_directory
 from flask_socketio import SocketIO, emit, join_room, leave_room
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
 
 os.makedirs('templates', exist_ok=True)
+os.makedirs('static', exist_ok=True)
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'wetmo_gateway_v14'
@@ -124,7 +125,29 @@ def send_system_msg(target_username, text):
     db.session.add(Message(chat_id=cid, sender="wetmo_auth", content=text))
     db.session.commit()
 
+# --- PWA ---
+@app.route('/manifest.json')
+def manifest():
+    return send_from_directory('static', 'manifest.json')
+
+@app.route('/sw.js')
+def service_worker():
+    return send_from_directory('static', 'sw.js')
+
 # --- API ---
+@app.route('/api/search_all')
+def search_all():
+    if 'user' not in session: return jsonify({"users": [], "channels": []})
+    query = request.args.get('q', '').strip().lower()
+    if len(query) < 1: return jsonify({"users": [], "channels": []})
+    current_user = session['user']
+    users = User.query.filter(User.username.contains(query), User.username != current_user, ~User.username.in_(['wetmo_auth'])).limit(5).all()
+    channels = Channel.query.filter(Channel.name.contains(query), Channel.is_public == True).limit(5).all()
+    return jsonify({
+        'users': [{'username': u.username, 'is_verified': u.is_verified} for u in users],
+        'channels': [{'name': c.name, 'description': c.description, 'is_verified': c.is_verified, 'badge': c.badge} for c in channels]
+    })
+
 @app.route('/api/search_users')
 def search_users():
     if 'user' not in session: return jsonify([])
