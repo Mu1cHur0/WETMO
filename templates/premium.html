@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>WETMO Premium</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%2353fc18'/%3E%3Ctext x='50' y='72' font-family='Montserrat, sans-serif' font-size='60' font-weight='900' fill='%23000000' text-anchor='middle'%3EW%3C/text%3E%3C/svg%3E">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root { --bg: #050505; --kick: #53fc18; --border: #1a1a1a; --danger: #ff4444; --accent: #ffffff; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Montserrat', sans-serif; background: var(--bg); color: #fff; min-height: 100vh; }
+        
+        .header { background: rgba(5,5,5,0.9); backdrop-filter: blur(15px); padding: 15px 25px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; }
+        .logo { display: flex; align-items: center; gap: 10px; font-weight: 900; color: var(--kick); text-decoration: none; font-size: 22px; }
+        .logo-icon { width: 30px; height: 30px; background: var(--kick); border-radius: 8px; display: flex; align-items: center; justify-content: center; }
+        .logo-icon span { color: #000; font-size: 18px; font-weight: 900; }
+        .back-btn { background: rgba(255,255,255,0.05); color: #fff; padding: 10px 18px; border-radius: 10px; font-size: 12px; font-weight: 700; text-decoration: none; border: 1px solid #333; transition: all 0.2s; }
+        .back-btn:hover { background: rgba(255,255,255,0.1); border-color: #555; }
+        
+        .container { max-width: 900px; margin: 0 auto; padding: 30px 20px; }
+        
+        /* Hero */
+        .hero { text-align: center; margin-bottom: 40px; padding: 40px 20px; background: linear-gradient(135deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02)); border-radius: 24px; border: 1px solid #222; }
+        .hero-title { font-size: 42px; font-weight: 900; background: linear-gradient(45deg, #ffffff, #aaaaaa, #ffffff); -webkit-background-clip: text; background-clip: text; color: transparent; margin-bottom: 10px; }
+        .hero-subtitle { color: #888; font-size: 16px; font-weight: 600; }
+        .hero-status { margin-top: 20px; padding: 12px 25px; border-radius: 30px; display: inline-block; font-weight: 700; font-size: 14px; }
+        .status-active { background: rgba(83,252,24,0.15); color: var(--kick); border: 1px solid rgba(83,252,24,0.3); }
+        .status-inactive { background: rgba(255,255,255,0.05); color: #888; border: 1px solid #333; }
+        
+        /* Features */
+        .features { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 40px; }
+        .feature-card { background: rgba(20,20,20,0.6); border: 1px solid #222; border-radius: 16px; padding: 25px; text-align: center; transition: all 0.2s; }
+        .feature-card:hover { border-color: #444; transform: translateY(-3px); }
+        .feature-icon { font-size: 36px; margin-bottom: 12px; }
+        .feature-title { font-weight: 800; font-size: 15px; margin-bottom: 8px; color: var(--accent); }
+        .feature-desc { color: #888; font-size: 12px; font-weight: 600; line-height: 1.5; }
+        
+        /* Colors */
+        .colors-section { margin-bottom: 40px; }
+        .section-title { font-size: 22px; font-weight: 900; margin-bottom: 25px; color: var(--accent); display: flex; align-items: center; gap: 10px; }
+        .colors-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; }
+        .color-option { background: rgba(20,20,20,0.6); border: 2px solid #222; border-radius: 16px; padding: 20px 15px; text-align: center; cursor: pointer; transition: all 0.2s; }
+        .color-option:hover { border-color: #555; transform: translateY(-3px); background: rgba(30,30,30,0.8); }
+        .color-option.selected { border-color: var(--accent); background: rgba(255,255,255,0.1); box-shadow: 0 0 20px rgba(255,255,255,0.1); }
+        .color-preview { width: 40px; height: 40px; border-radius: 50%; margin: 0 auto 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
+        .color-name { font-size: 11px; font-weight: 700; color: #aaa; }
+        .color-custom { background: conic-gradient(#ffffff, #aaaaaa, #ffffff, #555555, #ffffff); }
+        
+        /* Referral */
+        .referral-section { background: rgba(20,20,20,0.6); border: 1px solid #222; border-radius: 20px; padding: 30px; margin-bottom: 40px; }
+        .referral-link { background: rgba(0,0,0,0.5); border: 1px dashed #444; padding: 16px; border-radius: 12px; color: var(--accent); font-size: 13px; font-family: monospace; word-break: break-all; margin: 20px 0; text-align: center; }
+        .btn { padding: 14px 24px; border-radius: 12px; font-weight: 800; cursor: pointer; font-size: 13px; border: none; transition: all 0.2s; }
+        .btn-accent { background: var(--accent); color: #000; box-shadow: 0 4px 15px rgba(255,255,255,0.15); }
+        .btn-accent:hover { background: #e6e6e6; transform: translateY(-2px); }
+        .btn-outline { background: transparent; border: 1px solid #333; color: #fff; }
+        .btn-outline:hover { background: rgba(255,255,255,0.05); }
+        
+        .ad-banner { background: rgba(255,255,255,0.03); border: 1px dashed #444; border-radius: 16px; padding: 20px; text-align: center; margin-bottom: 40px; }
+        .ad-banner a { color: var(--accent); text-decoration: none; font-weight: 700; }
+        
+        /* Profile card */
+        .profile-mini { background: rgba(20,20,20,0.6); border: 1px solid #222; border-radius: 20px; padding: 25px; margin-bottom: 40px; display: flex; align-items: center; gap: 20px; }
+        .profile-avatar { width: 60px; height: 60px; background: var(--accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 28px; font-weight: 900; color: #000; }
+        .profile-info { flex: 1; }
+        .profile-nick { font-size: 20px; font-weight: 900; display: flex; align-items: center; gap: 10px; }
+        .profile-status { color: #888; font-size: 12px; font-weight: 600; margin-top: 4px; }
+        .verify-badge { display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; border-radius: 50%; font-size: 10px; font-weight: bold; }
+        .verify-green { background: var(--kick); color: #000; }
+        .verify-green::after { content: '✓'; }
+        .verify-white { background: #e0e0e0; color: #000; }
+        .verify-white::after { content: '✓'; }
+        .verify-premium { background: linear-gradient(135deg, #ffffff, #888888); color: #000; }
+        .verify-premium::after { content: '✓'; }
+        
+        /* Modal */
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); z-index: 1000; align-items: center; justify-content: center; }
+        .modal-content { background: #0a0a0a; border: 1px solid #222; padding: 30px; border-radius: 20px; width: 380px; max-width: 90%; box-shadow: 0 20px 50px rgba(0,0,0,0.7); }
+        .modal-title { color: var(--accent); font-size: 22px; font-weight: 900; margin-bottom: 20px; }
+        .form-input { width: 100%; padding: 14px; background: rgba(255,255,255,0.05); border: 1px solid #333; color: #fff; border-radius: 12px; margin-bottom: 15px; outline: none; box-sizing: border-box; }
+        .form-input:focus { border-color: var(--accent); }
+        .color-input { padding: 4px; height: 40px; cursor: pointer; }
+        .modal-buttons { display: flex; gap: 10px; }
+        .modal-btn { flex: 1; padding: 14px; border-radius: 12px; font-weight: 800; cursor: pointer; border: none; font-size: 13px; }
+        .modal-btn.primary { background: var(--accent); color: #000; }
+        .modal-btn.secondary { background: rgba(255,255,255,0.05); color: #fff; border: 1px solid #333; }
+        
+        .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: #fff; padding: 14px 28px; border-radius: 12px; color: #000; font-size: 13px; font-weight: 700; z-index: 2000; animation: toastFade 2.5s forwards; pointer-events: none; }
+        @keyframes toastFade { 0% { opacity: 0; transform: translate(-50%, 20px) scale(0.9); } 10% { opacity: 1; transform: translate(-50%, 0) scale(1); } 90% { opacity: 1; } 100% { opacity: 0; } }
+        
+        @media (max-width: 768px) {
+            .features { grid-template-columns: 1fr; }
+            .colors-grid { grid-template-columns: repeat(3, 1fr); }
+            .hero-title { font-size: 30px; }
+            .profile-mini { flex-direction: column; text-align: center; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <a href="/" class="logo"><div class="logo-icon"><span>W</span></div>WETMO</a>
+        <a href="/" class="back-btn">← НАЗАД</a>
+    </div>
+    
+    <div class="container">
+        <!-- Профиль -->
+        <div class="profile-mini">
+            <div class="profile-avatar"><span>{{ user.username[0]|upper }}</span></div>
+            <div class="profile-info">
+                <div class="profile-nick">
+                    {% if user.user_badge %}<img src="{{ user.user_badge }}" style="width:20px; height:20px;">{% endif %}
+                    {{ user.username }}
+                    {% if user.verification_type == 1 %}<span class="verify-badge verify-white"></span>
+                    {% elif user.verification_type == 2 %}<span class="verify-badge verify-green"></span>
+                    {% elif user.verification_type == 3 %}<span class="verify-badge verify-premium"></span>{% endif %}
+                </div>
+                <div class="profile-status">
+                    {% if premium %}WETMO Premium активен{% else %}Обычный аккаунт{% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Hero -->
+        <div class="hero">
+            <div class="hero-title">💎 WETMO PREMIUM</div>
+            <div class="hero-subtitle">Эксклюзивное переливание ника и особый статус</div>
+            <div class="hero-status {% if premium %}status-active{% else %}status-inactive{% endif %}">
+                {% if premium %}✅ Premium активен{% else %}🔒 Premium не активен{% endif %}
+            </div>
+        </div>
+        
+        <!-- Особенности -->
+        <div class="features">
+            <div class="feature-card">
+                <div class="feature-icon">✨</div>
+                <div class="feature-title">Переливание ника</div>
+                <div class="feature-desc">10 цветов + кастомный</div>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🎯</div>
+                <div class="feature-title">Особая галочка</div>
+                <div class="feature-desc">Золотая галочка с анимацией</div>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🚫</div>
+                <div class="feature-title">Без рекламы</div>
+                <div class="feature-desc">Никакой рекламы в мессенджере</div>
+            </div>
+        </div>
+        
+        <!-- Выбор цвета -->
+        {% if premium %}
+        <div class="colors-section">
+            <div class="section-title">🎨 Выберите цвет переливания</div>
+            <div class="colors-grid">
+                {% for color in premium_colors %}
+                <div class="color-option {% if premium.animation_type == loop.index %}selected{% endif %}" onclick="selectAnimation({{ loop.index }})">
+                    <div class="color-preview" style="background: linear-gradient(45deg, {{ color.colors[0] }}, {{ color.colors[1] }});"></div>
+                    <div class="color-name">{{ color.name }}</div>
+                </div>
+                {% endfor %}
+                <div class="color-option {% if premium.animation_type == 11 %}selected{% endif %}" onclick="showCustomModal()">
+                    <div class="color-preview color-custom"></div>
+                    <div class="color-name">Кастомный</div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        
+        <!-- Реферальная система -->
+        <div class="referral-section">
+            <div class="section-title">🔗 Реферальная программа</div>
+            <p style="color: #888; font-size: 13px; font-weight: 600; margin-bottom: 15px;">Пригласи друга — получи <span style="color: var(--accent);">+20 монет</span>, друг получит <span style="color: var(--accent);">+15 монет</span>!</p>
+            <div class="referral-link" id="referral-link">{{ referral_link }}</div>
+            <button class="btn btn-accent" style="width: 100%;" onclick="copyReferral()">📋 Копировать ссылку</button>
+        </div>
+        
+        <!-- Реклама -->
+        {% if show_ads %}
+        <div class="ad-banner">
+            <span style="color: #888; font-size: 13px; font-weight: 600;">📢 Здесь могла быть ваша реклама</span>
+            <p style="margin-top: 8px;"><span style="color: var(--accent); font-weight: 800;">WETMO Premium</span> отключает всю рекламу</p>
+        </div>
+        {% endif %}
+    </div>
+    
+    <!-- Модалка кастомного цвета -->
+    <div id="custom-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-title">🎨 Кастомный цвет</div>
+            <label style="color: #888; font-size: 12px; font-weight: 600;">Цвет 1</label>
+            <input type="color" id="custom-color1" class="form-input color-input" value="{{ user.custom_color1 or '#ffffff' }}">
+            <label style="color: #888; font-size: 12px; font-weight: 600;">Цвет 2</label>
+            <input type="color" id="custom-color2" class="form-input color-input" value="{{ user.custom_color2 or '#cccccc' }}">
+            <div class="modal-buttons">
+                <button class="modal-btn primary" onclick="saveCustom()">СОХРАНИТЬ</button>
+                <button class="modal-btn secondary" onclick="closeCustomModal()">ОТМЕНА</button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        function showToast(text) { const t = document.createElement('div'); t.className = 'toast'; t.textContent = text; document.body.appendChild(t); setTimeout(() => t.remove(), 2500); }
+        
+        function selectAnimation(type) {
+            fetch(`/api/premium/animation/${type}`, {method: 'POST'}).then(r => r.json()).then(d => {
+                if (d.status === 'ok') { showToast('Цвет обновлён!'); location.reload(); }
+            });
+        }
+        
+        function showCustomModal() { document.getElementById('custom-modal').style.display = 'flex'; }
+        function closeCustomModal() { document.getElementById('custom-modal').style.display = 'none'; }
+        
+        function saveCustom() {
+            const c1 = document.getElementById('custom-color1').value;
+            const c2 = document.getElementById('custom-color2').value;
+            fetch('/api/premium/custom_color', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({color1: c1, color2: c2}) })
+            .then(r => r.json()).then(d => { if (d.status === 'ok') { closeCustomModal(); showToast('Цвет сохранён!'); location.reload(); } });
+        }
+        
+        function copyReferral() {
+            navigator.clipboard.writeText(document.getElementById('referral-link').textContent).then(() => showToast('Ссылка скопирована!'));
+        }
+    </script>
+</body>
+</html>
