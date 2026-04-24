@@ -12,232 +12,271 @@
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%2353fc18'/%3E%3Ctext x='50' y='72' font-family='Montserrat, sans-serif' font-size='60' font-weight='900' fill='%23000000' text-anchor='middle'%3EW%3C/text%3E%3C/svg%3E">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;900&display=swap" rel="stylesheet">
     <style>
-        :root { --bg: #050505; --kick: #53fc18; --border: #111; --danger: #ff4444; --gold: #ffd700; }
-        body { font-family: 'Montserrat', sans-serif; background: var(--bg); color: #fff; margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+        :root { 
+            --bg: #050505; 
+            --bg-glass: rgba(5, 5, 5, 0.75);
+            --kick: #53fc18; 
+            --border: #1a1a1a; 
+            --danger: #ff4444; 
+            --accent-white: #ffffff;
+            --accent-silver: #cccccc;
+        }
         
-        /* Мобильная адаптация */
+        body { 
+            font-family: 'Montserrat', sans-serif; 
+            background: var(--bg); 
+            color: #fff; 
+            margin: 0; 
+            display: flex; 
+            flex-direction: column; 
+            height: 100vh; 
+            overflow: hidden; 
+            -webkit-font-smoothing: antialiased;
+        }
+        
+        .verify-badge { 
+            display: inline-flex; align-items: center; justify-content: center; 
+            width: 16px; height: 16px; border-radius: 50%; margin-left: 6px; 
+            cursor: pointer; font-size: 10px; font-weight: bold; 
+            box-shadow: 0 0 5px rgba(255,255,255,0.1);
+        }
+        .verify-white { background: #e0e0e0; color: #000; }
+        .verify-green { background: var(--kick); color: #000; }
+        .verify-accent { background: var(--accent-white); color: #000; }
+        .verify-badge::after { content: '✓'; }
+        
+        /* Переливающиеся галочки премиум */
+        .verify-premium-1 { background: linear-gradient(45deg, #ffffff, #aaaaaa, #ffffff, #aaaaaa); background-size: 300% 300%; animation: premiumShine1 3s ease infinite; color: #000; }
+        .verify-premium-2 { background: linear-gradient(45deg, #ff00ff, #00ffff, #ff00ff, #00ffff); background-size: 300% 300%; animation: premiumShine2 2s ease infinite; color: #000; }
+        .verify-premium-3 { background: linear-gradient(45deg, #53fc18, #00ff88, #53fc18, #00ff88); background-size: 300% 300%; animation: premiumShine3 4s ease infinite; color: #000; }
+        .verify-premium-4 { background: linear-gradient(45deg, #ff4444, #ff8800, #ff4444, #ff8800); background-size: 300% 300%; animation: premiumShine4 2.5s ease infinite; color: #000; }
+        .verify-premium-5 { background: linear-gradient(45deg, #7c3aed, #3b82f6, #7c3aed, #3b82f6); background-size: 300% 300%; animation: premiumShine5 3.5s ease infinite; color: #000; }
+        .verify-premium-6 { background: linear-gradient(45deg, #ec4899, #fbbf24, #ec4899, #fbbf24); background-size: 300% 300%; animation: premiumShine6 2s ease infinite; color: #000; }
+        .verify-premium-7 { background: linear-gradient(45deg, #06b6d4, #10b981, #06b6d4, #10b981); background-size: 300% 300%; animation: premiumShine7 3s ease infinite; color: #000; }
+        .verify-premium-8 { background: linear-gradient(45deg, #ffffff, #ff00ff, #00ffff, #ffffff); background-size: 400% 400%; animation: premiumShine8 4s ease infinite; color: #000; }
+        .verify-premium-9 { background: linear-gradient(45deg, #c0c0c0, #e0e0e0, #c0c0c0, #e0e0e0); background-size: 300% 300%; animation: premiumShine9 3s ease infinite; color: #000; }
+        .verify-premium-10 { background: linear-gradient(45deg, #aaaaaa, #555555, #aaaaaa, #555555); background-size: 300% 300%; animation: premiumShine10 3s ease infinite; color: #000; }
+        .verify-premium-11 { background-size: 300% 300%; animation: premiumShine1 3s ease infinite; color: #000; }
+        .verify-premium-1::after, .verify-premium-2::after, .verify-premium-3::after, .verify-premium-4::after, .verify-premium-5::after, .verify-premium-6::after, .verify-premium-7::after, .verify-premium-8::after, .verify-premium-9::after, .verify-premium-10::after, .verify-premium-11::after { content: '✓'; }
+        
+        /* Premium анимации для ника */
+        .premium-name-1 { background: linear-gradient(45deg, #ffffff, #aaaaaa, #ffffff, #aaaaaa); background-size: 300% 300%; -webkit-background-clip: text; background-clip: text; color: transparent; animation: premiumShine1 3s ease infinite; }
+        .premium-name-2 { background: linear-gradient(45deg, #ff00ff, #00ffff, #ff00ff, #00ffff); background-size: 300% 300%; -webkit-background-clip: text; background-clip: text; color: transparent; animation: premiumShine2 2s ease infinite; }
+        .premium-name-3 { background: linear-gradient(45deg, #53fc18, #00ff88, #53fc18, #00ff88); background-size: 300% 300%; -webkit-background-clip: text; background-clip: text; color: transparent; animation: premiumShine3 4s ease infinite; }
+        .premium-name-4 { background: linear-gradient(45deg, #ff4444, #ff8800, #ff4444, #ff8800); background-size: 300% 300%; -webkit-background-clip: text; background-clip: text; color: transparent; animation: premiumShine4 2.5s ease infinite; }
+        .premium-name-5 { background: linear-gradient(45deg, #7c3aed, #3b82f6, #7c3aed, #3b82f6); background-size: 300% 300%; -webkit-background-clip: text; background-clip: text; color: transparent; animation: premiumShine5 3.5s ease infinite; }
+        .premium-name-6 { background: linear-gradient(45deg, #ec4899, #fbbf24, #ec4899, #fbbf24); background-size: 300% 300%; -webkit-background-clip: text; background-clip: text; color: transparent; animation: premiumShine6 2s ease infinite; }
+        .premium-name-7 { background: linear-gradient(45deg, #06b6d4, #10b981, #06b6d4, #10b981); background-size: 300% 300%; -webkit-background-clip: text; background-clip: text; color: transparent; animation: premiumShine7 3s ease infinite; }
+        .premium-name-8 { background: linear-gradient(45deg, #ffffff, #ff00ff, #00ffff, #ffffff); background-size: 400% 400%; -webkit-background-clip: text; background-clip: text; color: transparent; animation: premiumShine8 4s ease infinite; }
+        .premium-name-9 { background: linear-gradient(45deg, #c0c0c0, #e0e0e0, #c0c0c0, #e0e0e0); background-size: 300% 300%; -webkit-background-clip: text; background-clip: text; color: transparent; animation: premiumShine9 3s ease infinite; }
+        .premium-name-10 { background: linear-gradient(45deg, #aaaaaa, #555555, #aaaaaa, #555555); background-size: 300% 300%; -webkit-background-clip: text; background-clip: text; color: transparent; animation: premiumShine10 3s ease infinite; }
+        .premium-name-11 { background-size: 300% 300%; -webkit-background-clip: text; background-clip: text; color: transparent; animation: premiumShine1 3s ease infinite; }
+        
+        @keyframes premiumShine1 { 0%,100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
+        @keyframes premiumShine2 { 0%,100% { background-position: 0% 0%; } 50% { background-position: 100% 100%; } }
+        @keyframes premiumShine3 { 0%,100% { background-position: 0% 50%; } 25% { background-position: 50% 100%; } 75% { background-position: 100% 50%; } }
+        @keyframes premiumShine4 { 0%,100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
+        @keyframes premiumShine5 { 0%,100% { background-position: 100% 0%; } 50% { background-position: 0% 100%; } }
+        @keyframes premiumShine6 { 0%,100% { background-position: 0% 50%; } 33% { background-position: 100% 50%; } 66% { background-position: 50% 100%; } }
+        @keyframes premiumShine7 { 0%,100% { background-position: 50% 0%; } 50% { background-position: 50% 100%; } }
+        @keyframes premiumShine8 { 0% { background-position: 0% 50%; } 25% { background-position: 50% 100%; } 50% { background-position: 100% 50%; } 75% { background-position: 50% 0%; } 100% { background-position: 0% 50%; } }
+        @keyframes premiumShine9 { 0%,100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
+        @keyframes premiumShine10 { 0%,100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
+        
         .mobile-menu-btn { display: none; }
         .mobile-menu { display: none; }
         
         @media (max-width: 768px) {
-            .header { 
-                padding: 8px 12px; 
-                flex-wrap: wrap;
-            }
-            
-            .logo span { 
-                display: inline; 
-                font-size: 16px;
-            }
-            .logo { 
-                font-size: 16px; 
-                margin-right: 8px;
-            }
-            .logo-icon { 
-                width: 24px; 
-                height: 24px; 
-            }
-            
-            .btn-header { 
-                padding: 6px 8px; 
-                font-size: 9px; 
-                margin-left: 5px;
-            }
-            
-            .search-container { 
-                margin-left: 0; 
-                margin-right: 0;
-                flex: 1;
-                order: 1;
-                width: 100%;
-                margin-top: 8px;
-            }
-            
-            .search-input { 
-                width: 100%; 
-                padding: 10px 12px;
-                font-size: 13px;
-                border-radius: 20px;
-            }
-            .search-input:focus { 
-                width: 100%; 
-            }
-            
-            .header-actions .btn-header { 
-                display: none; 
-            }
-            .header-actions .btn-header:last-child { 
-                display: block; 
-            }
-            
-            .mobile-menu-btn { 
-                display: block; 
-                background: #111; 
-                border: 1px solid #222; 
-                color: #fff; 
-                padding: 8px 12px; 
-                border-radius: 6px; 
-                font-size: 16px; 
-                cursor: pointer; 
-                margin-left: 8px; 
-            }
-            
-            .mobile-menu { 
-                display: none; 
-                position: fixed; 
-                bottom: 0; 
-                left: 0; 
-                right: 0; 
-                background: #0a0a0a; 
-                border-top: 1px solid var(--border); 
-                padding: 15px; 
-                z-index: 500; 
-            }
-            .mobile-menu.active { 
-                display: flex; 
-                gap: 8px; 
-                flex-wrap: wrap; 
-                justify-content: center;
-            }
-            .mobile-menu .btn-header { 
-                margin: 0; 
-                flex: 0 1 auto;
-                padding: 10px 16px;
-                font-size: 12px;
-            }
-            
-            .tabs-bar { 
-                padding: 0; 
-                overflow-x: auto;
-                -webkit-overflow-scrolling: touch;
-            }
-            .tab { 
-                padding: 12px 15px; 
-                font-size: 11px; 
-                white-space: nowrap;
-            }
-            
-            #messages { 
-                padding: 12px; 
-            }
-            .msg { 
-                max-width: 95%; 
-                padding: 10px 12px;
-            }
-            
-            .input-wrap { 
-                padding: 12px; 
-            }
-            .input-wrap input { 
-                padding: 12px; 
-                font-size: 14px;
-            }
-            
-            .modal-content {
-                width: 90%;
-                padding: 20px;
-                margin: 20px;
-            }
-            
-            ::-webkit-scrollbar { 
-                width: 3px; 
-                height: 3px; 
-            }
-            ::-webkit-scrollbar-thumb { 
-                background: var(--kick); 
-            }
-            
-            .search-results {
-                max-height: 300px;
-                position: fixed;
-                top: 100px;
-                left: 12px;
-                right: 12px;
-                width: auto;
-            }
+            .header { padding: 8px 12px; flex-wrap: wrap; }
+            .logo span { display: inline; font-size: 16px; }
+            .logo { font-size: 16px; margin-right: 8px; }
+            .logo-icon { width: 24px; height: 24px; }
+            .btn-header { padding: 8px 10px; font-size: 10px; margin-left: 5px; }
+            .search-container { margin-left: 0; margin-right: 0; flex: 1; order: 1; width: 100%; margin-top: 8px; }
+            .search-input { width: 100%; padding: 10px 12px; font-size: 13px; border-radius: 20px; }
+            .search-input:focus { width: 100%; }
+            .header-actions .btn-header { display: none; }
+            .header-actions .btn-header:last-child { display: block; }
+            .mobile-menu-btn { display: block; background: #111; border: 1px solid #222; color: #fff; padding: 8px 12px; border-radius: 8px; font-size: 16px; cursor: pointer; margin-left: 8px; transition: all 0.2s; }
+            .mobile-menu-btn:active { transform: scale(0.95); }
+            .mobile-menu { display: none; position: fixed; bottom: 0; left: 0; right: 0; background: rgba(10, 10, 10, 0.9); backdrop-filter: blur(10px); border-top: 1px solid var(--border); padding: 15px; z-index: 500; }
+            .mobile-menu.active { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; animation: slideUp 0.3s ease; }
+            .mobile-menu .btn-header { margin: 0; flex: 0 1 auto; padding: 10px 16px; font-size: 12px; }
+            .tabs-bar { padding: 0; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+            .tab { padding: 12px 15px; font-size: 11px; white-space: nowrap; }
+            #messages { padding: 12px; }
+            .msg { max-width: 95%; padding: 12px 14px; }
+            .input-wrap { padding: 12px; }
+            .input-wrap input { padding: 12px; font-size: 14px; }
+            .modal-content { width: 90%; padding: 25px; margin: 20px; }
+            ::-webkit-scrollbar { width: 3px; height: 3px; }
+            ::-webkit-scrollbar-thumb { background: var(--accent-white); }
+            .search-results { max-height: 300px; position: fixed; top: 100px; left: 12px; right: 12px; width: auto; }
         }
+        
+        @keyframes slideUp { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
         
         @media (min-width: 769px) {
             ::-webkit-scrollbar { width: 6px; height: 6px; }
-            ::-webkit-scrollbar-track { background: #0a0a0a; }
+            ::-webkit-scrollbar-track { background: transparent; }
             ::-webkit-scrollbar-thumb { background: #333; border-radius: 6px; }
-            ::-webkit-scrollbar-thumb:hover { background: var(--kick); }
+            ::-webkit-scrollbar-thumb:hover { background: var(--accent-white); }
         }
         
-        * { scrollbar-width: thin; scrollbar-color: var(--kick) #0a0a0a; }
+        * { scrollbar-width: thin; scrollbar-color: #333 transparent; transition: background-color 0.2s ease, border-color 0.2s ease; }
         
-        /* Основные стили */
-        .badge-box { display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; background: var(--kick); border-radius: 4px; margin-right: 8px; }
+        .badge-box { display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; background: var(--kick); border-radius: 6px; margin-right: 8px; }
         .badge-icon { width: 16px; height: 16px; filter: brightness(0); }
-        .kick-badge { display: inline-flex; align-items: center; justify-content: center; width: 14px; height: 14px; background: var(--kick); border-radius: 50%; margin-left: 6px; cursor: pointer; }
-        .kick-badge::after { content: '✓'; color: #000; font-size: 9px; font-weight: bold; }
-        .channel-badge { display: inline-flex; align-items: center; justify-content: center; width: 14px; height: 14px; background: var(--gold); border-radius: 50%; margin-left: 6px; cursor: pointer; }
-        .channel-badge::after { content: '✓'; color: #000; font-size: 9px; font-weight: bold; }
-        .header { background: #000; padding: 12px 20px; display: flex; align-items: center; border-bottom: 1px solid var(--border); }
-        .logo { display: flex; align-items: center; gap: 8px; font-weight: 900; color: var(--kick); text-decoration: none; font-size: 20px; }
+        
+        .header { background: var(--bg-glass); backdrop-filter: blur(12px); padding: 12px 20px; display: flex; align-items: center; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; }
+        .logo { display: flex; align-items: center; gap: 8px; font-weight: 900; color: var(--kick); text-decoration: none; font-size: 20px; transition: transform 0.2s; }
+        .logo:hover { transform: scale(1.02); }
         .logo-icon { display: flex; align-items: center; justify-content: center; width: 28px; height: 28px; background: var(--kick); border-radius: 8px; }
         .logo-icon span { color: #000; font-size: 18px; font-weight: 900; }
-        .btn-header { background: #111; color: #fff; padding: 8px 14px; border-radius: 6px; font-size: 11px; font-weight: 900; text-decoration: none; margin-left: 10px; border: 1px solid #222; cursor: pointer; }
-        .btn-gold { background: var(--gold); color: #000; border-color: var(--gold); }
+        
+        .btn-header { background: #111; color: #fff; padding: 8px 16px; border-radius: 8px; font-size: 11px; font-weight: 900; text-decoration: none; margin-left: 10px; border: 1px solid #222; cursor: pointer; transition: all 0.2s; }
+        .btn-header:hover { background: #1a1a1a; transform: translateY(-1px); border-color: #333; }
+        .btn-header:active { transform: translateY(0); }
+        .btn-accent { background: var(--accent-white); color: #000; border-color: var(--accent-white); box-shadow: 0 2px 10px rgba(255,255,255,0.15); }
+        .btn-accent:hover { background: #e6e6e6; border-color: #e6e6e6; box-shadow: 0 4px 15px rgba(255,255,255,0.25); }
+        
         .search-container { position: relative; margin-left: 15px; margin-right: auto; }
-        .search-input { background: #0a0a0a; border: 1px solid #222; color: #fff; padding: 8px 12px; border-radius: 6px; font-size: 11px; width: 200px; outline: none; }
-        .search-input:focus { border-color: var(--kick); width: 250px; }
-        .search-results { position: absolute; top: 100%; left: 0; right: 0; background: #0a0a0a; border: 1px solid #222; border-radius: 6px; margin-top: 5px; max-height: 400px; overflow-y: auto; z-index: 100; display: none; }
-        .search-result-item { padding: 10px 12px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; border-bottom: 1px solid #111; }
-        .search-result-item:hover { background: #111; }
-        .search-result-link { color: var(--kick); text-decoration: none; font-size: 10px; padding: 4px 8px; background: #1a1a1a; border-radius: 4px; }
-        .search-section-title { padding: 8px 12px; color: var(--gold); font-size: 9px; font-weight: 900; text-transform: uppercase; background: #050505; border-bottom: 1px solid #111; }
-        .tabs-bar { display: flex; background: #000; border-bottom: 1px solid var(--border); overflow-x: auto; }
-        .tab { padding: 14px 20px; color: #666; text-decoration: none; font-size: 11px; font-weight: 800; border-right: 1px solid var(--border); white-space: nowrap; display: flex; align-items: center; gap: 6px; }
-        .tab.active { background: var(--bg); color: var(--kick); border-bottom: 2px solid var(--kick); }
-        .tab.channel { color: var(--gold); }
-        .tab.channel.active { color: var(--gold); border-bottom-color: var(--gold); }
-        .tab-close { margin-left: 8px; color: #666; font-size: 14px; cursor: pointer; }
+        .search-input { background: rgba(255,255,255,0.05); border: 1px solid #222; color: #fff; padding: 10px 16px; border-radius: 20px; font-size: 12px; width: 220px; outline: none; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .search-input:focus { border-color: var(--accent-white); width: 280px; background: rgba(255,255,255,0.1); box-shadow: 0 0 0 3px rgba(255,255,255,0.1); }
+        .search-results { position: absolute; top: calc(100% + 10px); left: 0; right: 0; background: rgba(15,15,15,0.95); backdrop-filter: blur(10px); border: 1px solid #222; border-radius: 12px; max-height: 400px; overflow-y: auto; z-index: 100; display: none; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .search-result-item { padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; border-bottom: 1px solid #1a1a1a; transition: background 0.2s; }
+        .search-result-item:hover { background: rgba(255,255,255,0.05); }
+        .search-result-link { color: var(--accent-white); text-decoration: none; font-size: 10px; padding: 6px 10px; background: rgba(255,255,255,0.1); border-radius: 6px; transition: all 0.2s; }
+        .search-result-link:hover { background: var(--accent-white); color: #000; }
+        .search-section-title { padding: 10px 16px; color: var(--accent-white); font-size: 10px; font-weight: 900; letter-spacing: 1px; text-transform: uppercase; background: #000; border-bottom: 1px solid #1a1a1a; }
+        
+        .tabs-bar { display: flex; background: transparent; border-bottom: 1px solid var(--border); overflow-x: auto; padding: 0 10px; }
+        .tab { padding: 16px 20px; color: #666; text-decoration: none; font-size: 12px; font-weight: 700; border-bottom: 2px solid transparent; white-space: nowrap; display: flex; align-items: center; gap: 8px; transition: all 0.2s; }
+        .tab:hover { color: #aaa; background: rgba(255,255,255,0.02); }
+        .tab.active { color: var(--accent-white); border-bottom: 2px solid var(--accent-white); background: linear-gradient(to top, rgba(255,255,255,0.05), transparent); }
+        .tab.channel { color: var(--accent-silver); }
+        .tab.channel.active { color: var(--accent-white); border-bottom-color: var(--accent-white); }
+        .tab-close { margin-left: 10px; color: #555; font-size: 16px; cursor: pointer; transition: color 0.2s; line-height: 1; }
         .tab-close:hover { color: var(--danger); }
-        #messages { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 10px; }
-        .msg { background: #0a0a0a; padding: 12px 16px; border-radius: 15px; border: 1px solid #111; max-width: 80%; }
-        .msg.me { align-self: flex-end; border-color: #1a1a1a; }
-        .msg-content code { background: #222; padding: 2px 5px; border-radius: 5px; color: var(--kick); font-family: monospace; }
-        .msg-content a { color: var(--kick); text-decoration: underline; }
-        .sender { font-size: 10px; color: var(--kick); font-weight: 900; margin-bottom: 5px; display: flex; align-items: center; }
-        .channel-sender { color: var(--gold); }
-        .msg-actions { display: flex; gap: 15px; margin-top: 8px; padding-top: 8px; border-top: 1px solid #1a1a1a; }
-        .reaction-btn { background: transparent; border: none; color: #666; cursor: pointer; font-size: 12px; padding: 4px 8px; border-radius: 4px; }
-        .reaction-btn:hover { background: #1a1a1a; color: #fff; }
-        .reaction-btn.active { color: var(--kick); }
-        .comment-link { color: #666; text-decoration: none; font-size: 12px; margin-left: auto; }
-        .comment-link:hover { color: var(--gold); }
-        .input-wrap { padding: 20px; border-top: 1px solid var(--border); display: flex; gap: 10px; background: #000; }
-        .input-wrap input { flex: 1; background: #0a0a0a; border: 1px solid #222; color: #fff; padding: 15px; border-radius: 12px; outline: none; }
-        .input-wrap button { background: var(--kick); border: none; width: 55px; border-radius: 12px; font-weight: 900; cursor: pointer; }
+        
+        #messages { flex: 1; overflow-y: auto; padding: 25px; display: flex; flex-direction: column; gap: 16px; scroll-behavior: smooth; }
+        .msg { background: rgba(20,20,20,0.6); padding: 16px 20px; border-radius: 16px; border: 1px solid #1f1f1f; max-width: 75%; position: relative; box-shadow: 0 4px 15px rgba(0,0,0,0.2); transition: transform 0.2s ease; }
+        .msg:hover { transform: translateY(-2px); border-color: #2a2a2a; }
+        .msg.me { align-self: flex-end; background: rgba(30,30,30,0.8); border-color: #333; }
+        .msg-content { font-size: 14px; line-height: 1.5; color: #e0e0e0; }
+        .msg-content code { background: #222; padding: 3px 6px; border-radius: 6px; color: var(--accent-white); font-family: monospace; font-size: 13px; }
+        .msg-content a { color: var(--accent-white); text-decoration: underline; text-underline-offset: 3px; }
+        .msg-image { max-width: 300px; border-radius: 12px; cursor: pointer; transition: transform 0.2s; }
+        .msg-image:hover { transform: scale(1.02); }
+        .sender { font-size: 11px; color: #aaa; font-weight: 800; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; letter-spacing: 0.5px; }
+        .channel-sender { color: var(--accent-white); }
+        .sender-name { text-decoration: none; color: inherit; cursor: pointer; }
+        .sender-name:hover { text-decoration: underline; }
+        .sender-avatar { width: 22px; height: 22px; border-radius: 50%; object-fit: cover; margin-right: 6px; }
+        
+        .msg-actions { display: flex; gap: 10px; margin-top: 12px; padding-top: 12px; border-top: 1px dashed #2a2a2a; flex-wrap: wrap; align-items: center; }
+        .reaction-btn { background: rgba(255,255,255,0.05); border: 1px solid transparent; color: #888; cursor: pointer; font-size: 12px; padding: 6px 12px; border-radius: 8px; font-weight: 600; transition: all 0.2s; }
+        .reaction-btn:hover { background: rgba(255,255,255,0.1); color: #fff; transform: translateY(-1px); }
+        .reaction-btn.active { background: rgba(255,255,255,0.15); color: var(--accent-white); border-color: rgba(255,255,255,0.3); }
+        .giveaway-btn { background: var(--accent-white) !important; color: #000 !important; font-weight: 900 !important; padding: 8px 16px !important; margin-left: auto !important; box-shadow: 0 2px 10px rgba(255,255,255,0.2); }
+        .giveaway-btn:hover { background: #e6e6e6 !important; transform: scale(1.05); }
+        .comment-link { color: #888; text-decoration: none; font-size: 12px; font-weight: 600; margin-left: auto; transition: color 0.2s; }
+        .comment-link:hover { color: var(--accent-white); }
+        
+        .input-wrap { padding: 20px 25px; border-top: 1px solid var(--border); display: flex; gap: 12px; background: rgba(5,5,5,0.8); backdrop-filter: blur(10px); }
+        .input-wrap input { flex: 1; background: rgba(255,255,255,0.05); border: 1px solid #222; color: #fff; padding: 16px 20px; border-radius: 16px; outline: none; font-size: 14px; transition: all 0.3s; }
+        .input-wrap input:focus { border-color: var(--accent-white); background: rgba(255,255,255,0.08); box-shadow: 0 0 0 3px rgba(255,255,255,0.1); }
+        .input-wrap button { background: var(--accent-white); color: #000; border: none; width: 60px; border-radius: 16px; font-size: 18px; font-weight: 900; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 15px rgba(255,255,255,0.15); }
+        .input-wrap button:hover { transform: translateY(-2px); background: #e6e6e6; }
+        .input-wrap button:active { transform: translateY(0); }
+        .attach-btn { background: transparent; border: none; color: #888; font-size: 20px; cursor: pointer; padding: 0 10px; transition: color 0.2s; }
+        .attach-btn:hover { color: var(--accent-white); }
+        
         .header-actions { display: flex; align-items: center; margin-left: auto; }
-        .subscribe-btn { flex: 1; padding: 15px; background: var(--gold); color: #000; border: none; border-radius: 12px; font-weight: 900; cursor: pointer; font-size: 14px; }
-        .subscribe-btn.subscribed { background: var(--kick); }
-        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 1000; align-items: center; justify-content: center; }
-        .modal-content { background: #0a0a0a; border: 1px solid var(--border); padding: 30px; border-radius: 20px; width: 350px; max-width: 90%; }
-        .form-input { width: 100%; padding: 12px; background: #000; border: 1px solid #222; color: #fff; border-radius: 8px; margin-bottom: 12px; }
-        .modal-buttons { display: flex; gap: 10px; margin-top: 20px; }
-        .modal-btn { flex: 1; padding: 12px; border: none; border-radius: 8px; font-weight: 900; cursor: pointer; }
-        .modal-btn.primary { background: var(--gold); color: #000; }
-        .modal-btn.secondary { background: #222; color: #fff; }
-        .admin-tabs { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
-        .admin-tab { padding: 10px 20px; background: #111; border-radius: 8px; color: #666; text-decoration: none; font-weight: 900; font-size: 12px; }
-        .admin-tab.active { background: var(--kick); color: #000; }
-        .back-link { color: var(--kick); text-decoration: none; display: inline-block; margin-bottom: 20px; }
-        .comment-section { margin-top: 20px; }
-        .comment { background: #0a0a0a; border: 1px solid #111; border-radius: 10px; padding: 12px; margin-bottom: 8px; }
-        .comment-header { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
-        .comment-sender { color: var(--gold); font-size: 12px; font-weight: 900; }
-        .comment-time { color: #666; font-size: 10px; }
-        .comment-content { color: #ccc; font-size: 13px; }
-        .badge-selector { display: flex; gap: 8px; margin-top: 8px; }
-        .badge-option { padding: 6px 10px; background: #111; border-radius: 6px; cursor: pointer; border: 2px solid transparent; }
-        .badge-option.selected { border-color: var(--gold); }
-        .badge-option img { width: 20px; height: 20px; }
-        .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: #1a1a1a; border: 1px solid var(--kick); padding: 12px 24px; border-radius: 8px; color: #fff; font-size: 13px; font-weight: 600; z-index: 2000; animation: fadeInOut 2s; }
-        @keyframes fadeInOut { 0% { opacity: 0; transform: translateX(-50%) translateY(20px); } 10% { opacity: 1; transform: translateX(-50%) translateY(0); } 90% { opacity: 1; } 100% { opacity: 0; } }
+        .subscribe-btn { flex: 1; padding: 16px; background: var(--accent-white); color: #000; border: none; border-radius: 16px; font-weight: 900; cursor: pointer; font-size: 14px; transition: all 0.3s; box-shadow: 0 4px 15px rgba(255,255,255,0.15); }
+        .subscribe-btn:hover { background: #e6e6e6; transform: translateY(-2px); }
+        .subscribe-btn.subscribed { background: rgba(255,255,255,0.1); color: #fff; box-shadow: none; border: 1px solid #333; }
+        
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(8px); z-index: 1000; align-items: center; justify-content: center; animation: fadeIn 0.2s ease; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .modal-content { background: #0a0a0a; border: 1px solid #222; padding: 35px; border-radius: 24px; width: 380px; max-width: 90%; box-shadow: 0 20px 50px rgba(0,0,0,0.7); transform: scale(0.95); animation: scaleUp 0.2s ease forwards; }
+        @keyframes scaleUp { to { transform: scale(1); } }
+        .form-input { width: 100%; padding: 14px 16px; background: rgba(255,255,255,0.05); border: 1px solid #222; color: #fff; border-radius: 12px; margin-bottom: 16px; outline: none; transition: all 0.3s; box-sizing: border-box; }
+        .form-input:focus { border-color: var(--accent-white); background: rgba(255,255,255,0.08); }
+        .modal-buttons { display: flex; gap: 12px; margin-top: 25px; }
+        .modal-btn { flex: 1; padding: 14px; border: none; border-radius: 12px; font-weight: 900; cursor: pointer; font-size: 13px; transition: all 0.2s; }
+        .modal-btn.primary { background: var(--accent-white); color: #000; box-shadow: 0 4px 15px rgba(255,255,255,0.15); }
+        .modal-btn.primary:hover { background: #e6e6e6; transform: translateY(-2px); }
+        .modal-btn.secondary { background: rgba(255,255,255,0.05); color: #fff; border: 1px solid #333; }
+        .modal-btn.secondary:hover { background: rgba(255,255,255,0.1); border-color: #555; }
+        
+        .admin-tabs { display: flex; gap: 12px; margin-bottom: 25px; border-bottom: 1px solid var(--border); padding-bottom: 15px; }
+        .admin-tab { padding: 12px 20px; background: rgba(255,255,255,0.05); border-radius: 10px; color: #888; text-decoration: none; font-weight: 800; font-size: 12px; transition: all 0.2s; border: 1px solid transparent; }
+        .admin-tab:hover { background: rgba(255,255,255,0.1); color: #fff; }
+        .admin-tab.active { background: var(--accent-white); color: #000; box-shadow: 0 4px 15px rgba(255,255,255,0.2); }
+        
+        .back-link { color: #888; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; margin-bottom: 25px; font-weight: 600; transition: color 0.2s; }
+        .back-link:hover { color: var(--accent-white); }
+        
+        .comment-section { margin-top: 30px; }
+        .comment { background: rgba(20,20,20,0.5); border: 1px solid #1a1a1a; border-radius: 12px; padding: 14px 16px; margin-bottom: 10px; transition: background 0.2s; }
+        .comment:hover { background: rgba(255,255,255,0.02); }
+        .comment-header { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+        .comment-sender { color: var(--accent-white); font-size: 12px; font-weight: 800; }
+        .comment-time { color: #666; font-size: 11px; }
+        .comment-content { color: #ccc; font-size: 13px; line-height: 1.4; }
+        
+        .badge-selector { display: flex; gap: 10px; margin-top: 12px; flex-wrap: wrap; }
+        .badge-option { padding: 8px 12px; background: rgba(255,255,255,0.05); border-radius: 8px; cursor: pointer; border: 2px solid transparent; transition: all 0.2s; }
+        .badge-option:hover { background: rgba(255,255,255,0.1); }
+        .badge-option.selected { border-color: var(--accent-white); background: rgba(255,255,255,0.15); }
+        .badge-option img { width: 22px; height: 22px; }
+        
+        .toast { position: fixed; bottom: 40px; left: 50%; transform: translateX(-50%); background: rgba(255,255,255,0.95); backdrop-filter: blur(5px); padding: 14px 28px; border-radius: 12px; color: #000; font-size: 13px; font-weight: 700; z-index: 2000; box-shadow: 0 10px 30px rgba(0,0,0,0.5); animation: toastFade 2.5s forwards; pointer-events: none; }
+        @keyframes toastFade { 0% { opacity: 0; transform: translate(-50%, 20px) scale(0.9); } 10% { opacity: 1; transform: translate(-50%, 0) scale(1); } 90% { opacity: 1; transform: translate(-50%, 0) scale(1); } 100% { opacity: 0; transform: translate(-50%, -20px) scale(0.9); } }
+        
+        .animation-option { background: rgba(255,255,255,0.05); padding: 12px; border-radius: 12px; cursor: pointer; text-align: center; border: 2px solid transparent; transition: all 0.2s; }
+        .animation-option:hover { border-color: rgba(255,255,255,0.5); background: rgba(255,255,255,0.1); transform: translateY(-2px); }
+        .animation-option.selected { border-color: var(--accent-white); background: rgba(255,255,255,0.15); box-shadow: 0 0 15px rgba(255,255,255,0.1); }
+        
+        .admin-verify-buttons { display: flex; gap: 8px; flex-wrap: wrap; }
+        .admin-verify-btn { padding: 6px 12px; border-radius: 6px; text-decoration: none; font-weight: 800; font-size: 11px; border: none; cursor: pointer; transition: all 0.2s; }
+        .admin-verify-btn:hover { transform: translateY(-1px); filter: brightness(1.1); }
+        .admin-verify-btn.white { background: #e0e0e0; color: #000; }
+        .admin-verify-btn.green { background: var(--kick); color: #000; }
+        .admin-verify-btn.silver { background: var(--accent-silver); color: #000; }
+        .admin-verify-btn.none { background: rgba(255,255,255,0.1); color: #fff; }
+        .delete-btn { color: var(--danger); margin-left: 8px; text-decoration: none; font-size: 12px; padding: 6px 10px; background: rgba(255,68,68,0.1); border-radius: 6px; transition: all 0.2s; }
+        .delete-btn:hover { background: var(--danger); color: #fff; }
+        
+        .profile-container { flex: 1; overflow-y: auto; padding: 30px 20px; max-width: 650px; margin: 0 auto; width: 100%; box-sizing: border-box; }
+        .profile-card { background: rgba(20,20,20,0.6); backdrop-filter: blur(10px); border: 1px solid #222; border-radius: 24px; padding: 40px 30px; margin-bottom: 30px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+        .profile-avatar { width: 90px; height: 90px; background: var(--accent-white); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; box-shadow: 0 10px 25px rgba(255,255,255,0.15); position: relative; cursor: pointer; }
+        .profile-avatar img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
+        .profile-avatar span { font-size: 40px; font-weight: 900; color: #000; }
+        .profile-avatar .change-avatar { position: absolute; bottom: -5px; right: -5px; background: var(--accent-white); border-radius: 50%; width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; font-size: 13px; color: #000; cursor: pointer; }
+        .profile-name { font-size: 26px; font-weight: 900; margin-bottom: 12px; display: flex; align-items: center; justify-content: center; gap: 12px; letter-spacing: -0.5px; }
+        .info-section { background: rgba(20,20,20,0.6); border: 1px solid #222; border-radius: 20px; padding: 30px; margin-bottom: 30px; }
+        .info-title { color: var(--accent-white); font-size: 18px; font-weight: 800; margin-bottom: 25px; letter-spacing: 0.5px; }
+        .info-row { display: flex; justify-content: space-between; padding: 14px 0; border-bottom: 1px solid #1a1a1a; }
+        .info-row:last-child { border-bottom: none; padding-bottom: 0; }
+        .info-label { color: #888; font-size: 14px; font-weight: 600; }
+        .info-value { color: #fff; font-size: 14px; font-weight: 700; }
+        .referral-card { background: rgba(20,20,20,0.6); border: 1px solid #222; border-radius: 20px; padding: 30px; margin-bottom: 30px; }
+        .referral-link { background: rgba(0,0,0,0.5); border: 1px dashed #444; padding: 16px; border-radius: 12px; color: var(--accent-white); font-size: 13px; font-family: monospace; word-break: break-all; margin: 20px 0; text-align: center; }
+        .copy-btn { background: var(--accent-white); color: #000; border: none; padding: 14px 20px; border-radius: 12px; font-weight: 900; cursor: pointer; font-size: 13px; width: 100%; transition: all 0.2s; box-shadow: 0 4px 15px rgba(255,255,255,0.1); }
+        .copy-btn:hover { background: #e6e6e6; transform: translateY(-2px); }
+        .pin-section { background: rgba(20,20,20,0.6); border: 1px solid #222; border-radius: 20px; padding: 30px; margin-bottom: 30px; }
+        .pin-select { width: 100%; padding: 16px; background: rgba(255,255,255,0.05); border: 1px solid #333; color: #fff; border-radius: 12px; margin: 20px 0; font-size: 14px; outline: none; transition: border-color 0.3s; }
+        .pin-select:focus { border-color: var(--accent-white); }
+        .pin-btn { background: var(--accent-white); color: #000; border: none; padding: 14px 20px; border-radius: 12px; font-weight: 900; cursor: pointer; font-size: 14px; width: 100%; transition: all 0.2s; }
+        .pin-btn:hover { background: #e6e6e6; transform: translateY(-2px); box-shadow: 0 4px 15px rgba(255,255,255,0.15); }
+        .premium-section { background: linear-gradient(135deg, rgba(30,30,30,0.8), rgba(10,10,10,0.9)); border: 1px solid #444; border-radius: 20px; padding: 30px; margin-bottom: 30px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+        .ad-banner { background: rgba(255,255,255,0.03); border: 1px dashed #444; border-radius: 12px; padding: 12px; text-align: center; margin-top: 20px; }
+        .ad-banner a { color: var(--accent-white); text-decoration: none; font-weight: 600; }
+        .fixed-ad { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(10,10,10,0.95); backdrop-filter: blur(5px); padding: 8px; text-align: center; font-size: 11px; color: #888; z-index: 50; border-top: 1px solid #222; }
     </style>
 </head>
 <body>
@@ -247,56 +286,33 @@
             <span>WETMO</span>
         </a>
         
-        {% if mode in ['chat', 'channel', 'post'] %}
-        <button class="btn-header" onclick="showEventModal()">КВЕСТ</button>
-        
+        {% if mode in ['chat', 'channel', 'post', 'profile', 'user_profile'] %}
         <button class="mobile-menu-btn" onclick="toggleMobileMenu()">☰</button>
         
         <div class="search-container">
-            <input type="text" class="search-input" id="user-search" placeholder="🔍 Поиск пользователей и каналов..." autocomplete="off">
+            <input type="text" class="search-input" id="user-search" placeholder="🔍 Поиск..." autocomplete="off">
             <div class="search-results" id="search-results"></div>
         </div>
         
         <div class="header-actions" id="desktop-actions">
-            <button class="btn-header btn-gold" onclick="showCreateChannelModal()">📢 СОЗДАТЬ КАНАЛ</button>
+            <a href="/profile" class="btn-header btn-accent" style="margin-right:10px;">👤 ПРОФИЛЬ</a>
+            <button class="btn-header btn-accent" onclick="showCreateChannelModal()">📢 СОЗДАТЬ КАНАЛ</button>
             {% if user and user.username == 'wetmo' %}<a href="/admin" class="btn-header">АДМИНКА</a>{% endif %}
-            <a href="/logout" class="btn-header" style="color:var(--danger)">ВЫХОД</a>
+            <a href="/logout" class="btn-header" style="color:var(--danger); border-color: rgba(255,68,68,0.3);">ВЫХОД</a>
         </div>
         {% endif %}
     </div>
     
     <div class="mobile-menu" id="mobile-menu">
-        <button class="btn-header btn-gold" onclick="showCreateChannelModal()">📢 СОЗДАТЬ КАНАЛ</button>
+        <a href="/profile" class="btn-header btn-accent">👤 ПРОФИЛЬ</a>
+        <button class="btn-header btn-accent" onclick="showCreateChannelModal()">📢 СОЗДАТЬ КАНАЛ</button>
         {% if user and user.username == 'wetmo' %}<a href="/admin" class="btn-header">АДМИНКА</a>{% endif %}
-        <button class="btn-header" onclick="showEventModal()">КВЕСТ</button>
         <a href="/logout" class="btn-header" style="color:var(--danger)">ВЫХОД</a>
     </div>
 
-    <!-- МОДАЛКА КВЕСТА -->
-    <div id="event-modal" class="modal">
-        <div class="modal-content" style="width:320px;">
-            <h2 style="color:var(--kick); margin-bottom:20px;">ЭМБЛЕМЫ</h2>
-            {% if user %}
-            <div style="background:#000; height:8px; border-radius:4px; margin:15px 0;">
-                <div style="background:var(--kick); height:100%; width:{{ (user.msg_count / 1000 * 100) if user.msg_count <= 1000 else 100 }}%; border-radius:4px;"></div>
-            </div>
-            <p style="font-size:10px; color:#444; margin-bottom:20px;">Прогресс: {{ user.msg_count }}/1000</p>
-            {% else %}
-            <p style="font-size:10px; color:#444; margin-bottom:20px;">Войдите чтобы видеть прогресс</p>
-            {% endif %}
-            <div style="display:grid; grid-template-columns:repeat(5,1fr); gap:8px;">
-                {% for b in event_badges %}
-                <div style="background:#111; padding:8px; border-radius:10px; cursor:pointer;" onclick="selectBadge('{{ b }}')"><img src="{{ b }}" style="width:100%;"></div>
-                {% endfor %}
-            </div>
-            <button class="modal-btn secondary" style="margin-top:20px;" onclick="closeEventModal()">ЗАКРЫТЬ</button>
-        </div>
-    </div>
-
-    <!-- МОДАЛКА СОЗДАНИЯ КАНАЛА -->
     <div id="create-channel-modal" class="modal">
         <div class="modal-content">
-            <h2 style="color:var(--gold); margin-bottom:20px;">📢 СОЗДАТЬ КАНАЛ</h2>
+            <h2 style="color:var(--accent-white); margin-bottom:25px; font-weight:900;">📢 СОЗДАТЬ КАНАЛ</h2>
             <input type="text" id="modal-channel-name" class="form-input" placeholder="Название (латиница, без пробелов)">
             <input type="text" id="modal-channel-desc" class="form-input" placeholder="Описание">
             <div class="modal-buttons">
@@ -306,427 +322,388 @@
         </div>
     </div>
 
+    <div id="premium-modal" class="modal">
+        <div class="modal-content" style="width:450px;">
+            <h2 style="color:var(--accent-white); margin-bottom:20px; font-weight:900;">💎 WETMO PREMIUM</h2>
+            <p style="font-size:13px; color:#888; margin-bottom:25px; font-weight:600;">Выберите цвет переливания ника:</p>
+            <div style="display:grid; grid-template-columns:repeat(5,1fr); gap:10px;">
+                {% for color in premium_colors %}
+                <div class="animation-option {% if premium and premium.animation_type == loop.index %}selected{% endif %}" onclick="selectAnimation({{ loop.index }})">
+                    <div style="background: linear-gradient(45deg, {{ color.colors[0] }}, {{ color.colors[1] }}); width:28px; height:28px; border-radius:50%; margin:0 auto; box-shadow: 0 2px 8px rgba(255,255,255,0.1);"></div>
+                    <div style="font-size:10px; margin-top:8px; color:#aaa; font-weight:600;">{{ color.name }}</div>
+                </div>
+                {% endfor %}
+                <div class="animation-option {% if premium and premium.animation_type == 11 %}selected{% endif %}" onclick="showCustomColorModal()">
+                    <div style="width:28px; height:28px; border-radius:50%; margin:0 auto; background: conic-gradient(#ffffff, #aaaaaa, #ffffff); box-shadow: 0 2px 8px rgba(255,255,255,0.1);"></div>
+                    <div style="font-size:10px; margin-top:8px; color:#aaa; font-weight:600;">Кастом</div>
+                </div>
+            </div>
+            <button class="modal-btn secondary" style="margin-top:25px; width: 100%;" onclick="closePremiumModal()">ЗАКРЫТЬ</button>
+        </div>
+    </div>
+
+    <div id="custom-color-modal" class="modal">
+        <div class="modal-content" style="width:350px;">
+            <h2 style="color:var(--accent-white); margin-bottom:25px; font-weight:900;">🎨 Кастомный цвет</h2>
+            <label style="color:#aaa; font-size:13px; font-weight:600; display:block; margin-bottom:6px;">Цвет 1</label>
+            <input type="color" id="custom-color1" class="form-input" style="padding:4px; height:40px;" value="{{ user.custom_color1 if user else '#ffffff' }}">
+            <label style="color:#aaa; font-size:13px; font-weight:600; display:block; margin-bottom:6px; margin-top:10px;">Цвет 2</label>
+            <input type="color" id="custom-color2" class="form-input" style="padding:4px; height:40px;" value="{{ user.custom_color2 if user else '#cccccc' }}">
+            <div class="modal-buttons">
+                <button onclick="saveCustomColor()" class="modal-btn primary">СОХРАНИТЬ</button>
+                <button onclick="closeCustomColorModal()" class="modal-btn secondary">ОТМЕНА</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="giveaway-modal" class="modal">
+        <div class="modal-content">
+            <h2 style="color:var(--accent-white); margin-bottom:25px; font-weight:900;">🎁 РОЗЫГРЫШ PREMIUM</h2>
+            <input type="datetime-local" id="giveaway-end" class="form-input">
+            <input type="number" id="giveaway-winners" class="form-input" placeholder="Количество победителей" value="1" min="1" max="10">
+            <div class="modal-buttons">
+                <button onclick="createGiveaway()" class="modal-btn primary">СОЗДАТЬ</button>
+                <button onclick="closeGiveawayModal()" class="modal-btn secondary">ОТМЕНА</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="badge-info-modal" class="modal">
+        <div class="modal-content" style="width: 350px; text-align: center;">
+            <h3 id="badge-title" style="color: var(--accent-white); margin-bottom: 15px; font-weight: 900;"></h3>
+            <p id="badge-description" style="color: #ccc; font-size: 13px; line-height: 1.6;"></p>
+            <button class="modal-btn primary" style="margin-top: 20px; width: 100%;" onclick="closeBadgeInfoModal()">ПОНЯТНО</button>
+        </div>
+    </div>
+
     {% if mode == 'auth' %}
-    <div style="display:flex; flex:1; align-items:center; justify-content:center;">
-        <div style="background:#080808; padding:40px; border-radius:20px; border:1px solid #111; width:280px; text-align:center;">
-            <div style="display:flex; align-items:center; justify-content:center; gap:8px; margin-bottom:25px;">
-                <div style="display:flex; align-items:center; justify-content:center; width:36px; height:36px; background:var(--kick); border-radius:10px;"><span style="color:#000; font-size:24px; font-weight:900;">W</span></div>
-                <h1 style="color:var(--kick); margin:0; font-size:28px;">WETMO</h1>
+    <div style="display:flex; flex:1; align-items:center; justify-content:center; padding: 20px;">
+        <div style="background:rgba(20,20,20,0.8); backdrop-filter:blur(15px); padding:45px 35px; border-radius:24px; border:1px solid #222; width:320px; text-align:center; box-shadow: 0 20px 50px rgba(0,0,0,0.5);">
+            <div style="display:flex; align-items:center; justify-content:center; gap:12px; margin-bottom:35px;">
+                <div style="display:flex; align-items:center; justify-content:center; width:44px; height:44px; background:var(--kick); border-radius:12px; box-shadow: 0 5px 15px rgba(83,252,24,0.3);"><span style="color:#000; font-size:28px; font-weight:900;">W</span></div>
+                <h1 style="color:var(--kick); margin:0; font-size:32px; font-weight:900; letter-spacing: -1px;">WETMO</h1>
             </div>
             <form method="POST">
-                <input type="text" name="username" placeholder="НИК" required style="width:100%; padding:14px; background:#000; border:1px solid #222; color:#fff; margin-bottom:12px; border-radius:10px;">
-                <input type="password" name="password" placeholder="ПАРОЛЬ" required style="width:100%; padding:14px; background:#000; border:1px solid #222; color:#fff; margin-bottom:20px; border-radius:10px;">
-                <button type="submit" style="width:100%; padding:14px; background:var(--kick); border:none; font-weight:900; border-radius:10px; cursor:pointer;">{{ 'ВОЙТИ' if auth_type == 'login' else 'РЕГИСТРАЦИЯ' }}</button>
+                <input type="text" name="username" placeholder="НИКНЕЙМ" required minlength="3" maxlength="20" pattern="[a-zA-Z0-9_]+" style="width:100%; padding:16px; background:rgba(0,0,0,0.5); border:1px solid #333; color:#fff; margin-bottom:16px; border-radius:12px; outline:none; transition:0.3s; box-sizing:border-box; font-size:14px;">
+                <input type="password" name="password" placeholder="ПАРОЛЬ" required minlength="6" style="width:100%; padding:16px; background:rgba(0,0,0,0.5); border:1px solid #333; color:#fff; margin-bottom:25px; border-radius:12px; outline:none; transition:0.3s; box-sizing:border-box; font-size:14px;">
+                <button type="submit" style="width:100%; padding:16px; background:var(--accent-white); color:#000; border:none; font-weight:900; font-size:14px; border-radius:12px; cursor:pointer; transition:all 0.3s; box-shadow: 0 4px 15px rgba(255,255,255,0.15);">{{ 'ВОЙТИ' if auth_type == 'login' else 'РЕГИСТРАЦИЯ' }}</button>
             </form>
-            <a href="/auth?type={{ 'register' if auth_type == 'login' else 'login' }}" style="display:block; margin-top:20px; font-size:11px; color:#444; text-decoration:none;">{{ 'НЕТ АККАУНТА?' if auth_type == 'login' else 'УЖЕ ЕСТЬ АККАУНТ' }}</a>
+            <p style="font-size:11px; color:#666; margin-top:20px; font-weight:600;">Только латиница, цифры и _ (от 3 до 20 символов)</p>
+            <a href="/auth?type={{ 'register' if auth_type == 'login' else 'login' }}" style="display:inline-block; margin-top:20px; font-size:12px; font-weight:700; color:#aaa; text-decoration:none; transition:color 0.2s;">{{ 'НЕТ АККАУНТА?' if auth_type == 'login' else 'УЖЕ ЕСТЬ АККАУНТ' }}</a>
         </div>
     </div>
 
     {% elif mode == 'verify' %}
-    <div style="display:flex; flex:1; align-items:center; justify-content:center;">
-        <div style="background:#080808; padding:40px; border-radius:20px; border:1px solid #111; width:280px; text-align:center;">
-            <div style="display:flex; align-items:center; justify-content:center; gap:8px; margin-bottom:20px;">
-                <div style="display:flex; align-items:center; justify-content:center; width:32px; height:32px; background:var(--kick); border-radius:8px;"><span style="color:#000; font-size:20px; font-weight:900;">W</span></div>
-                <h2 style="color:var(--kick); margin:0;">ПОДТВЕРЖДЕНИЕ</h2>
+    <div style="display:flex; flex:1; align-items:center; justify-content:center; padding: 20px;">
+        <div style="background:rgba(20,20,20,0.8); backdrop-filter:blur(15px); padding:45px 35px; border-radius:24px; border:1px solid #222; width:320px; text-align:center; box-shadow: 0 20px 50px rgba(0,0,0,0.5);">
+            <div style="display:flex; align-items:center; justify-content:center; gap:12px; margin-bottom:25px;">
+                <div style="display:flex; align-items:center; justify-content:center; width:36px; height:36px; background:var(--kick); border-radius:10px;"><span style="color:#000; font-size:22px; font-weight:900;">W</span></div>
+                <h2 style="color:var(--kick); margin:0; font-weight:900;">ПОДТВЕРЖДЕНИЕ</h2>
             </div>
-            <p style="font-size:11px; color:#444; margin-bottom:20px;">Введите код, отправленный в чат WETMO_AUTH</p>
+            <p style="font-size:13px; color:#888; margin-bottom:25px; line-height:1.4;">Введите код, отправленный в чат World</p>
             <form method="POST">
-                <input type="text" name="code" placeholder="000-000" required style="width:100%; padding:14px; background:#000; border:1px solid #222; color:#fff; margin-bottom:15px; border-radius:10px; text-align:center; font-size:20px;">
-                <button type="submit" style="width:100%; padding:14px; background:var(--kick); border:none; font-weight:900; border-radius:10px; cursor:pointer;">ВОЙТИ</button>
+                <input type="text" name="code" placeholder="000-000" required style="width:100%; padding:16px; background:rgba(0,0,0,0.5); border:1px solid #333; color:#fff; margin-bottom:20px; border-radius:12px; text-align:center; font-size:24px; font-weight:700; letter-spacing:2px; outline:none; transition:0.3s; box-sizing:border-box;">
+                <button type="submit" style="width:100%; padding:16px; background:var(--accent-white); color:#000; border:none; font-weight:900; font-size:14px; border-radius:12px; cursor:pointer; transition:all 0.3s; box-shadow: 0 4px 15px rgba(255,255,255,0.15);">ПОДТВЕРДИТЬ</button>
             </form>
         </div>
     </div>
 
     {% elif mode == 'admin' %}
-    <div style="padding:25px; flex:1; overflow-y:auto;">
-        <h2 style="color:var(--kick); margin-bottom:20px;">АДМИН-ПАНЕЛЬ</h2>
+    <div style="padding:30px 25px; flex:1; overflow-y:auto; max-width:900px; margin:0 auto; width:100%; box-sizing:border-box;">
+        <h2 style="color:var(--accent-white); margin-bottom:25px; font-weight:900;">АДМИН-ПАНЕЛЬ</h2>
         <div class="admin-tabs">
             <a href="/admin?tab=users" class="admin-tab {{ 'active' if tab == 'users' }}">👥 ПОЛЬЗОВАТЕЛИ</a>
             <a href="/admin?tab=channels" class="admin-tab {{ 'active' if tab == 'channels' }}">📢 КАНАЛЫ</a>
+            <a href="/admin?tab=premium" class="admin-tab {{ 'active' if tab == 'premium' }}">💎 PREMIUM</a>
         </div>
         
         {% if tab == 'users' %}
-        <h3 style="color:#666; margin-bottom:15px;">УПРАВЛЕНИЕ ПОЛЬЗОВАТЕЛЯМИ</h3>
+        <h3 style="color:#aaa; margin-bottom:20px; font-size:14px;">УПРАВЛЕНИЕ ПОЛЬЗОВАТЕЛЯМИ</h3>
         {% for u in all_users %}
-        <div style="display:flex; justify-content:space-between; align-items:center; background:#080808; padding:15px; margin-bottom:10px; border-radius:10px; border:1px solid #111;">
-            <span>{{ u.username|upper }} {% if u.is_verified %}<span class="kick-badge" onclick="showToast('Пользователь верифицирован WETMO')"></span>{% endif %}</span>
-            <div>
-                <a href="/admin/verify/{{ u.id }}" style="color:{{ 'var(--danger)' if u.is_verified else 'var(--kick)' }}; font-weight:900; text-decoration:none; margin-right:15px;">[ {{ 'ЗАБРАТЬ' if u.is_verified else 'ВЫДАТЬ' }} ]</a>
-                {% if u.username != 'wetmo' %}
-                <a href="/admin/delete/{{ u.id }}" class="delete-btn" onclick="return confirm('Удалить {{ u.username }}?')">🗑️ УДАЛИТЬ</a>
-                {% endif %}
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; background:rgba(20,20,20,0.6); padding:16px 20px; margin-bottom:12px; border-radius:16px; border:1px solid #222; flex-wrap:wrap; gap:10px;">
+            <div style="min-width:150px;">
+                <span style="font-weight:700; display:flex; align-items:center; gap:5px;">
+                    {% if u.avatar_data %}<img src="{{ u.avatar_data }}" class="sender-avatar">{% endif %}
+                    <a href="/profile/{{ u.username }}" style="color:var(--accent-white); text-decoration:none;">{{ u.username|upper }}</a>
+                    {% if u.user_badge %}<img src="{{ u.user_badge }}" style="width:18px; height:18px; margin-left:5px;">{% endif %}
+                    {% if u.verification_type == 1 %}<span class="verify-badge verify-white" onclick="showBadgeInfo(event, 'Подтверждённый', 'Аккаунт подтверждён')"></span>
+                    {% elif u.verification_type == 2 %}<span class="verify-badge verify-green" onclick="showBadgeInfo(event, 'Сотрудник/Блогер', 'Официальный аккаунт')"></span>
+                    {% elif u.verification_type == 3 %}<span class="verify-badge verify-premium-1" onclick="showBadgeInfo(event, 'Premium', 'Премиум-подписчик')"></span>{% endif %}
+                </span>
+                <div class="badge-selector" style="margin-top:10px; max-width:300px;">
+                    <p style="color:#888; font-size:10px; margin:5px 0; width:100%;">Эмблема:</p>
+                    {% for b in user_badges %}
+                    <div class="badge-option {% if u.user_badge == b.url %}selected{% endif %}" onclick="setUserBadge('{{ u.username }}', '{{ b.url }}')" style="padding:5px;">
+                        <img src="{{ b.url }}" title="{{ b.name }}" style="width:18px; height:18px;">
+                    </div>
+                    {% endfor %}
+                    <div class="badge-option {% if not u.user_badge %}selected{% endif %}" onclick="setUserBadge('{{ u.username }}', '')" style="padding:5px;">🚫</div>
+                </div>
+            </div>
+            <div class="admin-verify-buttons" style="align-self:center;">
+                <button onclick="giveBadge('{{ u.username }}', 0, '')" class="admin-verify-btn none">✕</button>
+                <button onclick="giveBadge('{{ u.username }}', 1, 'Подтверждённый')" class="admin-verify-btn white">○</button>
+                <button onclick="giveBadge('{{ u.username }}', 2, 'Сотрудник/Блогер')" class="admin-verify-btn green">✓</button>
+                <button onclick="givePremiumUser('{{ u.username }}')" class="admin-verify-btn silver">💎</button>
+                {% if u.username != 'wetmo' %}<a href="/admin/delete/{{ u.id }}" class="delete-btn" onclick="return confirm('Удалить {{ u.username }}?')">🗑️</a>{% endif %}
             </div>
         </div>
         {% endfor %}
         
         {% elif tab == 'channels' %}
-        <h3 style="color:#666; margin-bottom:15px;">УПРАВЛЕНИЕ КАНАЛАМИ</h3>
+        <h3 style="color:#aaa; margin-bottom:20px; font-size:14px;">УПРАВЛЕНИЕ КАНАЛАМИ</h3>
         {% for c in all_channels %}
-        <div style="display:flex; justify-content:space-between; align-items:center; background:#080808; padding:15px; margin-bottom:10px; border-radius:10px; border:1px solid #111;">
+        <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(20,20,20,0.6); padding:16px 20px; margin-bottom:12px; border-radius:16px; border:1px solid #222;">
             <div>
-                <div style="font-weight:900; color:var(--gold); display:flex; align-items:center; gap:6px;">
-                    {% if c.badge %}
-                        {% for b in channel_badges %}
-                            {% if b.url == c.badge %}<img src="{{ b.url }}" style="width:16px; height:16px;">{% endif %}
-                        {% endfor %}
-                    {% endif %}
-                    @{{ c.name }} 
-                    {% if c.is_verified %}<span class="channel-badge" onclick="showToast('Канал верифицирован WETMO')"></span>{% endif %}
+                <div style="font-weight:900; color:var(--accent-white); display:flex; align-items:center; gap:8px; font-size:15px;">
+                    {% if c.badge %}{% for b in channel_badges %}{% if b.url == c.badge %}<img src="{{ b.url }}" style="width:18px; height:18px;">{% endif %}{% endfor %}{% endif %}
+                    @{{ c.name }}
+                    {% if c.verification_type == 4 %}<span class="verify-badge verify-accent" onclick="showBadgeInfo(event, 'Верифицирован', 'Официальный канал')"></span>{% endif %}
                 </div>
-                <div style="font-size:11px; color:#666;">{{ c.description or 'Без описания' }} • Владелец: {{ c.created_by }}</div>
-                <div class="badge-selector">
+                <div style="font-size:12px; color:#888; margin-top:4px;">{{ c.description or 'Без описания' }} • Владелец: <a href="/profile/{{ c.created_by }}" style="color:#ccc;">{{ c.created_by }}</a></div>
+                <div class="badge-selector" style="margin-top:12px;">
                     {% for b in channel_badges %}
-                    <div class="badge-option {% if c.badge == b.url %}selected{% endif %}" onclick="setChannelBadge({{ c.id }}, '{{ b.url }}')">
-                        <img src="{{ b.url }}" title="{{ b.name }}">
-                    </div>
+                    <div class="badge-option {% if c.badge == b.url %}selected{% endif %}" onclick="setChannelBadge({{ c.id }}, '{{ b.url }}')"><img src="{{ b.url }}" title="{{ b.name }}"></div>
                     {% endfor %}
                     <div class="badge-option {% if not c.badge %}selected{% endif %}" onclick="setChannelBadge({{ c.id }}, '')">🚫</div>
                 </div>
             </div>
-            <div>
-                <a href="/admin/channel/verify/{{ c.id }}" style="color:{{ 'var(--danger)' if c.is_verified else 'var(--kick)' }}; font-weight:900; text-decoration:none;">[ {{ 'ЗАБРАТЬ' if c.is_verified else 'ВЫДАТЬ' }} ]</a>
-                <a href="#" onclick="deleteChannel({{ c.id }})" class="delete-btn">🗑️</a>
+            <div style="display:flex; gap:8px;">
+                <a href="/admin/channel/verify/{{ c.id }}" style="padding:8px 12px; background:{{ 'var(--accent-white)' if c.verification_type == 4 else '#333' }}; color:#000; border-radius:8px; text-decoration:none; font-weight:700; font-size:12px;">📢</a>
+                <a href="#" onclick="deleteChannel({{ c.id }})" class="delete-btn" style="padding:8px 12px;">🗑️</a>
             </div>
         </div>
         {% endfor %}
+        
+        {% elif tab == 'premium' %}
+        <h3 style="color:#aaa; margin-bottom:20px; font-size:14px;">УПРАВЛЕНИЕ PREMIUM</h3>
+        {% for p in premium_users %}
+        <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(20,20,20,0.6); padding:16px 20px; margin-bottom:12px; border-radius:16px; border:1px solid #222;">
+            <div>
+                <a href="/profile/{{ p.username }}" style="font-weight:900; font-size:15px; color:var(--accent-white); text-decoration:none;">{{ p.username }}</a>
+                <div style="color:#888; margin-top:6px; font-size:12px;">Анимация: {{ p.animation_type }} • Выдан: {{ p.activated_at.strftime('%d.%m.%Y') }}</div>
+            </div>
+            <a href="#" onclick="removePremium('{{ p.username }}')" class="delete-btn" style="padding:8px 12px;">🗑️</a>
+        </div>
+        {% endfor %}
         {% endif %}
-        <a href="/" class="btn-header" style="display:inline-block; margin-top:20px;">НАЗАД В ЧАТ</a>
+        <a href="/" class="btn-header" style="display:inline-block; margin-top:25px; padding:12px 20px;">НАЗАД В ЧАТ</a>
+    </div>
+
+    {% elif mode == 'profile' %}
+    <div class="profile-container">
+        <div class="profile-card">
+            <div class="profile-avatar" onclick="document.getElementById('avatar-input').click()">
+                {% if user.avatar_data %}
+                <img src="{{ user.avatar_data }}" id="profile-avatar-img">
+                {% else %}
+                <span id="profile-avatar-text">{{ user.username[0]|upper }}</span>
+                {% endif %}
+                <div class="change-avatar">📷</div>
+            </div>
+            <input type="file" id="avatar-input" accept="image/*" style="display:none;" onchange="uploadAvatar(this)">
+            <div class="profile-name">
+                {{ user.username }}
+                {% if user.user_badge %}<img src="{{ user.user_badge }}" style="width:20px; height:20px;">{% endif %}
+                {% if user.verification_type == 1 %}<span class="verify-badge verify-white" onclick="showBadgeInfo(event, 'Подтверждённый', 'Аккаунт подтверждён')"></span>
+                {% elif user.verification_type == 2 %}<span class="verify-badge verify-green" onclick="showBadgeInfo(event, 'Сотрудник/Блогер', 'Официальный аккаунт')"></span>
+                {% elif user.verification_type == 3 %}<span class="verify-badge verify-premium-{{ premium.animation_type if premium else 1 }}" onclick="showBadgeInfo(event, 'Premium', 'Премиум-подписчик')"></span>{% endif %}
+            </div>
+        </div>
+        
+        <div class="info-section">
+            <div class="info-title">📋 Информация</div>
+            <div class="info-row"><span class="info-label">Никнейм</span><span class="info-value">@{{ user.username }}</span></div>
+            <div class="info-row"><span class="info-label">Статус</span><span class="info-value">{% if user.verification_type == 1 %}Подтверждённый{% elif user.verification_type == 2 %}Сотрудник/Блогер{% elif user.verification_type == 3 %}Premium{% else %}Обычный{% endif %}</span></div>
+            {% if user.badge_reason %}<div class="info-row"><span class="info-label">Причина</span><span class="info-value">{{ user.badge_reason }}</span></div>{% endif %}
+            <div class="info-row"><span class="info-label">Сообщений</span><span class="info-value">{{ user.msg_count }}</span></div>
+        </div>
+        
+        <div class="pin-section">
+            <div class="info-title">📌 Закреплённый канал</div>
+            <select id="pin-select" class="pin-select">
+                <option value="">Не выбран</option>
+                {% for ch in channels %}<option value="{{ ch.name }}" {% if pinned_channel and pinned_channel.name == ch.name %}selected{% endif %}>@{{ ch.name }}</option>{% endfor %}
+            </select>
+            <button class="pin-btn" onclick="pinChannel()">Сохранить</button>
+        </div>
+        
+        {% if premium %}
+        <div class="premium-section">
+            <div class="info-title" style="color:var(--accent-white);">💎 Premium анимация</div>
+            <div style="display:grid; grid-template-columns:repeat(5,1fr); gap:12px; margin-top:20px;">
+                {% for color in premium_colors %}
+                <div class="animation-option {% if premium.animation_type == loop.index %}selected{% endif %}" onclick="selectAnimation({{ loop.index }})">
+                    <div style="background: linear-gradient(45deg, {{ color.colors[0] }}, {{ color.colors[1] }}); width:28px; height:28px; border-radius:50%; margin:0 auto;"></div>
+                </div>
+                {% endfor %}
+                <div class="animation-option {% if premium.animation_type == 11 %}selected{% endif %}" onclick="showCustomColorModal()">
+                    <div style="width:28px; height:28px; border-radius:50%; margin:0 auto; background: conic-gradient(#ffffff, #aaaaaa, #ffffff);"></div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        
+        <div class="referral-card">
+            <div class="info-title">🔗 Реферальная ссылка</div>
+            <div class="referral-link" id="referral-link">{{ referral_link }}</div>
+            <button class="copy-btn" onclick="copyReferralLink()">📋 Копировать</button>
+        </div>
+        
+        {% if show_ads %}
+        <div class="ad-banner">
+            <span style="color:#888; font-size:12px;">📢 Здесь могла быть ваша реклама</span>
+            <a href="/premium.html" style="display:block; margin-top:8px; color:var(--accent-white); font-size:11px; font-weight:600;">WETMO Premium отключает рекламу</a>
+        </div>
+        {% endif %}
+    </div>
+
+    {% elif mode == 'user_profile' %}
+    <div class="profile-container">
+        <div class="profile-card">
+            <div class="profile-avatar">
+                {% if profile_user.avatar_data %}<img src="{{ profile_user.avatar_data }}">{% else %}<span>{{ profile_user.username[0]|upper }}</span>{% endif %}
+            </div>
+            <div class="profile-name">
+                {{ profile_user.username }}
+                {% if profile_user.user_badge %}<img src="{{ profile_user.user_badge }}" style="width:20px; height:20px;">{% endif %}
+                {% if profile_user.verification_type == 1 %}<span class="verify-badge verify-white" onclick="showBadgeInfo(event, 'Подтверждённый', 'Аккаунт подтверждён')"></span>
+                {% elif profile_user.verification_type == 2 %}<span class="verify-badge verify-green" onclick="showBadgeInfo(event, 'Сотрудник/Блогер', 'Официальный аккаунт')"></span>
+                {% elif profile_user.verification_type == 3 %}<span class="verify-badge verify-premium-{{ premium.animation_type if premium else 1 }}" onclick="showBadgeInfo(event, 'Premium', 'Премиум-подписчик')"></span>{% endif %}
+            </div>
+        </div>
+        
+        <div class="info-section">
+            <div class="info-title">📋 Информация</div>
+            <div class="info-row"><span class="info-label">Никнейм</span><span class="info-value">@{{ profile_user.username }}</span></div>
+            <div class="info-row"><span class="info-label">Статус</span><span class="info-value">{% if profile_user.verification_type == 1 %}Подтверждённый{% elif profile_user.verification_type == 2 %}Сотрудник/Блогер{% elif profile_user.verification_type == 3 %}Premium{% else %}Обычный{% endif %}</span></div>
+            <div class="info-row"><span class="info-label">Сообщений</span><span class="info-value">{{ profile_user.msg_count }}</span></div>
+        </div>
+        
+        <a href="/im/{{ profile_user.username }}" class="pin-btn" style="display:block; text-align:center; text-decoration:none; margin-top:20px;">💬 Написать сообщение</a>
+        <a href="/" class="btn-header" style="display:block; text-align:center; margin-top:10px;">← НАЗАД</a>
     </div>
 
     {% elif mode == 'channel' %}
     <div class="tabs-bar">
         {% for c in contacts %}
-        <a href="/im/{{ c.username }}" class="tab">{{ c.username|upper }} {% if c.is_verified %}<span class="kick-badge" onclick="showToast('Пользователь верифицирован WETMO')"></span>{% endif %}<span class="tab-close" onclick="deleteChat('{{ c.username }}')">&times;</span></a>
+        <a href="/im/{{ c.username }}" class="tab">
+            {% if c.avatar_data %}<img src="{{ c.avatar_data }}" class="sender-avatar">{% endif %}
+            {{ c.username|upper }}
+            {% if c.user_badge %}<img src="{{ c.user_badge }}" style="width:14px; height:14px; margin-right:4px;">{% endif %}
+            {% if c.verification_type == 1 %}<span class="verify-badge verify-white" onclick="showBadgeInfo(event, 'Подтверждённый', '')"></span>
+            {% elif c.verification_type == 2 %}<span class="verify-badge verify-green" onclick="showBadgeInfo(event, 'Сотрудник/Блогер', '')"></span>
+            {% elif c.verification_type == 3 %}<span class="verify-badge verify-premium-{{ premium.animation_type if premium else 1 }}" onclick="showBadgeInfo(event, 'Premium', '')"></span>{% endif %}
+            <span class="tab-close" onclick="deleteChat('{{ c.username }}')">&times;</span>
+        </a>
         {% endfor %}
         {% for ch in channels %}
         <a href="/channel/{{ ch.name }}" class="tab channel {{ 'active' if channel and channel.id == ch.id }}">
-            {% if ch.badge %}
-                {% for b in channel_badges %}
-                    {% if b.url == ch.badge %}<img src="{{ b.url }}" style="width:14px; height:14px; margin-right:4px;">{% endif %}
-                {% endfor %}
-            {% endif %}
-            {{ ch.name }} 
-            {% if ch.is_verified %}<span class="channel-badge" onclick="showToast('Канал верифицирован WETMO')"></span>{% endif %}
+            {% if ch.badge %}{% for b in channel_badges %}{% if b.url == ch.badge %}<img src="{{ b.url }}" style="width:14px; height:14px; margin-right:6px;">{% endif %}{% endfor %}{% endif %}
+            {{ ch.name }}
+            {% if ch.verification_type == 4 %}<span class="verify-badge verify-accent" onclick="showBadgeInfo(event, 'Верифицирован', 'Официальный канал')"></span>{% endif %}
             <span class="tab-close" onclick="removeChannel('{{ ch.name }}', {{ ch.id }}, '{{ ch.created_by }}')">&times;</span>
         </a>
         {% endfor %}
     </div>
     
-    <div id="messages" style="padding:20px;">
+    <div id="messages">
+        {% if channel.created_by == user.username or user.username == 'wetmo' %}
+        <div style="margin-bottom:20px; padding: 0 5px;">
+            <button class="btn-header btn-accent" style="margin-left:0; padding:10px 16px; font-size:12px;" onclick="showGiveawayModal()">🎁 РОЗЫГРЫШ PREMIUM</button>
+        </div>
+        {% endif %}
+        
         {% for item in posts_with_reactions %}
         {% set m = item.msg %}
+        {% set s = item.sender %}
         <div class="msg {% if m.sender == user.username %}me{% endif %}" id="post-{{ m.id }}">
             <div class="sender channel-sender">
-                {{ m.sender }}
-                <span style="color:#666; margin-left:10px; font-weight:400;">{{ m.timestamp.strftime('%H:%M') }}</span>
+                {% if s.avatar_data %}<img src="{{ s.avatar_data }}" class="sender-avatar">{% endif %}
+                {% if s.user_badge %}<img src="{{ s.user_badge }}" style="width:14px; height:14px; margin-right:6px;">{% endif %}
+                <a href="/profile/{{ m.sender }}" class="sender-name">
+                    <span class="{% if m.sender == user.username and premium %}premium-name-{{ premium.animation_type }}{% endif %}"
+                          style="{% if m.sender == user.username and premium and premium.animation_type == 11 %}background: linear-gradient(45deg, {{ user.custom_color1 }}, {{ user.custom_color2 }}); background-size: 300% 300%; -webkit-background-clip: text; background-clip: text; color: transparent; animation: premiumShine1 3s ease infinite;{% endif %}">{{ m.sender }}</span>
+                </a>
+                {% if s.verification_type == 1 %}<span class="verify-badge verify-white" onclick="showBadgeInfo(event, 'Подтверждённый', '')"></span>
+                {% elif s.verification_type == 2 %}<span class="verify-badge verify-green" onclick="showBadgeInfo(event, 'Сотрудник/Блогер', '')"></span>
+                {% elif s.verification_type == 3 %}<span class="verify-badge verify-premium-{{ item.sender_premium.animation_type if item.sender_premium else 1 }}" onclick="showBadgeInfo(event, 'Premium', '')"></span>{% endif %}
+                <span style="color:#666; margin-left:12px; font-weight:600; font-size:10px;">{{ m.timestamp.strftime('%H:%M') }}</span>
                 {% if m.sender == user.username or channel.created_by == user.username or user.username == 'wetmo' %}
-                <span style="margin-left:auto; cursor:pointer;" onclick="deletePost({{ m.id }})" title="Удалить пост">🗑️</span>
+                <span style="margin-left:auto; cursor:pointer; font-size:14px; opacity:0.6;" onclick="deletePost({{ m.id }})" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.6">🗑️</span>
                 {% endif %}
             </div>
-            <div class="msg-content">{{ m.content }}</div>
+            <div class="msg-content" data-raw="{{ m.content }}"></div>
             <div class="msg-actions">
                 <button onclick="reactToPost({{ m.id }}, 'like')" class="reaction-btn {% if item.user_reaction == 'like' %}active{% endif %}">👍 <span id="likes-{{ m.id }}">{{ item.likes }}</span></button>
                 <button onclick="reactToPost({{ m.id }}, 'dislike')" class="reaction-btn {% if item.user_reaction == 'dislike' %}active{% endif %}">👎 <span id="dislikes-{{ m.id }}">{{ item.dislikes }}</span></button>
                 <a href="/post/{{ m.id }}" class="comment-link">💬 Комментарии</a>
+                {% if 'РОЗЫГРЫШ' in m.content %}<button class="reaction-btn giveaway-btn" onclick="joinGiveawayFromPost({{ m.id }})">🎁</button>{% endif %}
             </div>
         </div>
         {% endfor %}
     </div>
 
-    <div style="padding:20px; border-top:1px solid var(--border); display:flex; gap:10px; background:#000;">
+    <div class="input-wrap">
         {% if channel.created_by == user.username or user.username == 'wetmo' %}
-        <input type="text" id="channel-m-in" placeholder="Написать в канал..." style="flex:1; background:#0a0a0a; border:1px solid #222; color:#fff; padding:15px; border-radius:12px; outline:none;">
-        <button onclick="sendChannelMsg()" style="background:var(--kick); border:none; width:55px; border-radius:12px; font-weight:900; color:#000; cursor:pointer;">→</button>
+        <button class="attach-btn" onclick="document.getElementById('file-input').click()" title="Прикрепить фото">📎</button>
+        <input type="file" id="file-input" accept="image/*" style="display:none;" onchange="attachFile(this)">
+        <input type="text" id="channel-m-in" placeholder="Написать в канал...">
+        <button onclick="sendChannelMsg()">→</button>
         {% else %}
         <button id="subscribe-btn" class="subscribe-btn" onclick="toggleSubscribe()">📢 ПОДПИСАТЬСЯ <span id="sub-count"></span></button>
         {% endif %}
     </div>
 
-    <script>
-        const socket = io();
-        const me = "{{ user.username }}";
-        const channelId = {{ channel.id if channel else 'null' }};
-        if (channelId) socket.emit('join', { channel_id: channelId });
-        
-        function showToast(text) {
-            const toast = document.createElement('div');
-            toast.className = 'toast';
-            toast.textContent = text;
-            document.body.appendChild(toast);
-            setTimeout(() => toast.remove(), 2000);
-        }
-        
-        function sendChannelMsg() {
-            const input = document.getElementById('channel-m-in');
-            if (input.value.trim()) { socket.emit('send_msg', { channel_id: channelId, message: input.value }); input.value = ''; }
-        }
-        
-        socket.on('receive_channel_msg', (d) => {
-            if (d.channel_id === channelId) {
-                const div = document.createElement('div');
-                div.className = 'msg' + (d.sender === me ? ' me' : '');
-                div.id = 'post-' + d.id;
-                const canDelete = d.sender === me || '{{ channel.created_by }}' === me || me === 'wetmo';
-                div.innerHTML = `
-                    <div class="sender channel-sender">
-                        ${d.sender}
-                        <span style="color:#666; margin-left:10px; font-weight:400;">${d.timestamp}</span>
-                        ${canDelete ? '<span style="margin-left:auto; cursor:pointer;" onclick="deletePost(' + d.id + ')" title="Удалить пост">🗑️</span>' : ''}
-                    </div>
-                    <div class="msg-content">${d.message}</div>
-                    <div class="msg-actions">
-                        <button onclick="reactToPost(${d.id}, 'like')" class="reaction-btn">👍 <span id="likes-${d.id}">0</span></button>
-                        <button onclick="reactToPost(${d.id}, 'dislike')" class="reaction-btn">👎 <span id="dislikes-${d.id}">0</span></button>
-                        <a href="/post/${d.id}" class="comment-link">💬 Комментарии</a>
-                    </div>
-                `;
-                document.getElementById('messages').appendChild(div);
-                document.getElementById('messages').scrollTop = document.getElementById('messages').scrollHeight;
-            }
-        });
-        
-        document.getElementById('channel-m-in')?.addEventListener('keypress', (e) => { if(e.key === 'Enter') sendChannelMsg(); });
-        
-        function toggleSubscribe() {
-            fetch(`/api/channel/{{ channel.id }}/subscribe`, {method: 'POST'})
-                .then(r => r.json())
-                .then(d => {
-                    const btn = document.getElementById('subscribe-btn');
-                    btn.textContent = d.subscribed ? '✅ ВЫ ПОДПИСАНЫ' : '📢 ПОДПИСАТЬСЯ';
-                    btn.className = d.subscribed ? 'subscribe-btn subscribed' : 'subscribe-btn';
-                    document.getElementById('sub-count').textContent = ` (${d.count})`;
-                    if (d.subscribed) location.reload();
-                });
-        }
-        
-        function reactToPost(postId, type) {
-            fetch(`/api/post/${postId}/react`, {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({type})
-            }).then(r => r.json()).then(d => {
-                document.getElementById(`likes-${postId}`).textContent = d.likes;
-                document.getElementById(`dislikes-${postId}`).textContent = d.dislikes;
-            });
-        }
-        
-        function deletePost(postId) {
-            if (confirm('Удалить пост?')) {
-                fetch(`/api/post/${postId}/delete`, {method: 'DELETE'})
-                    .then(r => r.json())
-                    .then(d => {
-                        if (d.status === 'ok') document.getElementById(`post-${postId}`).remove();
-                    });
-            }
-        }
-        
-        function removeChannel(name, id, owner) {
-            if (owner === me || me === 'wetmo') {
-                if (confirm(`Удалить канал "${name}" навсегда?`)) {
-                    fetch(`/api/channel/${id}/delete`, {method: 'DELETE'}).then(() => location.href = '/');
-                }
-            } else {
-                if (confirm(`Отписаться от канала "${name}"?`)) {
-                    fetch(`/api/channel/${id}/unsubscribe`, {method: 'POST'}).then(() => location.reload());
-                }
-            }
-            return false;
-        }
-        
-        function deleteChat(target) { 
-            if (confirm(`Удалить чат с ${target}?`)) { 
-                fetch(`/api/chat/delete/${target}`, {method: 'DELETE'}).then(() => location.href = '/'); 
-            }
-            return false;
-        }
-        
-        fetch(`/api/channel/{{ channel.id }}/subscribers`)
-            .then(r => r.json())
-            .then(d => {
-                const btn = document.getElementById('subscribe-btn');
-                if (btn) {
-                    btn.textContent = d.is_subscribed ? '✅ ВЫ ПОДПИСАНЫ' : '📢 ПОДПИСАТЬСЯ';
-                    btn.className = d.is_subscribed ? 'subscribe-btn subscribed' : 'subscribe-btn';
-                    document.getElementById('sub-count').textContent = ` (${d.count})`;
-                }
-            });
-    </script>
-
     {% elif mode == 'post' %}
     <div class="tabs-bar">
         {% for c in contacts %}
-        <a href="/im/{{ c.username }}" class="tab">{{ c.username|upper }} {% if c.is_verified %}<span class="kick-badge" onclick="showToast('Пользователь верифицирован WETMO')"></span>{% endif %}<span class="tab-close" onclick="deleteChat('{{ c.username }}')">&times;</span></a>
+        <a href="/im/{{ c.username }}" class="tab">{{ c.username|upper }}{% if c.verification_type == 1 %}<span class="verify-badge verify-white"></span>{% elif c.verification_type == 2 %}<span class="verify-badge verify-green"></span>{% elif c.verification_type == 3 %}<span class="verify-badge verify-premium-1"></span>{% endif %}<span class="tab-close" onclick="deleteChat('{{ c.username }}')">&times;</span></a>
         {% endfor %}
         {% for ch in channels %}
-        <a href="/channel/{{ ch.name }}" class="tab channel">
-            {% if ch.badge %}
-                {% for b in channel_badges %}
-                    {% if b.url == ch.badge %}<img src="{{ b.url }}" style="width:14px; height:14px; margin-right:4px;">{% endif %}
-                {% endfor %}
-            {% endif %}
-            {{ ch.name }} 
-            {% if ch.is_verified %}<span class="channel-badge" onclick="showToast('Канал верифицирован WETMO')"></span>{% endif %}
-            <span class="tab-close" onclick="removeChannel('{{ ch.name }}', {{ ch.id }}, '{{ ch.created_by }}')">&times;</span>
-        </a>
+        <a href="/channel/{{ ch.name }}" class="tab channel">@{{ ch.name }}{% if ch.verification_type == 4 %}<span class="verify-badge verify-accent"></span>{% endif %}<span class="tab-close" onclick="removeChannel('{{ ch.name }}', {{ ch.id }}, '{{ ch.created_by }}')">&times;</span></a>
         {% endfor %}
     </div>
 
-    <div id="messages" style="padding:20px;">
-        <a href="/channel/{{ channel.name }}" class="back-link">← Назад в {{ channel.name }}</a>
-        
+    <div id="messages">
+        <a href="/channel/{{ channel.name }}" class="back-link">← {{ channel.name }}</a>
         <div class="msg">
             <div class="sender channel-sender">
-                {{ post.sender }}
-                <span style="color:#666; margin-left:10px; font-weight:400;">{{ post.timestamp.strftime('%H:%M') }}</span>
-                {% if post.sender == user.username or channel.created_by == user.username or user.username == 'wetmo' %}
-                <span style="margin-left:auto; cursor:pointer;" onclick="deletePost({{ post.id }})" title="Удалить пост">🗑️</span>
-                {% endif %}
+                {% if post_sender.avatar_data %}<img src="{{ post_sender.avatar_data }}" class="sender-avatar">{% endif %}
+                <a href="/profile/{{ post.sender }}" class="sender-name">{{ post.sender }}</a>
+                {% if post_sender.verification_type == 1 %}<span class="verify-badge verify-white"></span>
+                {% elif post_sender.verification_type == 2 %}<span class="verify-badge verify-green"></span>
+                {% elif post_sender.verification_type == 3 %}<span class="verify-badge verify-premium-{{ sender_premium.animation_type if sender_premium else 1 }}"></span>{% endif %}
+                <span style="color:#666; margin-left:12px; font-size:10px;">{{ post.timestamp.strftime('%H:%M') }}</span>
             </div>
-            <div class="msg-content">{{ post.content }}</div>
+            <div class="msg-content" data-raw="{{ post.content }}"></div>
             <div class="msg-actions">
-                <button onclick="reactToPost({{ post.id }}, 'like')" class="reaction-btn {% if user_reaction == 'like' %}active{% endif %}">👍 <span id="likes-{{ post.id }}">{{ likes }}</span></button>
-                <button onclick="reactToPost({{ post.id }}, 'dislike')" class="reaction-btn {% if user_reaction == 'dislike' %}active{% endif %}">👎 <span id="dislikes-{{ post.id }}">{{ dislikes }}</span></button>
+                <button onclick="reactToPost({{ post.id }}, 'like')" class="reaction-btn {% if user_reaction == 'like' %}active{% endif %}">👍 {{ likes }}</button>
+                <button onclick="reactToPost({{ post.id }}, 'dislike')" class="reaction-btn {% if user_reaction == 'dislike' %}active{% endif %}">👎 {{ dislikes }}</button>
             </div>
         </div>
         
         <div class="comment-section">
-            <h3 style="color:#fff; font-size:16px; margin:20px 0 15px;">💬 Комментарии</h3>
-            <div id="comments-list">
-                {% for c in comments %}
-                <div class="comment">
-                    <div class="comment-header">
-                        <span class="comment-sender">{{ c.sender }}</span>
-                        <span class="comment-time">{{ c.timestamp.strftime('%H:%M') }}</span>
-                    </div>
-                    <div class="comment-content">{{ c.content }}</div>
-                </div>
-                {% endfor %}
-            </div>
-            
-            <div style="display:flex; gap:10px; margin-top:20px;">
-                <input type="text" id="comment-input" placeholder="Написать комментарий..." style="flex:1; background:#0a0a0a; border:1px solid #222; color:#fff; padding:14px; border-radius:12px; outline:none;">
-                <button onclick="addComment()" style="background:var(--kick); border:none; width:55px; border-radius:12px; font-weight:900; color:#000; cursor:pointer;">→</button>
-            </div>
+            <h3 style="color:var(--accent-white); font-size:16px; margin:25px 0 15px;">💬 Комментарии</h3>
+            <div id="comments-list">{% for c in comments %}<div class="comment"><div class="comment-header"><a href="/profile/{{ c.sender }}" class="sender-name" style="color:var(--accent-white);">{{ c.sender }}</a><span class="comment-time">{{ c.timestamp.strftime('%H:%M') }}</span></div><div class="comment-content">{{ c.content }}</div></div>{% endfor %}</div>
         </div>
     </div>
-
-    <script>
-        const socket = io();
-        const me = "{{ user.username }}";
-        const postId = {{ post.id }};
-        socket.emit('join', { post_id: postId });
-        
-        function showToast(text) {
-            const toast = document.createElement('div');
-            toast.className = 'toast';
-            toast.textContent = text;
-            document.body.appendChild(toast);
-            setTimeout(() => toast.remove(), 2000);
-        }
-        
-        function reactToPost(postId, type) {
-            fetch(`/api/post/${postId}/react`, {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({type})
-            }).then(r => r.json()).then(d => {
-                document.getElementById(`likes-${postId}`).textContent = d.likes;
-                document.getElementById(`dislikes-${postId}`).textContent = d.dislikes;
-                location.reload();
-            });
-        }
-        
-        function addComment() {
-            const input = document.getElementById('comment-input');
-            if (!input.value.trim()) return;
-            fetch(`/api/post/${postId}/comment`, {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({content: input.value})
-            }).then(r => r.json()).then(() => { 
-                input.value = ''; 
-                loadComments();
-            });
-        }
-        
-        function loadComments() {
-            fetch(`/api/post/${postId}/comments`)
-                .then(r => r.json())
-                .then(comments => {
-                    const list = document.getElementById('comments-list');
-                    list.innerHTML = comments.map(c => `
-                        <div class="comment">
-                            <div class="comment-header">
-                                <span class="comment-sender">${c.sender}</span>
-                                <span class="comment-time">${c.timestamp}</span>
-                            </div>
-                            <div class="comment-content">${c.content}</div>
-                        </div>
-                    `).join('');
-                });
-        }
-        
-        function deletePost(postId) {
-            if (confirm('Удалить пост?')) {
-                fetch(`/api/post/${postId}/delete`, {method: 'DELETE'})
-                    .then(r => r.json())
-                    .then(d => {
-                        if (d.status === 'ok') window.location.href = '/channel/{{ channel.name }}';
-                    });
-            }
-        }
-        
-        socket.on('new_comment', (d) => {
-            if (d.post_id === postId) loadComments();
-        });
-        
-        socket.on('reaction_update', (d) => {
-            if (d.post_id === postId) {
-                document.getElementById(`likes-${postId}`).textContent = d.likes;
-                document.getElementById(`dislikes-${postId}`).textContent = d.dislikes;
-            }
-        });
-        
-        function removeChannel(name, id, owner) {
-            if (owner === me || me === 'wetmo') {
-                if (confirm(`Удалить канал "${name}" навсегда?`)) {
-                    fetch(`/api/channel/${id}/delete`, {method: 'DELETE'}).then(() => location.href = '/');
-                }
-            } else {
-                if (confirm(`Отписаться от канала "${name}"?`)) {
-                    fetch(`/api/channel/${id}/unsubscribe`, {method: 'POST'}).then(() => location.reload());
-                }
-            }
-            return false;
-        }
-        
-        function deleteChat(target) { 
-            if (confirm(`Удалить чат с ${target}?`)) { 
-                fetch(`/api/chat/delete/${target}`, {method: 'DELETE'}).then(() => location.href = '/'); 
-            }
-            return false;
-        }
-    </script>
+    
+    <div class="input-wrap">
+        <input type="text" id="comment-input" placeholder="Комментарий...">
+        <button onclick="addComment()">→</button>
+    </div>
 
     {% else %}
     <div class="tabs-bar">
         {% for c in contacts %}
         <a href="/im/{{ c.username }}" class="tab {% if target and target.username == c.username %}active{% endif %}">
-            {{ c.username|upper }} {% if c.is_verified %}<span class="kick-badge" onclick="showToast('Пользователь верифицирован WETMO')"></span>{% endif %}
-            <span class="tab-close" onclick="deleteChat('{{ c.username }}')">&times;</span>
+            {% if c.avatar_data %}<img src="{{ c.avatar_data }}" class="sender-avatar">{% endif %}
+            {{ c.username|upper }}{% if c.verification_type == 1 %}<span class="verify-badge verify-white"></span>{% elif c.verification_type == 2 %}<span class="verify-badge verify-green"></span>{% elif c.verification_type == 3 %}<span class="verify-badge verify-premium-1"></span>{% endif %}<span class="tab-close" onclick="deleteChat('{{ c.username }}')">&times;</span>
         </a>
         {% endfor %}
         {% for ch in channels %}
-        <a href="/channel/{{ ch.name }}" class="tab channel">
-            {% if ch.badge %}
-                {% for b in channel_badges %}
-                    {% if b.url == ch.badge %}<img src="{{ b.url }}" style="width:14px; height:14px; margin-right:4px;">{% endif %}
-                {% endfor %}
-            {% endif %}
-            {{ ch.name }} 
-            {% if ch.is_verified %}<span class="channel-badge" onclick="showToast('Канал верифицирован WETMO')"></span>{% endif %}
-            <span class="tab-close" onclick="removeChannel('{{ ch.name }}', {{ ch.id }}, '{{ ch.created_by }}')">&times;</span>
-        </a>
+        <a href="/channel/{{ ch.name }}" class="tab channel">@{{ ch.name }}{% if ch.verification_type == 4 %}<span class="verify-badge verify-accent"></span>{% endif %}<span class="tab-close" onclick="removeChannel('{{ ch.name }}', {{ ch.id }}, '{{ ch.created_by }}')">&times;</span></a>
         {% endfor %}
     </div>
     
@@ -736,11 +713,19 @@
             <div class="msg {% if m.sender.lower() == user.username.lower() %}me{% endif %}">
                 <div class="sender">
                     {% if m.sender == user.username %}
-                        {% if user.status_icon %}<div class="badge-box"><img src="{{ user.status_icon }}" class="badge-icon"></div>{% endif %}
-                        {{ user.username }} {% if user.is_verified %}<span class="kick-badge" onclick="showToast('Пользователь верифицирован WETMO')"></span>{% endif %}
+                        {% if user.avatar_data %}<img src="{{ user.avatar_data }}" class="sender-avatar">{% endif %}
+                        {% if user.user_badge %}<img src="{{ user.user_badge }}" style="width:14px; height:14px; margin-right:6px;">{% endif %}
+                        <span class="{% if premium %}premium-name-{{ premium.animation_type }}{% endif %}" style="{% if premium and premium.animation_type == 11 %}background: linear-gradient(45deg, {{ user.custom_color1 }}, {{ user.custom_color2 }}); background-size: 300% 300%; -webkit-background-clip: text; background-clip: text; color: transparent; animation: premiumShine1 3s ease infinite;{% endif %}">{{ user.username }}</span>
+                        {% if user.verification_type == 1 %}<span class="verify-badge verify-white" onclick="showBadgeInfo(event, 'Подтверждённый', '')"></span>
+                        {% elif user.verification_type == 2 %}<span class="verify-badge verify-green" onclick="showBadgeInfo(event, 'Сотрудник/Блогер', '')"></span>
+                        {% elif user.verification_type == 3 %}<span class="verify-badge verify-premium-{{ premium.animation_type if premium else 1 }}" onclick="showBadgeInfo(event, 'Premium', '')"></span>{% endif %}
                     {% else %}
-                        {% if target.status_icon %}<div class="badge-box"><img src="{{ target.status_icon }}" class="badge-icon"></div>{% endif %}
-                        {{ target.username }} {% if target.is_verified %}<span class="kick-badge" onclick="showToast('Пользователь верифицирован WETMO')"></span>{% endif %}
+                        {% if target.avatar_data %}<img src="{{ target.avatar_data }}" class="sender-avatar">{% endif %}
+                        {% if target.user_badge %}<img src="{{ target.user_badge }}" style="width:14px; height:14px; margin-right:6px;">{% endif %}
+                        <a href="/profile/{{ target.username }}" class="sender-name">{{ target.username }}</a>
+                        {% if target.verification_type == 1 %}<span class="verify-badge verify-white" onclick="showBadgeInfo(event, 'Подтверждённый', '')"></span>
+                        {% elif target.verification_type == 2 %}<span class="verify-badge verify-green" onclick="showBadgeInfo(event, 'Сотрудник/Блогер', '')"></span>
+                        {% elif target.verification_type == 3 %}<span class="verify-badge verify-premium-{{ premium.animation_type if premium else 1 }}" onclick="showBadgeInfo(event, 'Premium', '')"></span>{% endif %}
                     {% endif %}
                 </div>
                 <div class="msg-content" data-raw="{{ m.content }}"></div>
@@ -751,162 +736,343 @@
     
     {% if target %}
     <div class="input-wrap">
-        <input type="text" id="m-in" placeholder="Написать...">
+        <button class="attach-btn" onclick="document.getElementById('file-input').click()" title="Прикрепить фото">📎</button>
+        <input type="file" id="file-input" accept="image/*" style="display:none;" onchange="attachFile(this)">
+        <input type="text" id="m-in" placeholder="Написать сообщение...">
         <button onclick="send()">→</button>
     </div>
     {% endif %}
     {% endif %}
 
+    {% if mode in ['chat', 'channel', 'post'] and not premium %}
+    <div class="fixed-ad">
+        <span>📢 Реклама • WETMO Premium отключает рекламу</span>
+        <a href="/premium.html" style="color:var(--accent-white); margin-left:10px; text-decoration:none; font-weight:600;">Узнать больше</a>
+    </div>
+    {% endif %}
+
     <script>
-        // Общие функции
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/sw.js');
-        }
-        
+        // ============ ОСНОВНЫЕ ПЕРЕМЕННЫЕ ============
         const socket = io();
         const me = "{{ user.username if user else '' }}";
         marked.setOptions({ breaks: true, gfm: true });
         
+        // ============ IndexedDB ============
+        const DB_NAME = 'wetmo_files_v3';
+        let db;
+
+        function openDB() {
+            return new Promise((resolve, reject) => {
+                const request = indexedDB.open(DB_NAME, 1);
+                request.onupgradeneeded = (e) => {
+                    const db = e.target.result;
+                    if (!db.objectStoreNames.contains('files')) db.createObjectStore('files', { keyPath: 'id', autoIncrement: true });
+                    if (!db.objectStoreNames.contains('avatars')) db.createObjectStore('avatars', { keyPath: 'username' });
+                };
+                request.onsuccess = (e) => { db = e.target.result; resolve(db); };
+                request.onerror = (e) => reject(e.target.error);
+            });
+        }
+
+        function saveFileToDB(data) {
+            return new Promise(async (resolve) => {
+                await openDB();
+                const tx = db.transaction('files', 'readwrite');
+                const store = tx.objectStore('files');
+                const request = store.add({ ...data, timestamp: Date.now() });
+                request.onsuccess = () => resolve(request.result);
+            });
+        }
+
+        function getFileFromDB(id) {
+            return new Promise(async (resolve) => {
+                await openDB();
+                const tx = db.transaction('files', 'readonly');
+                const store = tx.objectStore('files');
+                const request = store.get(id);
+                request.onsuccess = () => resolve(request.result);
+            });
+        }
+
+        // ============ ВСПЛЫВАШКИ ============
         function showToast(text) {
             const toast = document.createElement('div');
             toast.className = 'toast';
             toast.textContent = text;
             document.body.appendChild(toast);
-            setTimeout(() => toast.remove(), 2000);
+            setTimeout(() => toast.remove(), 2500);
         }
-        
-        function toggleMobileMenu() {
-            const menu = document.getElementById('mobile-menu');
-            menu.classList.toggle('active');
+
+        function showBadgeInfo(event, title, description) {
+            event.stopPropagation();
+            document.getElementById('badge-title').textContent = title;
+            document.getElementById('badge-description').textContent = description;
+            document.getElementById('badge-info-modal').style.display = 'flex';
         }
-        
+
+        function closeBadgeInfoModal() { document.getElementById('badge-info-modal').style.display = 'none'; }
+
+        // ============ МОБИЛЬНОЕ МЕНЮ ============
+        function toggleMobileMenu() { document.getElementById('mobile-menu').classList.toggle('active'); }
         document.addEventListener('click', (e) => {
             const menu = document.getElementById('mobile-menu');
             const btn = document.querySelector('.mobile-menu-btn');
-            if (menu && btn && !menu.contains(e.target) && !btn.contains(e.target)) {
-                menu.classList.remove('active');
-            }
+            if (menu && btn && !menu.contains(e.target) && !btn.contains(e.target)) menu.classList.remove('active');
         });
-        
-        function parseMsgs() { document.querySelectorAll('.msg-content').forEach(el => { if (el.dataset.raw) { el.innerHTML = marked.parse(el.dataset.raw); delete el.dataset.raw; } }); }
-        parseMsgs();
-        
-        function selectBadge(url) { fetch('/set_badge', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({badge_url: url}) }).then(r => window.location.reload()); }
-        function showEventModal() { 
-            document.getElementById('event-modal').style.display = 'flex'; 
-            document.getElementById('mobile-menu')?.classList.remove('active');
+
+        // ============ АВАТАРКА ============
+        function uploadAvatar(input) {
+            const file = input.files[0];
+            if (!file) return;
+            if (file.size > 500 * 1024) { showToast('Максимальный размер 500KB'); return; }
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                const compressed = await compressImage(e.target.result, 200, 200, 0.6);
+                fetch('/api/user/avatar', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({avatar: compressed}) })
+                .then(() => location.reload());
+            };
+            reader.readAsDataURL(file);
         }
-        function closeEventModal() { document.getElementById('event-modal').style.display = 'none'; }
-        function showCreateChannelModal() { 
-            document.getElementById('create-channel-modal').style.display = 'flex'; 
-            document.getElementById('mobile-menu')?.classList.remove('active');
+
+        // ============ ОТПРАВКА ФАЙЛОВ ============
+        function attachFile(input) {
+            const file = input.files[0];
+            if (!file) return;
+            if (!file.type.startsWith('image/')) { showToast('Только изображения'); return; }
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                const compressed = await compressImage(e.target.result, 800, 600, 0.5);
+                const fileId = await saveFileToDB({ name: file.name, type: file.type, data: compressed });
+                const msgInput = document.getElementById('m-in') || document.getElementById('channel-m-in');
+                if (msgInput) {
+                    msgInput.value += ` [IMG:${fileId}:${file.name}] `;
+                    msgInput.focus();
+                }
+            };
+            reader.readAsDataURL(file);
         }
+
+        // ============ СЖАТИЕ ИЗОБРАЖЕНИЯ ============
+        function compressImage(base64, maxW, maxH, quality) {
+            return new Promise((resolve) => {
+                const img = new Image();
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    let w = img.width, h = img.height;
+                    if (w > maxW) { h = h * (maxW / w); w = maxW; }
+                    if (h > maxH) { w = w * (maxH / h); h = maxH; }
+                    canvas.width = w; canvas.height = h;
+                    canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+                    resolve(canvas.toDataURL('image/jpeg', quality));
+                };
+                img.src = base64;
+            });
+        }
+
+        // ============ ОТОБРАЖЕНИЕ ФАЙЛОВ В СООБЩЕНИЯХ ============
+        async function renderFileContent(content) {
+            const imgMatch = content.match(/\[IMG:(\d+):(.*?)\]/g);
+            if (!imgMatch) return marked.parse(content);
+            let html = content;
+            for (const match of imgMatch) {
+                const [, id, name] = match.match(/\[IMG:(\d+):(.*?)\]/);
+                const file = await getFileFromDB(parseInt(id));
+                if (file && file.data) {
+                    html = html.replace(match, `<div style="margin-top:8px;"><img src="${file.data}" class="msg-image" onclick="window.open(this.src)"><div style="font-size:10px; color:#888; margin-top:4px;">📸 ${name}</div></div>`);
+                } else {
+                    html = html.replace(match, `<div style="color:#888; font-size:12px;">📎 ${name} (недоступен)</div>`);
+                }
+            }
+            return marked.parse(html);
+        }
+
+        async function parseMsgs() {
+            const msgs = document.querySelectorAll('.msg-content[data-raw]');
+            for (const el of msgs) {
+                el.innerHTML = await renderFileContent(el.dataset.raw);
+                delete el.dataset.raw;
+            }
+        }
+
+        // ============ МОДАЛКИ ============
+        function showCreateChannelModal() { document.getElementById('create-channel-modal').style.display = 'flex'; document.getElementById('mobile-menu')?.classList.remove('active'); }
         function closeCreateChannelModal() { document.getElementById('create-channel-modal').style.display = 'none'; }
-        
+        function showPremiumModal() { document.getElementById('premium-modal').style.display = 'flex'; }
+        function closePremiumModal() { document.getElementById('premium-modal').style.display = 'none'; }
+        function showCustomColorModal() { closePremiumModal(); document.getElementById('custom-color-modal').style.display = 'flex'; }
+        function closeCustomColorModal() { document.getElementById('custom-color-modal').style.display = 'none'; }
+        function showGiveawayModal() { document.getElementById('giveaway-modal').style.display = 'flex'; }
+        function closeGiveawayModal() { document.getElementById('giveaway-modal').style.display = 'none'; }
+
+        // ============ PREMIUM ============
+        function saveCustomColor() {
+            const c1 = document.getElementById('custom-color1').value;
+            const c2 = document.getElementById('custom-color2').value;
+            fetch('/api/premium/custom_color', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({color1: c1, color2: c2}) })
+            .then(r => r.json()).then(d => { if (d.status === 'ok') { closeCustomColorModal(); showToast('Цвет сохранён!'); location.reload(); } });
+        }
+
+        function selectAnimation(type) {
+            fetch(`/api/premium/animation/${type}`, {method: 'POST'}).then(r => r.json()).then(d => {
+                if (d.status === 'ok') { closePremiumModal(); showToast('Цвет обновлён!'); location.reload(); }
+            });
+        }
+
+        // ============ КАНАЛЫ ============
         function createUserChannel() {
             const name = document.getElementById('modal-channel-name').value.trim();
             const desc = document.getElementById('modal-channel-desc').value.trim();
-            if (!name) { alert('Введите название!'); return; }
+            if (!name) return;
             fetch('/api/channel/create', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({name, description: desc}) })
-            .then(r => r.json()).then(d => { if (d.status === 'ok') window.location.href = '/channel/' + d.name; else alert('Ошибка: ' + d.error); });
+            .then(r => r.json()).then(d => { if (d.status === 'ok') window.location.href = '/channel/' + d.name; });
         }
-        
-        function setChannelBadge(channelId, badge) {
-            fetch(`/admin/channel/badge/${channelId}`, {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({badge})
-            }).then(() => location.reload());
+
+        function createGiveaway() {
+            const end = document.getElementById('giveaway-end').value;
+            const winners = document.getElementById('giveaway-winners').value;
+            if (!end) { alert('Выберите дату!'); return; }
+            fetch(`/api/channel/{{ channel.id if channel else 1 }}/giveaway/create`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ends_at: end, winners: parseInt(winners)}) })
+            .then(r => r.json()).then(d => { if (d.status === 'ok') { closeGiveawayModal(); location.reload(); } });
         }
-        
-        function deleteChannel(id) { if (confirm('Удалить канал?')) { fetch(`/admin/channel/delete/${id}`, {method: 'DELETE'}).then(() => location.reload()); } }
-        
+
+        function joinGiveaway(id) { fetch(`/api/giveaway/${id}/join`, {method: 'POST'}).then(r => r.json()).then(d => { if (d.status === 'ok') showToast('✅ Вы участвуете!'); else alert(d.error); }); }
+
+        // ============ АДМИНКА ============
+        function setChannelBadge(id, badge) { fetch(`/admin/channel/badge/${id}`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({badge}) }).then(() => location.reload()); }
+        function setUserBadge(username, url) { fetch(`/admin/give_user_badge/${username}`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({badge_url: url}) }).then(() => location.reload()); }
+        function deleteChannel(id) { if (confirm('Удалить канал?')) fetch(`/admin/channel/delete/${id}`, {method: 'DELETE'}).then(() => location.reload()); }
+        function giveBadge(username, vtype, reason) { fetch(`/admin/give_badge/${username}`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({vtype, reason}) }).then(r => r.json()).then(d => { if (d.status === 'ok') { showToast('Галочка выдана!'); location.reload(); } }); }
+        function givePremiumUser(username) { if (confirm(`Выдать Premium ${username}?`)) fetch(`/admin/give_premium/${username}`, {method: 'POST'}).then(r => r.json()).then(d => { if (d.status === 'ok') location.reload(); }); }
+        function removePremium(username) { if (confirm(`Забрать Premium у ${username}?`)) fetch(`/admin/remove_premium/${username}`, {method: 'DELETE'}).then(() => location.reload()); }
+
+        // ============ ПРОФИЛЬ ============
+        function copyReferralLink() { navigator.clipboard.writeText(document.getElementById('referral-link')?.textContent || '').then(() => showToast('Ссылка скопирована!')); }
+        function pinChannel() { const ch = document.getElementById('pin-select').value; fetch('/api/user/pin_channel', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({channel: ch}) }).then(r => r.json()).then(d => { if (d.status === 'ok') showToast(ch ? 'Закреплено!' : 'Снято'); }); }
+
+        // ============ СООБЩЕНИЯ ============
+        function sendChannelMsg() {
+            const input = document.getElementById('channel-m-in');
+            if (input && input.value.trim()) {
+                socket.emit('send_msg', { channel_id: {{ channel.id if channel else 'null' }}, message: input.value });
+                input.value = '';
+            }
+        }
+
+        function send() {
+            const input = document.getElementById('m-in');
+            if (input && input.value.trim()) {
+                socket.emit('send_msg', { target: "{{ target.username if target else '' }}", message: input.value });
+                input.value = '';
+            }
+        }
+
+        function reactToPost(id, type) {
+            fetch(`/api/post/${id}/react`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({type}) })
+            .then(r => r.json()).then(d => {
+                document.getElementById(`likes-${id}`).textContent = d.likes;
+                document.getElementById(`dislikes-${id}`).textContent = d.dislikes;
+            });
+        }
+
+        function deletePost(id) {
+            if (confirm('Удалить пост?')) fetch(`/api/post/${id}/delete`, {method: 'DELETE'}).then(r => r.json()).then(d => { if (d.status === 'ok') document.getElementById(`post-${id}`)?.remove(); });
+        }
+
+        function addComment() {
+            const input = document.getElementById('comment-input');
+            if (!input || !input.value.trim()) return;
+            fetch(`/api/post/{{ post.id if post else 0 }}/comment`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({content: input.value}) })
+            .then(() => { input.value = ''; /* reload comments */ });
+        }
+
+        function deleteChat(target) { if (confirm(`Удалить чат с ${target}?`)) fetch(`/api/chat/delete/${target}`, {method: 'DELETE'}).then(() => location.href = '/'); return false; }
+        function removeChannel(name, id, owner) { if (owner === me || me === 'wetmo') { if (confirm(`Удалить канал "${name}"?`)) fetch(`/api/channel/${id}/delete`, {method: 'DELETE'}).then(() => location.href = '/'); } else { if (confirm(`Отписаться от "${name}"?`)) fetch(`/api/channel/${id}/unsubscribe`, {method: 'POST'}).then(() => location.reload()); } return false; }
+        function toggleSubscribe() { fetch(`/api/channel/{{ channel.id if channel else 0 }}/subscribe`, {method: 'POST'}).then(r => r.json()).then(d => { const btn = document.getElementById('subscribe-btn'); if (btn) { btn.textContent = d.subscribed ? '✅ ВЫ ПОДПИСАНЫ' : '📢 ПОДПИСАТЬСЯ'; btn.className = d.subscribed ? 'subscribe-btn subscribed' : 'subscribe-btn'; document.getElementById('sub-count').textContent = ` (${d.count})`; if (d.subscribed) location.reload(); } }); }
+
+        // ============ SOCKET ============
         {% if chat_id %} socket.emit('join', { chat_id: "{{ chat_id }}" }); {% endif %}
-        function send() { const i = document.getElementById('m-in'); if (i.value.trim()) { socket.emit('send_msg', { target: "{{ target.username if target else '' }}", message: i.value }); i.value = ''; } }
-        socket.on('receive_msg', (d) => {
+        {% if channel %} socket.emit('join', { channel_id: {{ channel.id }} }); {% endif %}
+
+        socket.on('receive_msg', async (d) => {
             const div = document.createElement('div');
             div.className = 'msg' + (d.sender.toLowerCase() === me.toLowerCase() ? ' me' : '');
-            const v = d.verified ? '<span class="kick-badge" onclick="showToast(\'Пользователь верифицирован WETMO\')"></span>' : '';
-            const b = d.badge ? `<div class="badge-box"><img src="${d.badge}" class="badge-icon"></div>` : '';
-            div.innerHTML = `<div class="sender">${b}${d.sender}${v}</div><div class="msg-content">${marked.parse(d.message)}</div>`;
+            const vtype = d.verification_type || 0;
+            let badge = '';
+            if (vtype === 1) badge = '<span class="verify-badge verify-white" onclick="showBadgeInfo(event, \'Подтверждённый\', \'\')"></span>';
+            else if (vtype === 2) badge = '<span class="verify-badge verify-green" onclick="showBadgeInfo(event, \'Сотрудник/Блогер\', \'\')"></span>';
+            else if (vtype === 3) badge = '<span class="verify-badge verify-premium-1" onclick="showBadgeInfo(event, \'Premium\', \'\')"></span>';
+            const avatar = d.avatar_data ? `<img src="${d.avatar_data}" class="sender-avatar">` : '';
+            const userBadge = d.user_badge ? `<img src="${d.user_badge}" style="width:14px; height:14px; margin-right:6px;">` : '';
+            div.innerHTML = `<div class="sender">${avatar}${userBadge}<a href="/profile/${d.sender}" class="sender-name">${d.sender}</a>${badge}</div><div class="msg-content">${await renderFileContent(d.message)}</div>`;
             document.getElementById('messages').appendChild(div);
             document.getElementById('messages').scrollTop = document.getElementById('messages').scrollHeight;
         });
+
+        socket.on('receive_channel_msg', async (d) => {
+            if (d.channel_id === {{ channel.id if channel else 'null' }}) {
+                const div = document.createElement('div');
+                div.className = 'msg' + (d.sender === me ? ' me' : '');
+                div.id = 'post-' + d.id;
+                const vtype = d.verification_type || 0;
+                let badge = '';
+                if (vtype === 1) badge = '<span class="verify-badge verify-white" onclick="showBadgeInfo(event, \'Подтверждённый\', \'\')"></span>';
+                else if (vtype === 2) badge = '<span class="verify-badge verify-green" onclick="showBadgeInfo(event, \'Сотрудник/Блогер\', \'\')"></span>';
+                else if (vtype === 3) badge = '<span class="verify-badge verify-premium-1" onclick="showBadgeInfo(event, \'Premium\', \'\')"></span>';
+                const avatar = d.avatar_data ? `<img src="${d.avatar_data}" class="sender-avatar">` : '';
+                const canDelete = d.sender === me || '{{ channel.created_by if channel else '' }}' === me || me === 'wetmo';
+                div.innerHTML = `<div class="sender channel-sender">${avatar}<a href="/profile/${d.sender}" class="sender-name">${d.sender}</a>${badge}<span style="color:#666; margin-left:12px; font-size:10px;">${d.timestamp}</span>${canDelete ? '<span style="margin-left:auto; cursor:pointer; font-size:14px; opacity:0.6;" onclick="deletePost(' + d.id + ')" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.6">🗑️</span>' : ''}</div><div class="msg-content">${await renderFileContent(d.message)}</div><div class="msg-actions"><button onclick="reactToPost(${d.id}, \'like\')" class="reaction-btn">👍 0</button><button onclick="reactToPost(${d.id}, \'dislike\')" class="reaction-btn">👎 0</button>${d.giveaway_id ? `<button class="reaction-btn giveaway-btn" onclick="joinGiveaway(${d.giveaway_id})">🎁</button>` : ''}</div>`;
+                document.getElementById('messages').appendChild(div);
+                document.getElementById('messages').scrollTop = document.getElementById('messages').scrollHeight;
+            }
+        });
+
         document.getElementById('m-in')?.addEventListener('keypress', (e) => { if(e.key === 'Enter') send(); });
-        
-        // Поиск (пользователи + каналы)
+        document.getElementById('channel-m-in')?.addEventListener('keypress', (e) => { if(e.key === 'Enter') sendChannelMsg(); });
+        document.getElementById('comment-input')?.addEventListener('keypress', (e) => { if(e.key === 'Enter') addComment(); });
+
+        // ============ ПОИСК ============
         const searchInput = document.getElementById('user-search');
         const searchResults = document.getElementById('search-results');
         let searchTimeout;
-        
         if (searchInput) {
             searchInput.addEventListener('input', function() {
                 clearTimeout(searchTimeout);
                 const query = this.value.trim();
                 if (query.length < 1) { searchResults.style.display = 'none'; return; }
-                
                 searchTimeout = setTimeout(() => {
-                    fetch(`/api/search_all?q=${encodeURIComponent(query)}`)
-                        .then(r => r.json())
-                        .then(data => {
-                            let html = '';
-                            
-                            if (data.users && data.users.length > 0) {
-                                html += '<div class="search-section-title">👤 ПОЛЬЗОВАТЕЛИ</div>';
-                                html += data.users.map(u => `
-                                    <div class="search-result-item">
-                                        <div class="search-result-name">${u.username} ${u.is_verified ? '<span class="kick-badge"></span>' : ''}</div>
-                                        <a href="/im/${u.username}" class="search-result-link">➔</a>
-                                    </div>
-                                `).join('');
-                            }
-                            
-                            if (data.channels && data.channels.length > 0) {
-                                html += '<div class="search-section-title">📢 КАНАЛЫ</div>';
-                                html += data.channels.map(c => `
-                                    <div class="search-result-item">
-                                        <div class="search-result-name">@${c.name} ${c.is_verified ? '<span class="channel-badge"></span>' : ''}</div>
-                                        <a href="/channel/${c.name}" class="search-result-link">➔</a>
-                                    </div>
-                                `).join('');
-                            }
-                            
-                            if (!html) {
-                                html = '<div class="search-result-item" style="color:#666;">Ничего не найдено</div>';
-                            }
-                            
-                            searchResults.innerHTML = html;
-                            searchResults.style.display = 'block';
-                        });
+                    fetch(`/api/search_all?q=${encodeURIComponent(query)}`).then(r => r.json()).then(data => {
+                        let html = '';
+                        if (data.users?.length) { html += '<div class="search-section-title">👤 ПОЛЬЗОВАТЕЛИ</div>'; html += data.users.map(u => `<div class="search-result-item"><div class="search-result-name">${u.username}</div><a href="/im/${u.username}" class="search-result-link">➔</a></div>`).join(''); }
+                        if (data.channels?.length) { html += '<div class="search-section-title">📢 КАНАЛЫ</div>'; html += data.channels.map(c => `<div class="search-result-item"><div class="search-result-name">@${c.name}</div><a href="/channel/${c.name}" class="search-result-link">➔</a></div>`).join(''); }
+                        if (!html) html = '<div class="search-result-item" style="color:#666;">Ничего не найдено</div>';
+                        searchResults.innerHTML = html; searchResults.style.display = 'block';
+                    });
                 }, 300);
             });
-            
-            document.addEventListener('click', (e) => {
-                if (!searchInput.contains(e.target) && !searchResults.contains(e.target)) {
-                    searchResults.style.display = 'none';
-                }
-            });
+            document.addEventListener('click', (e) => { if (!searchInput.contains(e.target) && !searchResults.contains(e.target)) searchResults.style.display = 'none'; });
         }
-        
-        function removeChannel(name, id, owner) {
-            if (owner === me || me === 'wetmo') {
-                if (confirm(`Удалить канал "${name}" навсегда?`)) {
-                    fetch(`/api/channel/${id}/delete`, {method: 'DELETE'}).then(() => location.href = '/');
-                }
-            } else {
-                if (confirm(`Отписаться от канала "${name}"?`)) {
-                    fetch(`/api/channel/${id}/unsubscribe`, {method: 'POST'}).then(() => location.reload());
-                }
-            }
-            return false;
-        }
-        
-        function deleteChat(target) { 
-            if (confirm(`Удалить чат с ${target}?`)) { 
-                fetch(`/api/chat/delete/${target}`, {method: 'DELETE'}).then(() => location.href = '/'); 
-            }
-            return false;
-        }
+
+        // ============ ИНИЦИАЛИЗАЦИЯ ============
+        openDB().then(() => parseMsgs());
     </script>
+
+    {% if mode == 'channel' or mode == 'post' %}
+    <script>
+        // Дополнительные скрипты для каналов и постов
+        {% if channel %} socket.emit('join', { channel_id: {{ channel.id }} }); {% endif %}
+        {% if post %} socket.emit('join', { post_id: {{ post.id }} }); {% endif %}
+        
+        let currentGiveawayId = null;
+        function joinGiveawayFromPost(postId) { if (currentGiveawayId) joinGiveaway(currentGiveawayId); else alert('Розыгрыш не найден'); }
+        
+        socket.on('new_comment', (d) => { if (d.post_id === {{ post.id if post else 0 }}) { /* reload comments */ } });
+        socket.on('reaction_update', (d) => {
+            if (d.post_id === {{ post.id if post else 0 }}) {
+                document.getElementById(`likes-${d.post_id}`).textContent = d.likes;
+                document.getElementById(`dislikes-${d.post_id}`).textContent = d.dislikes;
+            }
+        });
+    </script>
+    {% endif %}
 </body>
 </html>
