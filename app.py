@@ -3,7 +3,6 @@ import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from flask import Flask, render_template, request, session, redirect, url_for, abort, jsonify, send_from_directory
-from flask_socketio import SocketIO, emit, join_room
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime, timedelta
@@ -22,7 +21,6 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
-socketio = SocketIO(app, cors_allowed_origins="*")
 
 SMTP_SERVER = "smtp.mail.ru"
 SMTP_PORT = 587
@@ -140,11 +138,10 @@ class User(db.Model):
     muted_until = db.Column(db.DateTime, nullable=True)
     is_admin = db.Column(db.Boolean, default=False)
     admin_level = db.Column(db.Integer, default=0)
-    moderator_title = db.Column(db.String(100), default="")  # Кастомный титул модератора
-    is_anonymous_mod = db.Column(db.Boolean, default=False)  # Анонимный режим
+    moderator_title = db.Column(db.String(100), default="")
+    is_anonymous_mod = db.Column(db.Boolean, default=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     
-    # Права модератора (устанавливаются админом)
     can_delete_messages = db.Column(db.Boolean, default=False)
     can_ban_users = db.Column(db.Boolean, default=False)
     can_mute_users = db.Column(db.Boolean, default=False)
@@ -162,7 +159,7 @@ class Message(db.Model):
     is_edited = db.Column(db.Boolean, default=False)
     edited_at = db.Column(db.DateTime, nullable=True)
     reply_to = db.Column(db.Integer, nullable=True)
-    deleted_by = db.Column(db.String(50), nullable=True)  # Кто удалил (модератор)
+    deleted_by = db.Column(db.String(50), nullable=True)
     deleted_at = db.Column(db.DateTime, nullable=True)
 
 class Channel(db.Model):
@@ -373,11 +370,10 @@ def check_admin(username, level=1):
     return u and u.is_admin and u.admin_level >= level
 
 def check_permission(username, permission):
-    """Проверка конкретного права модератора"""
     u = User.query.filter_by(username=username).first()
     if not u or not u.is_admin:
         return False
-    if u.admin_level >= 3:  # Основатель — все права
+    if u.admin_level >= 3:
         return True
     return getattr(u, permission, False)
 
@@ -410,12 +406,6 @@ def broadcast_announcement(announcement_text, admin_username):
     )
     db.session.add(announcement)
     db.session.commit()
-    
-    socketio.emit('system_announcement', {
-        'content': announcement_text,
-        'admin': admin_username,
-        'timestamp': announcement.timestamp.strftime('%H:%M')
-    })
     
     users = User.query.filter(~User.username.in_(['world', admin_username])).all()
     for user in users:
@@ -486,21 +476,6 @@ def subscribe_channel(channel_id):
     db.session.commit()
     return jsonify({"subscribed": subscribed, "count": ChannelSubscriber.query.filter_by(channel_id=channel_id).count()})
 
-@app.route('/api/channel/<int:channel_id>/subscribers')
-def get_subscribers(channel_id):
-    count = ChannelSubscriber.query.filter_by(channel_id=channel_id).count()
-    is_subscribed = False
-    if 'user' in session:
-        is_subscribed = ChannelSubscriber.query.filter_by(channel_id=channel_id, username=session['user']).first() is not None
-    return jsonify({"count": count, "is_subscribed": is_subscribed})
-
-@app.route('/api/channel/<int:channel_id>/unsubscribe', methods=['POST'])
-def unsubscribe_channel(channel_id):
-    if 'user' not in session: return jsonify({"error": "Unauthorized"}), 401
-    ChannelSubscriber.query.filter_by(channel_id=channel_id, username=session['user']).delete()
-    db.session.commit()
-    return jsonify({"status": "ok"})
-
 @app.route('/api/channel/<int:channel_id>/delete', methods=['DELETE'])
 def delete_own_channel(channel_id):
     if 'user' not in session: return jsonify({"error": "Unauthorized"}), 401
@@ -514,15 +489,11 @@ def delete_own_channel(channel_id):
     log_action(session['user'], channel.name, "delete_channel", f"Канал удалён")
     return jsonify({"status": "ok"})
 
-# ============ РЕДАКТИРОВАНИЕ, УДАЛЕНИЕ, ПЕРЕСЫЛКА, ЗАКРЕПЛЕНИЕ ============
-
 @app.route('/api/message/<int:msg_id>/edit', methods=['POST'])
 def edit_message(msg_id):
     if 'user' not in session: return jsonify({"error": "Unauthorized"}), 401
-    
     data = request.json
     new_content = data.get('content', '').strip()
-    
     if not new_content:
         return jsonify({"error": "Сообщение не может быть пустым"}), 400
     
@@ -532,12 +503,6 @@ def edit_message(msg_id):
         msg.is_edited = True
         msg.edited_at = datetime.utcnow()
         db.session.commit()
-        socketio.emit('message_edited', {
-            'id': msg.id,
-            'content': new_content,
-            'chat_id': msg.chat_id,
-            'edited_at': msg.edited_at.strftime('%H:%M')
-        }, room=msg.chat_id)
         return jsonify({"status": "ok"})
     
     channel_msg = ChannelMessage.query.get(msg_id)
@@ -546,12 +511,6 @@ def edit_message(msg_id):
         channel_msg.is_edited = True
         channel_msg.edited_at = datetime.utcnow()
         db.session.commit()
-        socketio.emit('channel_message_edited', {
-            'id': channel_msg.id,
-            'content': new_content,
-            'channel_id': channel_msg.channel_id,
-            'edited_at': channel_msg.edited_at.strftime('%H:%M')
-        }, room=str(channel_msg.channel_id))
         return jsonify({"status": "ok"})
     
     return jsonify({"error": "Сообщение не найдено или нет прав"}), 404
@@ -559,44 +518,27 @@ def edit_message(msg_id):
 @app.route('/api/message/<int:msg_id>/delete', methods=['DELETE'])
 def delete_message(msg_id):
     if 'user' not in session: return jsonify({"error": "Unauthorized"}), 401
-    
     username = session['user']
     
-    # Проверяем в личных сообщениях
     msg = Message.query.get(msg_id)
     if msg:
-        # Может удалить: отправитель ИЛИ модератор с правом can_delete_messages
         if msg.sender == username or check_permission(username, 'can_delete_messages'):
-            chat_id = msg.chat_id
             msg.deleted_by = username
             msg.deleted_at = datetime.utcnow()
             db.session.commit()
-            socketio.emit('message_deleted', {
-                'id': msg_id, 
-                'chat_id': chat_id,
-                'deleted_by': username if check_permission(username, 'can_delete_messages') and msg.sender != username else None
-            }, room=chat_id)
             log_action(username, msg.sender, "delete_message", f"ID: {msg_id}")
             return jsonify({"status": "ok"})
         return jsonify({"error": "Нет прав"}), 403
     
-    # Проверяем в канальных сообщениях
     channel_msg = ChannelMessage.query.get(msg_id)
     if channel_msg:
         channel = Channel.query.get(channel_msg.channel_id)
-        # Может удалить: отправитель ИЛИ владелец канала ИЛИ модератор с правом
         if channel_msg.sender == username or channel.created_by == username or check_permission(username, 'can_delete_messages'):
-            channel_id = channel_msg.channel_id
             channel_msg.deleted_by = username
             channel_msg.deleted_at = datetime.utcnow()
             Comment.query.filter_by(post_id=msg_id).delete()
             Reaction.query.filter_by(post_id=msg_id).delete()
             db.session.commit()
-            socketio.emit('channel_message_deleted', {
-                'id': msg_id, 
-                'channel_id': channel_id,
-                'deleted_by': username if username != channel_msg.sender else None
-            }, room=str(channel_id))
             log_action(username, channel_msg.sender, "delete_channel_message", f"ID: {msg_id}")
             return jsonify({"status": "ok"})
         return jsonify({"error": "Нет прав"}), 403
@@ -606,10 +548,8 @@ def delete_message(msg_id):
 @app.route('/api/message/<int:msg_id>/forward', methods=['POST'])
 def forward_message(msg_id):
     if 'user' not in session: return jsonify({"error": "Unauthorized"}), 401
-    
     data = request.json
     target = data.get('target', '').strip().lower()
-    
     if not target:
         return jsonify({"error": "Укажите получателя"}), 400
     
@@ -623,52 +563,26 @@ def forward_message(msg_id):
         channel_name = target[1:]
         channel = Channel.query.filter_by(name=channel_name).first()
         if channel:
-            msg = ChannelMessage(
-                channel_id=channel.id,
-                sender=session['user'],
-                content=forwarded_content
-            )
+            msg = ChannelMessage(channel_id=channel.id, sender=session['user'], content=forwarded_content)
             db.session.add(msg)
             db.session.commit()
-            socketio.emit('receive_channel_msg', {
-                'id': msg.id,
-                'channel_id': channel.id,
-                'sender': session['user'],
-                'message': forwarded_content,
-                'timestamp': msg.timestamp.strftime('%H:%M'),
-                'is_forwarded': True
-            }, room=str(channel.id))
         else:
             return jsonify({"error": "Канал не найден"}), 404
     else:
         target_user = User.query.filter_by(username=target).first()
         if target_user:
             chat_id = "-".join(sorted([session['user'], target]))
-            msg = Message(
-                chat_id=chat_id,
-                sender=session['user'],
-                content=forwarded_content
-            )
+            msg = Message(chat_id=chat_id, sender=session['user'], content=forwarded_content)
             db.session.add(msg)
             db.session.commit()
-            socketio.emit('receive_msg', {
-                'sender': session['user'],
-                'message': forwarded_content,
-                'chat_id': chat_id,
-                'is_forwarded': True
-            }, room=chat_id)
         else:
             return jsonify({"error": "Пользователь не найден"}), 404
     
     return jsonify({"status": "ok"})
 
-# ============ ЗАКРЕПЛЕНИЕ СООБЩЕНИЙ ============
-
 @app.route('/api/message/<int:msg_id>/pin', methods=['POST'])
 def pin_message(msg_id):
-    """Закрепить/открепить сообщение в канале"""
     if 'user' not in session: return jsonify({"error": "Unauthorized"}), 401
-    
     if not check_permission(session['user'], 'can_pin_messages'):
         return jsonify({"error": "Нет прав на закрепление"}), 403
     
@@ -680,42 +594,26 @@ def pin_message(msg_id):
     if not channel:
         return jsonify({"error": "Канал не найден"}), 404
     
-    # Проверяем: владелец канала или модератор
     if channel.created_by != session['user'] and not check_permission(session['user'], 'can_pin_messages'):
         return jsonify({"error": "Нет прав"}), 403
     
-    # Снимаем все закрепления в этом канале
     if not channel_msg.is_pinned:
         ChannelMessage.query.filter_by(channel_id=channel_msg.channel_id, is_pinned=True).update(
             {"is_pinned": False, "pinned_by": None}
         )
         channel_msg.is_pinned = True
         channel_msg.pinned_by = session['user']
-        action = "pin"
     else:
         channel_msg.is_pinned = False
         channel_msg.pinned_by = None
-        action = "unpin"
     
     db.session.commit()
-    
-    socketio.emit('message_pinned', {
-        'id': msg_id,
-        'channel_id': channel_msg.channel_id,
-        'is_pinned': channel_msg.is_pinned,
-        'pinned_by': session['user'] if channel_msg.is_pinned else None,
-        'content': channel_msg.content if channel_msg.is_pinned else None
-    }, room=str(channel_msg.channel_id))
-    
-    log_action(session['user'], channel.name, f"{action}_message", f"ID: {msg_id}")
-    
+    log_action(session['user'], channel.name, "pin_message", f"ID: {msg_id}")
     return jsonify({"status": "ok", "is_pinned": channel_msg.is_pinned})
 
 # ============ АДМИН: УПРАВЛЕНИЕ МОДЕРАТОРАМИ ============
-
 @app.route('/api/admin/moderator/add', methods=['POST'])
 def add_moderator():
-    """Назначить пользователя модератором"""
     if 'user' not in session: return jsonify({"error": "Unauthorized"}), 401
     if not check_permission(session['user'], 'can_add_moderators'):
         return jsonify({"error": "Нет прав на назначение модераторов"}), 403
@@ -727,16 +625,10 @@ def add_moderator():
     if not user:
         return jsonify({"error": "Пользователь не найден"}), 404
     
-    if user.is_admin and user.admin_level >= session.get('admin_level', 0):
-        return jsonify({"error": "Нельзя изменить пользователя с более высоким уровнем"}), 403
-    
-    # Назначаем модератором с выбранными правами
     user.is_admin = True
-    user.admin_level = data.get('admin_level', 1)  # 1 = модер, 2 = админ
+    user.admin_level = data.get('admin_level', 1)
     user.moderator_title = data.get('moderator_title', 'Модератор')
     user.is_anonymous_mod = data.get('is_anonymous', False)
-    
-    # Права
     user.can_delete_messages = data.get('can_delete_messages', True)
     user.can_ban_users = data.get('can_ban_users', True)
     user.can_mute_users = data.get('can_mute_users', True)
@@ -744,19 +636,16 @@ def add_moderator():
     user.can_change_info = data.get('can_change_info', False)
     user.can_add_moderators = data.get('can_add_moderators', False)
     user.can_announce = data.get('can_announce', False)
-    
-    user.verification_type = 2  # Галочка модератора
+    user.verification_type = 2
     
     db.session.commit()
-    
     send_system_msg(target, f"🛡 **Вы назначены модератором WETMO!**\n\nТитул: {user.moderator_title}\nУровень: {user.admin_level}")
-    log_action(session['user'], target, "add_moderator", f"Уровень: {user.admin_level}, Титул: {user.moderator_title}")
+    log_action(session['user'], target, "add_moderator", f"Уровень: {user.admin_level}")
     
     return jsonify({"status": "ok", "message": f"Модератор {target} назначен"})
 
 @app.route('/api/admin/moderator/remove', methods=['POST'])
 def remove_moderator():
-    """Снять модератора"""
     if 'user' not in session: return jsonify({"error": "Unauthorized"}), 401
     if not check_permission(session['user'], 'can_add_moderators'):
         return jsonify({"error": "Нет прав"}), 403
@@ -770,9 +659,6 @@ def remove_moderator():
     user = User.query.filter_by(username=target).first()
     if not user:
         return jsonify({"error": "Пользователь не найден"}), 404
-    
-    if user.admin_level >= session.get('admin_level', 0) and session['user'] != 'wetmo':
-        return jsonify({"error": "Нельзя снять пользователя с более высоким уровнем"}), 403
     
     user.is_admin = False
     user.admin_level = 0
@@ -788,7 +674,6 @@ def remove_moderator():
     user.verification_type = 0
     
     db.session.commit()
-    
     send_system_msg(target, "С вас сняты права модератора.")
     log_action(session['user'], target, "remove_moderator")
     
@@ -796,7 +681,6 @@ def remove_moderator():
 
 @app.route('/api/admin/moderator/permissions', methods=['POST'])
 def update_moderator_permissions():
-    """Обновить права модератора"""
     if 'user' not in session: return jsonify({"error": "Unauthorized"}), 401
     if not check_permission(session['user'], 'can_add_moderators'):
         return jsonify({"error": "Нет прав"}), 403
@@ -808,7 +692,6 @@ def update_moderator_permissions():
     if not user or not user.is_admin:
         return jsonify({"error": "Не найден или не модератор"}), 404
     
-    # Обновляем права
     user.can_delete_messages = data.get('can_delete_messages', user.can_delete_messages)
     user.can_ban_users = data.get('can_ban_users', user.can_ban_users)
     user.can_mute_users = data.get('can_mute_users', user.can_mute_users)
@@ -826,7 +709,6 @@ def update_moderator_permissions():
 
 @app.route('/api/admin/moderators')
 def list_moderators():
-    """Список всех модераторов"""
     if 'user' not in session or not check_admin(session['user'], 1):
         return jsonify({"error": "Forbidden"}), 403
     
@@ -848,7 +730,6 @@ def list_moderators():
     } for m in mods]})
 
 # ============ АДМИН: ОБЪЯВЛЕНИЯ ============
-
 @app.route('/api/admin/announce', methods=['POST'])
 def admin_announce():
     if 'user' not in session: return jsonify({"error": "Unauthorized"}), 401
@@ -866,8 +747,7 @@ def admin_announce():
     
     return jsonify(result)
 
-# ============ АДМИН: БАН/МУТ (с проверкой прав) ============
-
+# ============ АДМИН: БАН/МУТ ============
 @app.route('/admin/ban', methods=['POST'])
 def admin_ban():
     if 'user' not in session: return jsonify({"error": "Unauthorized"}), 401
@@ -878,11 +758,6 @@ def admin_ban():
     target = data.get('target')
     reason = data.get('reason', 'Нарушение правил')
     hours = data.get('hours', 0)
-    
-    # Нельзя банить равных или выше
-    target_user = User.query.filter_by(username=target).first()
-    if target_user and target_user.is_admin and target_user.admin_level >= session.get('admin_level', 0) and session['user'] != 'wetmo':
-        return jsonify({"error": "Нельзя забанить этого пользователя"}), 403
     
     u = User.query.filter_by(username=target).first()
     if u:
@@ -946,22 +821,7 @@ def admin_unmute():
         log_action(session['user'], target, "unmute")
     return jsonify({"status": "ok"})
 
-# ============ ОСТАЛЬНЫЕ API (сокращённо, без изменений) ============
-
-@app.route('/api/post/<int:post_id>/delete', methods=['DELETE'])
-def delete_post(post_id):
-    if 'user' not in session: return jsonify({"error": "Unauthorized"}), 401
-    post = ChannelMessage.query.get_or_404(post_id)
-    channel = Channel.query.get(post.channel_id)
-    if post.sender != session['user'] and channel.created_by != session['user'] and not check_permission(session['user'], 'can_delete_messages'):
-        return jsonify({"error": "Forbidden"}), 403
-    Comment.query.filter_by(post_id=post_id).delete()
-    Reaction.query.filter_by(post_id=post_id).delete()
-    db.session.delete(post)
-    db.session.commit()
-    log_action(session['user'], post.sender, "delete_post", f"ID: {post_id}")
-    return jsonify({"status": "ok"})
-
+# ============ ОСТАЛЬНЫЕ API ============
 @app.route('/api/post/<int:post_id>/react', methods=['POST'])
 def react_post(post_id):
     if 'user' not in session: return jsonify({"error": "Unauthorized"}), 401
@@ -982,7 +842,6 @@ def react_post(post_id):
     likes = Reaction.query.filter_by(post_id=post_id, reaction_type='like').count()
     dislikes = Reaction.query.filter_by(post_id=post_id, reaction_type='dislike').count()
     
-    socketio.emit('reaction_update', {'post_id': post_id, 'likes': likes, 'dislikes': dislikes}, room=f"post_{post_id}")
     return jsonify({"likes": likes, "dislikes": dislikes})
 
 @app.route('/api/chat/delete/<target>', methods=['DELETE'])
@@ -1061,6 +920,7 @@ def save_passport():
     db.session.commit()
     return jsonify({"status": "ok"})
 
+# ============ РАЗРАБОТЧИКИ ============
 @app.route('/api/developers/app/create', methods=['POST'])
 def create_oauth_app():
     if 'user' not in session: return jsonify({"error": "Unauthorized"}), 401
@@ -1095,8 +955,7 @@ def create_bot():
     db.session.commit()
     return jsonify({"status": "ok", "username": username, "token": token})
 
-# ============ ОСНОВНЫЕ МАРШРУТЫ (без изменений) ============
-
+# ============ ОСНОВНЫЕ МАРШРУТЫ ============
 @app.route('/')
 def index():
     if 'user' not in session: return redirect(url_for('auth'))
@@ -1277,44 +1136,15 @@ def admin_panel():
     moderators = User.query.filter_by(is_admin=True).all()
     return render_template('index.html', mode='admin', tab=tab, all_users=all_users, all_channels=all_channels, premium_users=premium_users, announcements=announcements, moderators=moderators, user_badges=USER_BADGES, channel_badges=CHANNEL_BADGES)
 
-# ============ SOCKET.IO ============
-@socketio.on('join')
-def on_join(data):
-    if 'chat_id' in data: join_room(data['chat_id'])
-    if 'channel_id' in data: join_room(str(data['channel_id']))
-    if 'post_id' in data: join_room(f"post_{data['post_id']}")
-
-@socketio.on('send_msg')
-def handle_message(data):
-    sender_username = session.get('user')
-    if not sender_username: return
-    sender = User.query.filter_by(username=sender_username).first()
-    if not sender: return
-    
-    check = check_banned_or_muted(sender_username)
-    if check["muted"]: return
-    
-    if 'channel_id' in data:
-        channel_id = data['channel_id']
-        channel = Channel.query.get(channel_id)
-        if not channel: return
-        if channel.created_by != sender_username and sender_username != 'wetmo' and not check_permission(sender_username, 'can_change_info'):
-            return
-        msg = ChannelMessage(channel_id=channel_id, sender=sender_username, content=data['message'])
-        db.session.add(msg)
-        db.session.commit()
-        emit('receive_channel_msg', {'id': msg.id, 'channel_id': channel_id, 'sender': sender_username, 'message': data['message'], 'timestamp': msg.timestamp.strftime('%H:%M'), 'avatar_data': sender.avatar_data, 'user_badge': sender.user_badge, 'verification_type': sender.verification_type}, room=str(channel_id))
-    elif 'target' in data:
-        target = data['target'].lower()
-        target_user = User.query.filter_by(username=target).first()
-        if not target_user: return
-        chat_id = "-".join(sorted([sender_username, target]))
-        msg = Message(chat_id=chat_id, sender=sender_username, content=data['message'])
-        db.session.add(msg)
-        sender.msg_count += 1
-        db.session.commit()
-        emit('receive_msg', {'id': msg.id, 'sender': sender_username, 'message': data['message'], 'avatar_data': sender.avatar_data, 'user_badge': sender.user_badge, 'verification_type': sender.verification_type}, room=chat_id)
+@app.route('/moderator')
+def moderator_panel():
+    if 'user' not in session: return redirect(url_for('auth'))
+    if not check_permission(session['user'], 'can_delete_messages') and not check_permission(session['user'], 'can_ban_users'):
+        return redirect(url_for('index'))
+    user = User.query.filter_by(username=session['user']).first()
+    all_users = User.query.filter(~User.username.in_(['world', session['user']])).all()
+    return render_template('index.html', user=user, all_users=all_users, mode='moderator', user_badges=USER_BADGES, channel_badges=CHANNEL_BADGES, premium_colors=PREMIUM_COLORS)
 
 # ============ ЗАПУСК ============
 if __name__ == '__main__':
-    socketio.run(app, host='0.0.0.0', port=2500, debug=True)
+    app.run(host='0.0.0.0', port=2500)
