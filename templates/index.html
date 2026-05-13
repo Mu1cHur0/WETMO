@@ -22,6 +22,7 @@
             --danger: #ff4444; 
             --accent-white: #ffffff;
             --accent-silver: #cccccc;
+            --dev-blue: #00d4ff;
         }
         
         body { 
@@ -47,7 +48,6 @@
         .verify-accent { background: var(--accent-white); color: #000; }
         .verify-badge::after { content: '✓'; }
         
-        /* Переливающиеся галочки премиум */
         .verify-premium-1 { background: linear-gradient(45deg, #ffffff, #aaaaaa, #ffffff, #aaaaaa); background-size: 300% 300%; animation: premiumShine1 3s ease infinite; color: #000; }
         .verify-premium-2 { background: linear-gradient(45deg, #ff00ff, #00ffff, #ff00ff, #00ffff); background-size: 300% 300%; animation: premiumShine2 2s ease infinite; color: #000; }
         .verify-premium-3 { background: linear-gradient(45deg, #53fc18, #00ff88, #53fc18, #00ff88); background-size: 300% 300%; animation: premiumShine3 4s ease infinite; color: #000; }
@@ -59,9 +59,7 @@
         .verify-premium-9 { background: linear-gradient(45deg, #c0c0c0, #e0e0e0, #c0c0c0, #e0e0e0); background-size: 300% 300%; animation: premiumShine9 3s ease infinite; color: #000; }
         .verify-premium-10 { background: linear-gradient(45deg, #aaaaaa, #555555, #aaaaaa, #555555); background-size: 300% 300%; animation: premiumShine10 3s ease infinite; color: #000; }
         .verify-premium-11 { background-size: 300% 300%; animation: premiumShine1 3s ease infinite; color: #000; }
-        .verify-premium-1::after, .verify-premium-2::after, .verify-premium-3::after, .verify-premium-4::after, .verify-premium-5::after, .verify-premium-6::after, .verify-premium-7::after, .verify-premium-8::after, .verify-premium-9::after, .verify-premium-10::after, .verify-premium-11::after { content: '✓'; }
         
-        /* Premium анимации для ника */
         .premium-name-1 { background: linear-gradient(45deg, #ffffff, #aaaaaa, #ffffff, #aaaaaa); background-size: 300% 300%; -webkit-background-clip: text; background-clip: text; color: transparent; animation: premiumShine1 3s ease infinite; }
         .premium-name-2 { background: linear-gradient(45deg, #ff00ff, #00ffff, #ff00ff, #00ffff); background-size: 300% 300%; -webkit-background-clip: text; background-clip: text; color: transparent; animation: premiumShine2 2s ease infinite; }
         .premium-name-3 { background: linear-gradient(45deg, #53fc18, #00ff88, #53fc18, #00ff88); background-size: 300% 300%; -webkit-background-clip: text; background-clip: text; color: transparent; animation: premiumShine3 4s ease infinite; }
@@ -98,7 +96,6 @@
             .search-input { width: 100%; padding: 10px 12px; font-size: 13px; border-radius: 20px; }
             .search-input:focus { width: 100%; }
             .header-actions .btn-header { display: none; }
-            .header-actions .btn-header:last-child { display: block; }
             .mobile-menu-btn { display: block; background: #111; border: 1px solid #222; color: #fff; padding: 8px 12px; border-radius: 8px; font-size: 16px; cursor: pointer; margin-left: 8px; transition: all 0.2s; }
             .mobile-menu-btn:active { transform: scale(0.95); }
             .mobile-menu { display: none; position: fixed; bottom: 0; left: 0; right: 0; background: rgba(10, 10, 10, 0.9); backdrop-filter: blur(10px); border-top: 1px solid var(--border); padding: 15px; z-index: 500; }
@@ -141,6 +138,8 @@
         .btn-header:active { transform: translateY(0); }
         .btn-accent { background: var(--accent-white); color: #000; border-color: var(--accent-white); box-shadow: 0 2px 10px rgba(255,255,255,0.15); }
         .btn-accent:hover { background: #e6e6e6; border-color: #e6e6e6; box-shadow: 0 4px 15px rgba(255,255,255,0.25); }
+        .btn-dev { background: rgba(0,212,255,0.1); color: #00d4ff; border-color: rgba(0,212,255,0.3); }
+        .btn-dev:hover { background: rgba(0,212,255,0.2); border-color: rgba(0,212,255,0.5); box-shadow: 0 0 15px rgba(0,212,255,0.2); }
         
         .search-container { position: relative; margin-left: 15px; margin-right: auto; }
         .search-input { background: rgba(255,255,255,0.05); border: 1px solid #222; color: #fff; padding: 10px 16px; border-radius: 20px; font-size: 12px; width: 220px; outline: none; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
@@ -184,6 +183,8 @@
         .giveaway-btn:hover { background: #e6e6e6 !important; transform: scale(1.05); }
         .comment-link { color: #888; text-decoration: none; font-size: 12px; font-weight: 600; margin-left: auto; transition: color 0.2s; }
         .comment-link:hover { color: var(--accent-white); }
+        
+        .msg-deleted { background: rgba(255,68,68,0.05); border: 1px dashed rgba(255,68,68,0.2); color: #888; font-style: italic; padding: 10px 16px; border-radius: 12px; font-size: 12px; }
         
         .input-wrap { padding: 20px 25px; border-top: 1px solid var(--border); display: flex; gap: 12px; background: rgba(5,5,5,0.8); backdrop-filter: blur(10px); }
         .input-wrap input { flex: 1; background: rgba(255,255,255,0.05); border: 1px solid #222; color: #fff; padding: 16px 20px; border-radius: 16px; outline: none; font-size: 14px; transition: all 0.3s; }
@@ -234,6 +235,12 @@
         .badge-option.selected { border-color: var(--accent-white); background: rgba(255,255,255,0.15); }
         .badge-option img { width: 22px; height: 22px; }
         
+        .permission-toggle { display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 8px 12px; background: rgba(255,255,255,0.03); border-radius: 8px; margin-bottom: 6px; transition: all 0.2s; }
+        .permission-toggle:hover { background: rgba(255,255,255,0.06); }
+        .permission-toggle.enabled { background: rgba(83,252,24,0.1); }
+        .permission-toggle input[type="checkbox"] { accent-color: var(--kick); width: 16px; height: 16px; cursor: pointer; }
+        .permission-label { font-size: 12px; font-weight: 600; color: #ccc; }
+        
         .toast { position: fixed; bottom: 40px; left: 50%; transform: translateX(-50%); background: rgba(255,255,255,0.95); backdrop-filter: blur(5px); padding: 14px 28px; border-radius: 12px; color: #000; font-size: 13px; font-weight: 700; z-index: 2000; box-shadow: 0 10px 30px rgba(0,0,0,0.5); animation: toastFade 2.5s forwards; pointer-events: none; }
         @keyframes toastFade { 0% { opacity: 0; transform: translate(-50%, 20px) scale(0.9); } 10% { opacity: 1; transform: translate(-50%, 0) scale(1); } 90% { opacity: 1; transform: translate(-50%, 0) scale(1); } 100% { opacity: 0; transform: translate(-50%, -20px) scale(0.9); } }
         
@@ -277,6 +284,9 @@
         .ad-banner { background: rgba(255,255,255,0.03); border: 1px dashed #444; border-radius: 12px; padding: 12px; text-align: center; margin-top: 20px; }
         .ad-banner a { color: var(--accent-white); text-decoration: none; font-weight: 600; }
         .fixed-ad { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(10,10,10,0.95); backdrop-filter: blur(5px); padding: 8px; text-align: center; font-size: 11px; color: #888; z-index: 50; border-top: 1px solid #222; }
+        
+        .pinned-message { background: rgba(83,252,24,0.05); border: 1px solid rgba(83,252,24,0.2); padding: 12px 16px; border-radius: 12px; margin-bottom: 16px; font-size: 13px; display: flex; justify-content: space-between; align-items: center; }
+        .pinned-label { font-size: 10px; color: var(--kick); font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
     </style>
 </head>
 <body>
@@ -296,8 +306,9 @@
         
         <div class="header-actions" id="desktop-actions">
             <a href="/profile" class="btn-header btn-accent" style="margin-right:10px;">👤 ПРОФИЛЬ</a>
+            <a href="/developers" class="btn-header btn-dev">🛠️ DEV</a>
             <button class="btn-header btn-accent" onclick="showCreateChannelModal()">📢 СОЗДАТЬ КАНАЛ</button>
-            {% if user and user.username == 'wetmo' %}<a href="/admin" class="btn-header">АДМИНКА</a>{% endif %}
+            {% if user and (user.is_admin or user.username == 'wetmo') %}<a href="/admin" class="btn-header">АДМИНКА</a>{% endif %}
             <a href="/logout" class="btn-header" style="color:var(--danger); border-color: rgba(255,68,68,0.3);">ВЫХОД</a>
         </div>
         {% endif %}
@@ -305,11 +316,13 @@
     
     <div class="mobile-menu" id="mobile-menu">
         <a href="/profile" class="btn-header btn-accent">👤 ПРОФИЛЬ</a>
+        <a href="/developers" class="btn-header btn-dev">🛠️ DEV</a>
         <button class="btn-header btn-accent" onclick="showCreateChannelModal()">📢 СОЗДАТЬ КАНАЛ</button>
-        {% if user and user.username == 'wetmo' %}<a href="/admin" class="btn-header">АДМИНКА</a>{% endif %}
+        {% if user and (user.is_admin or user.username == 'wetmo') %}<a href="/admin" class="btn-header">АДМИНКА</a>{% endif %}
         <a href="/logout" class="btn-header" style="color:var(--danger)">ВЫХОД</a>
     </div>
 
+    <!-- Модалки -->
     <div id="create-channel-modal" class="modal">
         <div class="modal-content">
             <h2 style="color:var(--accent-white); margin-bottom:25px; font-weight:900;">📢 СОЗДАТЬ КАНАЛ</h2>
@@ -334,7 +347,7 @@
                 </div>
                 {% endfor %}
                 <div class="animation-option {% if premium and premium.animation_type == 11 %}selected{% endif %}" onclick="showCustomColorModal()">
-                    <div style="width:28px; height:28px; border-radius:50%; margin:0 auto; background: conic-gradient(#ffffff, #aaaaaa, #ffffff); box-shadow: 0 2px 8px rgba(255,255,255,0.1);"></div>
+                    <div style="width:28px; height:28px; border-radius:50%; margin:0 auto; background: conic-gradient(#ffffff, #aaaaaa, #ffffff);"></div>
                     <div style="font-size:10px; margin-top:8px; color:#aaa; font-weight:600;">Кастом</div>
                 </div>
             </div>
@@ -345,9 +358,7 @@
     <div id="custom-color-modal" class="modal">
         <div class="modal-content" style="width:350px;">
             <h2 style="color:var(--accent-white); margin-bottom:25px; font-weight:900;">🎨 Кастомный цвет</h2>
-            <label style="color:#aaa; font-size:13px; font-weight:600; display:block; margin-bottom:6px;">Цвет 1</label>
             <input type="color" id="custom-color1" class="form-input" style="padding:4px; height:40px;" value="{{ user.custom_color1 if user else '#ffffff' }}">
-            <label style="color:#aaa; font-size:13px; font-weight:600; display:block; margin-bottom:6px; margin-top:10px;">Цвет 2</label>
             <input type="color" id="custom-color2" class="form-input" style="padding:4px; height:40px;" value="{{ user.custom_color2 if user else '#cccccc' }}">
             <div class="modal-buttons">
                 <button onclick="saveCustomColor()" class="modal-btn primary">СОХРАНИТЬ</button>
@@ -376,6 +387,63 @@
         </div>
     </div>
 
+    <div id="moderator-modal" class="modal">
+        <div class="modal-content" style="width:480px; max-height:80vh; overflow-y:auto;">
+            <h2 style="color:var(--accent-white); margin-bottom:25px; font-weight:900;">🛡️ НАСТРОЙКА МОДЕРАТОРА</h2>
+            <input type="hidden" id="mod-target">
+            <div class="form-group">
+                <label class="form-label" style="display:block; margin-bottom:6px;">Титул модератора</label>
+                <input type="text" id="mod-title" class="form-input" placeholder="Модератор">
+            </div>
+            <div class="form-group">
+                <label class="form-label" style="display:block; margin-bottom:6px;">Уровень</label>
+                <select id="mod-level" class="form-input">
+                    <option value="1">Модератор (базовый)</option>
+                    <option value="2">Администратор (расширенный)</option>
+                </select>
+            </div>
+            <div style="margin:20px 0;">
+                <label class="form-label" style="display:block; margin-bottom:12px;">Права:</label>
+                <div class="permission-toggle enabled" onclick="this.querySelector('input').click()">
+                    <input type="checkbox" id="perm-delete" checked>
+                    <span class="permission-label">Удаление сообщений</span>
+                </div>
+                <div class="permission-toggle enabled" onclick="this.querySelector('input').click()">
+                    <input type="checkbox" id="perm-ban" checked>
+                    <span class="permission-label">Бан пользователей</span>
+                </div>
+                <div class="permission-toggle enabled" onclick="this.querySelector('input').click()">
+                    <input type="checkbox" id="perm-mute" checked>
+                    <span class="permission-label">Мут пользователей</span>
+                </div>
+                <div class="permission-toggle" onclick="this.querySelector('input').click()">
+                    <input type="checkbox" id="perm-pin">
+                    <span class="permission-label">Закрепление сообщений</span>
+                </div>
+                <div class="permission-toggle" onclick="this.querySelector('input').click()">
+                    <input type="checkbox" id="perm-info">
+                    <span class="permission-label">Изменение информации</span>
+                </div>
+                <div class="permission-toggle" onclick="this.querySelector('input').click()">
+                    <input type="checkbox" id="perm-addmod">
+                    <span class="permission-label">Назначение модераторов</span>
+                </div>
+                <div class="permission-toggle" onclick="this.querySelector('input').click()">
+                    <input type="checkbox" id="perm-announce">
+                    <span class="permission-label">Объявления</span>
+                </div>
+                <div class="permission-toggle" onclick="this.querySelector('input').click()">
+                    <input type="checkbox" id="perm-anonymous">
+                    <span class="permission-label">Анонимный режим</span>
+                </div>
+            </div>
+            <div class="modal-buttons">
+                <button onclick="saveModerator()" class="modal-btn primary">СОХРАНИТЬ</button>
+                <button onclick="closeModeratorModal()" class="modal-btn secondary">ОТМЕНА</button>
+            </div>
+        </div>
+    </div>
+
     {% if mode == 'auth' %}
     <div style="display:flex; flex:1; align-items:center; justify-content:center; padding: 20px;">
         <div style="background:rgba(20,20,20,0.8); backdrop-filter:blur(15px); padding:45px 35px; border-radius:24px; border:1px solid #222; width:320px; text-align:center; box-shadow: 0 20px 50px rgba(0,0,0,0.5);">
@@ -385,11 +453,15 @@
             </div>
             <form method="POST">
                 <input type="text" name="username" placeholder="НИКНЕЙМ" required minlength="3" maxlength="20" pattern="[a-zA-Z0-9_]+" style="width:100%; padding:16px; background:rgba(0,0,0,0.5); border:1px solid #333; color:#fff; margin-bottom:16px; border-radius:12px; outline:none; transition:0.3s; box-sizing:border-box; font-size:14px;">
+                {% if auth_type == 'register' %}
+                <input type="email" name="email" placeholder="EMAIL" required style="width:100%; padding:16px; background:rgba(0,0,0,0.5); border:1px solid #333; color:#fff; margin-bottom:16px; border-radius:12px; outline:none; transition:0.3s; box-sizing:border-box; font-size:14px;">
+                {% endif %}
                 <input type="password" name="password" placeholder="ПАРОЛЬ" required minlength="6" style="width:100%; padding:16px; background:rgba(0,0,0,0.5); border:1px solid #333; color:#fff; margin-bottom:25px; border-radius:12px; outline:none; transition:0.3s; box-sizing:border-box; font-size:14px;">
-                <button type="submit" style="width:100%; padding:16px; background:var(--accent-white); color:#000; border:none; font-weight:900; font-size:14px; border-radius:12px; cursor:pointer; transition:all 0.3s; box-shadow: 0 4px 15px rgba(255,255,255,0.15);">{{ 'ВОЙТИ' if auth_type == 'login' else 'РЕГИСТРАЦИЯ' }}</button>
+                <button type="submit" style="width:100%; padding:16px; background:var(--accent-white); color:#000; border:none; font-weight:900; font-size:14px; border-radius:12px; cursor:pointer; transition:all 0.3s; box-shadow: 0 4px 15px rgba(255,255,255,0.15);">{{ 'ВОЙТИ' if auth_type == 'login' else 'ЗАРЕГИСТРИРОВАТЬСЯ' }}</button>
             </form>
             <p style="font-size:11px; color:#666; margin-top:20px; font-weight:600;">Только латиница, цифры и _ (от 3 до 20 символов)</p>
             <a href="/auth?type={{ 'register' if auth_type == 'login' else 'login' }}" style="display:inline-block; margin-top:20px; font-size:12px; font-weight:700; color:#aaa; text-decoration:none; transition:color 0.2s;">{{ 'НЕТ АККАУНТА?' if auth_type == 'login' else 'УЖЕ ЕСТЬ АККАУНТ' }}</a>
+            {% if error %}<p style="color:var(--danger); font-size:12px; margin-top:15px; font-weight:600;">{{ error }}</p>{% endif %}
         </div>
     </div>
 
@@ -400,11 +472,14 @@
                 <div style="display:flex; align-items:center; justify-content:center; width:36px; height:36px; background:var(--kick); border-radius:10px;"><span style="color:#000; font-size:22px; font-weight:900;">W</span></div>
                 <h2 style="color:var(--kick); margin:0; font-weight:900;">ПОДТВЕРЖДЕНИЕ</h2>
             </div>
-            <p style="font-size:13px; color:#888; margin-bottom:25px; line-height:1.4;">Введите код, отправленный в чат World</p>
-            <form method="POST">
-                <input type="text" name="code" placeholder="000-000" required style="width:100%; padding:16px; background:rgba(0,0,0,0.5); border:1px solid #333; color:#fff; margin-bottom:20px; border-radius:12px; text-align:center; font-size:24px; font-weight:700; letter-spacing:2px; outline:none; transition:0.3s; box-sizing:border-box;">
+            {% if message %}<p style="font-size:13px; color:#888; margin-bottom:25px; line-height:1.4;">{{ message }}</p>
+            {% else %}<p style="font-size:13px; color:#888; margin-bottom:25px; line-height:1.4;">Введите код, отправленный на вашу почту</p>{% endif %}
+            <form method="POST" action="/verify">
+                <input type="text" name="code" placeholder="000000" required maxlength="6" pattern="[0-9]{6}" style="width:100%; padding:16px; background:rgba(0,0,0,0.5); border:1px solid #333; color:#fff; margin-bottom:20px; border-radius:12px; text-align:center; font-size:24px; font-weight:700; letter-spacing:4px; outline:none; transition:0.3s; box-sizing:border-box;">
                 <button type="submit" style="width:100%; padding:16px; background:var(--accent-white); color:#000; border:none; font-weight:900; font-size:14px; border-radius:12px; cursor:pointer; transition:all 0.3s; box-shadow: 0 4px 15px rgba(255,255,255,0.15);">ПОДТВЕРДИТЬ</button>
             </form>
+            {% if error %}<p style="color:var(--danger); font-size:12px; margin-top:15px; font-weight:600;">{{ error }}</p>{% endif %}
+            <a href="/auth?type=register" style="display:inline-block; margin-top:20px; font-size:12px; font-weight:700; color:#aaa; text-decoration:none;">← НАЗАД</a>
         </div>
     </div>
 
@@ -412,23 +487,55 @@
     <div style="padding:30px 25px; flex:1; overflow-y:auto; max-width:900px; margin:0 auto; width:100%; box-sizing:border-box;">
         <h2 style="color:var(--accent-white); margin-bottom:25px; font-weight:900;">АДМИН-ПАНЕЛЬ</h2>
         <div class="admin-tabs">
+            <a href="/admin?tab=moderators" class="admin-tab {{ 'active' if tab == 'moderators' }}">🛡️ МОДЕРАТОРЫ</a>
             <a href="/admin?tab=users" class="admin-tab {{ 'active' if tab == 'users' }}">👥 ПОЛЬЗОВАТЕЛИ</a>
             <a href="/admin?tab=channels" class="admin-tab {{ 'active' if tab == 'channels' }}">📢 КАНАЛЫ</a>
             <a href="/admin?tab=premium" class="admin-tab {{ 'active' if tab == 'premium' }}">💎 PREMIUM</a>
+            <a href="/admin?tab=announce" class="admin-tab {{ 'active' if tab == 'announce' }}">📢 ОБЪЯВЛЕНИЯ</a>
         </div>
         
-        {% if tab == 'users' %}
+        {% if tab == 'moderators' %}
+        <h3 style="color:#aaa; margin-bottom:20px; font-size:14px;">УПРАВЛЕНИЕ МОДЕРАТОРАМИ</h3>
+        <div style="margin-bottom:20px;">
+            <input type="text" id="new-mod-username" class="form-input" style="width:200px; display:inline; margin-right:10px;" placeholder="username">
+            <button class="btn-accent" onclick="addModerator()" style="padding:12px 20px; cursor:pointer;">🛡️ НАЗНАЧИТЬ МОДЕРАТОРОМ</button>
+        </div>
+        {% for mod in moderators %}
+        <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(20,20,20,0.6); padding:16px 20px; margin-bottom:12px; border-radius:16px; border:1px solid #222; flex-wrap:wrap; gap:10px;">
+            <div>
+                <a href="/passport/{{ mod.username }}" style="font-weight:900; font-size:15px; color:var(--accent-white); text-decoration:none;">{{ mod.username }}</a>
+                <span style="background: var(--kick); color: #000; font-size: 10px; padding: 3px 8px; border-radius: 10px; margin-left: 8px; font-weight: 700;">
+                    {{ 'Основатель' if mod.admin_level >= 3 else 'Админ' if mod.admin_level >= 2 else 'Модератор' }}
+                </span>
+                {% if mod.moderator_title %}<span style="color: #888; font-size: 11px; margin-left: 8px;">— {{ mod.moderator_title }}</span>{% endif %}
+                <div style="color:#888; margin-top:4px; font-size:11px;">
+                    Права: 
+                    {% if mod.can_delete_messages %}🗑️{% endif %}
+                    {% if mod.can_ban_users %}🚫{% endif %}
+                    {% if mod.can_mute_users %}🔇{% endif %}
+                    {% if mod.can_pin_messages %}📌{% endif %}
+                    {% if mod.can_announce %}📢{% endif %}
+                    {% if mod.can_add_moderators %}👥{% endif %}
+                    {% if mod.is_anonymous_mod %}🕶️{% endif %}
+                </div>
+            </div>
+            <div style="display:flex; gap:8px;">
+                <button onclick="openModeratorModal('{{ mod.username }}', {{ mod.admin_level }}, '{{ mod.moderator_title | default('') }}', {{ mod.can_delete_messages | lower }}, {{ mod.can_ban_users | lower }}, {{ mod.can_mute_users | lower }}, {{ mod.can_pin_messages | lower }}, {{ mod.can_change_info | lower }}, {{ mod.can_add_moderators | lower }}, {{ mod.can_announce | lower }}, {{ mod.is_anonymous_mod | lower }})" class="admin-verify-btn white">⚙️</button>
+                <button onclick="removeModerator('{{ mod.username }}')" class="admin-verify-btn none" style="color:var(--danger);">✕</button>
+            </div>
+        </div>
+        {% endfor %}
+        
+        {% elif tab == 'users' %}
         <h3 style="color:#aaa; margin-bottom:20px; font-size:14px;">УПРАВЛЕНИЕ ПОЛЬЗОВАТЕЛЯМИ</h3>
         {% for u in all_users %}
         <div style="display:flex; justify-content:space-between; align-items:flex-start; background:rgba(20,20,20,0.6); padding:16px 20px; margin-bottom:12px; border-radius:16px; border:1px solid #222; flex-wrap:wrap; gap:10px;">
             <div style="min-width:150px;">
                 <span style="font-weight:700; display:flex; align-items:center; gap:5px;">
                     {% if u.avatar_data %}<img src="{{ u.avatar_data }}" class="sender-avatar">{% endif %}
-                    <a href="/profile/{{ u.username }}" style="color:var(--accent-white); text-decoration:none;">{{ u.username|upper }}</a>
+                    <a href="/passport/{{ u.username }}" style="color:var(--accent-white); text-decoration:none;">{{ u.username|upper }}</a>
                     {% if u.user_badge %}<img src="{{ u.user_badge }}" style="width:18px; height:18px; margin-left:5px;">{% endif %}
-                    {% if u.verification_type == 1 %}<span class="verify-badge verify-white" onclick="showBadgeInfo(event, 'Подтверждённый', 'Аккаунт подтверждён')"></span>
-                    {% elif u.verification_type == 2 %}<span class="verify-badge verify-green" onclick="showBadgeInfo(event, 'Сотрудник/Блогер', 'Официальный аккаунт')"></span>
-                    {% elif u.verification_type == 3 %}<span class="verify-badge verify-premium-1" onclick="showBadgeInfo(event, 'Premium', 'Премиум-подписчик')"></span>{% endif %}
+                    {% if u.is_admin %}<span style="background: var(--kick); color: #000; font-size: 9px; padding: 2px 6px; border-radius: 6px; margin-left: 4px;">МОДЕР</span>{% endif %}
                 </span>
                 <div class="badge-selector" style="margin-top:10px; max-width:300px;">
                     <p style="color:#888; font-size:10px; margin:5px 0; width:100%;">Эмблема:</p>
@@ -441,10 +548,8 @@
                 </div>
             </div>
             <div class="admin-verify-buttons" style="align-self:center;">
-                <button onclick="giveBadge('{{ u.username }}', 0, '')" class="admin-verify-btn none">✕</button>
-                <button onclick="giveBadge('{{ u.username }}', 1, 'Подтверждённый')" class="admin-verify-btn white">○</button>
-                <button onclick="giveBadge('{{ u.username }}', 2, 'Сотрудник/Блогер')" class="admin-verify-btn green">✓</button>
-                <button onclick="givePremiumUser('{{ u.username }}')" class="admin-verify-btn silver">💎</button>
+                <button onclick="banUser('{{ u.username }}')" class="admin-verify-btn none" style="color:var(--danger);">🚫 Бан</button>
+                <button onclick="muteUser('{{ u.username }}')" class="admin-verify-btn none">🔇 Мут</button>
                 {% if u.username != 'wetmo' %}<a href="/admin/delete/{{ u.id }}" class="delete-btn" onclick="return confirm('Удалить {{ u.username }}?')">🗑️</a>{% endif %}
             </div>
         </div>
@@ -456,22 +561,10 @@
         <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(20,20,20,0.6); padding:16px 20px; margin-bottom:12px; border-radius:16px; border:1px solid #222;">
             <div>
                 <div style="font-weight:900; color:var(--accent-white); display:flex; align-items:center; gap:8px; font-size:15px;">
-                    {% if c.badge %}{% for b in channel_badges %}{% if b.url == c.badge %}<img src="{{ b.url }}" style="width:18px; height:18px;">{% endif %}{% endfor %}{% endif %}
-                    @{{ c.name }}
-                    {% if c.verification_type == 4 %}<span class="verify-badge verify-accent" onclick="showBadgeInfo(event, 'Верифицирован', 'Официальный канал')"></span>{% endif %}
-                </div>
-                <div style="font-size:12px; color:#888; margin-top:4px;">{{ c.description or 'Без описания' }} • Владелец: <a href="/profile/{{ c.created_by }}" style="color:#ccc;">{{ c.created_by }}</a></div>
-                <div class="badge-selector" style="margin-top:12px;">
-                    {% for b in channel_badges %}
-                    <div class="badge-option {% if c.badge == b.url %}selected{% endif %}" onclick="setChannelBadge({{ c.id }}, '{{ b.url }}')"><img src="{{ b.url }}" title="{{ b.name }}"></div>
-                    {% endfor %}
-                    <div class="badge-option {% if not c.badge %}selected{% endif %}" onclick="setChannelBadge({{ c.id }}, '')">🚫</div>
+                    @{{ c.name }} — Владелец: <a href="/passport/{{ c.created_by }}" style="color:#ccc;">{{ c.created_by }}</a>
                 </div>
             </div>
-            <div style="display:flex; gap:8px;">
-                <a href="/admin/channel/verify/{{ c.id }}" style="padding:8px 12px; background:{{ 'var(--accent-white)' if c.verification_type == 4 else '#333' }}; color:#000; border-radius:8px; text-decoration:none; font-weight:700; font-size:12px;">📢</a>
-                <a href="#" onclick="deleteChannel({{ c.id }})" class="delete-btn" style="padding:8px 12px;">🗑️</a>
-            </div>
+            <a href="#" onclick="deleteChannel({{ c.id }})" class="delete-btn" style="padding:8px 12px;">🗑️</a>
         </div>
         {% endfor %}
         
@@ -480,268 +573,108 @@
         {% for p in premium_users %}
         <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(20,20,20,0.6); padding:16px 20px; margin-bottom:12px; border-radius:16px; border:1px solid #222;">
             <div>
-                <a href="/profile/{{ p.username }}" style="font-weight:900; font-size:15px; color:var(--accent-white); text-decoration:none;">{{ p.username }}</a>
-                <div style="color:#888; margin-top:6px; font-size:12px;">Анимация: {{ p.animation_type }} • Выдан: {{ p.activated_at.strftime('%d.%m.%Y') }}</div>
+                <a href="/passport/{{ p.username }}" style="font-weight:900; font-size:15px; color:var(--accent-white); text-decoration:none;">{{ p.username }}</a>
+                <div style="color:#888; margin-top:6px; font-size:12px;">Выдан: {{ p.activated_at.strftime('%d.%m.%Y') if p.activated_at else '—' }}</div>
             </div>
             <a href="#" onclick="removePremium('{{ p.username }}')" class="delete-btn" style="padding:8px 12px;">🗑️</a>
+        </div>
+        {% endfor %}
+        
+        {% elif tab == 'announce' %}
+        <h3 style="color:#aaa; margin-bottom:20px; font-size:14px;">СОЗДАТЬ ОБЪЯВЛЕНИЕ</h3>
+        <div style="background:rgba(20,20,20,0.6); padding:20px; border-radius:16px; border:1px solid #222; margin-bottom:25px;">
+            <textarea id="announce-text" class="form-input" style="width:100%; min-height:120px; margin-bottom:12px;" placeholder="Текст объявления..."></textarea>
+            <button onclick="sendAnnouncement()" class="modal-btn primary" style="width:100%;">📢 ОТПРАВИТЬ НА ВЕСЬ МЕССЕНДЖЕР</button>
+        </div>
+        <h3 style="color:#aaa; margin-bottom:15px; font-size:14px;">ПОСЛЕДНИЕ ОБЪЯВЛЕНИЯ</h3>
+        {% for a in announcements %}
+        <div style="background:rgba(20,20,20,0.6); padding:16px; margin-bottom:10px; border-radius:12px; border:1px solid #222;">
+            <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+                <span style="font-weight:700; color:var(--accent-white);">{{ a.admin_username }}</span>
+                <span style="color:#666; font-size:11px;">{{ a.timestamp.strftime('%d.%m.%Y %H:%M') if a.timestamp else '—' }}</span>
+            </div>
+            <div style="color:#ccc; font-size:13px;">{{ a.content }}</div>
         </div>
         {% endfor %}
         {% endif %}
         <a href="/" class="btn-header" style="display:inline-block; margin-top:25px; padding:12px 20px;">НАЗАД В ЧАТ</a>
     </div>
 
-    {% elif mode == 'profile' %}
-    <div class="profile-container">
-        <div class="profile-card">
-            <div class="profile-avatar" onclick="document.getElementById('avatar-input').click()">
-                {% if user.avatar_data %}
-                <img src="{{ user.avatar_data }}" id="profile-avatar-img">
-                {% else %}
-                <span id="profile-avatar-text">{{ user.username[0]|upper }}</span>
-                {% endif %}
-                <div class="change-avatar">📷</div>
-            </div>
-            <input type="file" id="avatar-input" accept="image/*" style="display:none;" onchange="uploadAvatar(this)">
-            <div class="profile-name">
-                {{ user.username }}
-                {% if user.user_badge %}<img src="{{ user.user_badge }}" style="width:20px; height:20px;">{% endif %}
-                {% if user.verification_type == 1 %}<span class="verify-badge verify-white" onclick="showBadgeInfo(event, 'Подтверждённый', 'Аккаунт подтверждён')"></span>
-                {% elif user.verification_type == 2 %}<span class="verify-badge verify-green" onclick="showBadgeInfo(event, 'Сотрудник/Блогер', 'Официальный аккаунт')"></span>
-                {% elif user.verification_type == 3 %}<span class="verify-badge verify-premium-{{ premium.animation_type if premium else 1 }}" onclick="showBadgeInfo(event, 'Premium', 'Премиум-подписчик')"></span>{% endif %}
-            </div>
-        </div>
-        
-        <div class="info-section">
-            <div class="info-title">📋 Информация</div>
-            <div class="info-row"><span class="info-label">Никнейм</span><span class="info-value">@{{ user.username }}</span></div>
-            <div class="info-row"><span class="info-label">Статус</span><span class="info-value">{% if user.verification_type == 1 %}Подтверждённый{% elif user.verification_type == 2 %}Сотрудник/Блогер{% elif user.verification_type == 3 %}Premium{% else %}Обычный{% endif %}</span></div>
-            {% if user.badge_reason %}<div class="info-row"><span class="info-label">Причина</span><span class="info-value">{{ user.badge_reason }}</span></div>{% endif %}
-            <div class="info-row"><span class="info-label">Сообщений</span><span class="info-value">{{ user.msg_count }}</span></div>
-        </div>
-        
-        <div class="pin-section">
-            <div class="info-title">📌 Закреплённый канал</div>
-            <select id="pin-select" class="pin-select">
-                <option value="">Не выбран</option>
-                {% for ch in channels %}<option value="{{ ch.name }}" {% if pinned_channel and pinned_channel.name == ch.name %}selected{% endif %}>@{{ ch.name }}</option>{% endfor %}
-            </select>
-            <button class="pin-btn" onclick="pinChannel()">Сохранить</button>
-        </div>
-        
-        {% if premium %}
-        <div class="premium-section">
-            <div class="info-title" style="color:var(--accent-white);">💎 Premium анимация</div>
-            <div style="display:grid; grid-template-columns:repeat(5,1fr); gap:12px; margin-top:20px;">
-                {% for color in premium_colors %}
-                <div class="animation-option {% if premium.animation_type == loop.index %}selected{% endif %}" onclick="selectAnimation({{ loop.index }})">
-                    <div style="background: linear-gradient(45deg, {{ color.colors[0] }}, {{ color.colors[1] }}); width:28px; height:28px; border-radius:50%; margin:0 auto;"></div>
-                </div>
-                {% endfor %}
-                <div class="animation-option {% if premium.animation_type == 11 %}selected{% endif %}" onclick="showCustomColorModal()">
-                    <div style="width:28px; height:28px; border-radius:50%; margin:0 auto; background: conic-gradient(#ffffff, #aaaaaa, #ffffff);"></div>
-                </div>
-            </div>
-        </div>
-        {% endif %}
-        
-        <div class="referral-card">
-            <div class="info-title">🔗 Реферальная ссылка</div>
-            <div class="referral-link" id="referral-link">{{ referral_link }}</div>
-            <button class="copy-btn" onclick="copyReferralLink()">📋 Копировать</button>
-        </div>
-        
-        {% if show_ads %}
-        <div class="ad-banner">
-            <span style="color:#888; font-size:12px;">📢 Здесь могла быть ваша реклама</span>
-            <a href="/premium.html" style="display:block; margin-top:8px; color:var(--accent-white); font-size:11px; font-weight:600;">WETMO Premium отключает рекламу</a>
-        </div>
-        {% endif %}
-    </div>
-
-    {% elif mode == 'user_profile' %}
-    <div class="profile-container">
-        <div class="profile-card">
-            <div class="profile-avatar">
-                {% if profile_user.avatar_data %}<img src="{{ profile_user.avatar_data }}">{% else %}<span>{{ profile_user.username[0]|upper }}</span>{% endif %}
-            </div>
-            <div class="profile-name">
-                {{ profile_user.username }}
-                {% if profile_user.user_badge %}<img src="{{ profile_user.user_badge }}" style="width:20px; height:20px;">{% endif %}
-                {% if profile_user.verification_type == 1 %}<span class="verify-badge verify-white" onclick="showBadgeInfo(event, 'Подтверждённый', 'Аккаунт подтверждён')"></span>
-                {% elif profile_user.verification_type == 2 %}<span class="verify-badge verify-green" onclick="showBadgeInfo(event, 'Сотрудник/Блогер', 'Официальный аккаунт')"></span>
-                {% elif profile_user.verification_type == 3 %}<span class="verify-badge verify-premium-{{ premium.animation_type if premium else 1 }}" onclick="showBadgeInfo(event, 'Premium', 'Премиум-подписчик')"></span>{% endif %}
-            </div>
-        </div>
-        
-        <div class="info-section">
-            <div class="info-title">📋 Информация</div>
-            <div class="info-row"><span class="info-label">Никнейм</span><span class="info-value">@{{ profile_user.username }}</span></div>
-            <div class="info-row"><span class="info-label">Статус</span><span class="info-value">{% if profile_user.verification_type == 1 %}Подтверждённый{% elif profile_user.verification_type == 2 %}Сотрудник/Блогер{% elif profile_user.verification_type == 3 %}Premium{% else %}Обычный{% endif %}</span></div>
-            <div class="info-row"><span class="info-label">Сообщений</span><span class="info-value">{{ profile_user.msg_count }}</span></div>
-        </div>
-        
-        <a href="/im/{{ profile_user.username }}" class="pin-btn" style="display:block; text-align:center; text-decoration:none; margin-top:20px;">💬 Написать сообщение</a>
-        <a href="/" class="btn-header" style="display:block; text-align:center; margin-top:10px;">← НАЗАД</a>
-    </div>
-
-    {% elif mode == 'channel' %}
+    {% elif mode == 'chat' or mode == 'channel' or mode == 'post' or mode == 'profile' or mode == 'user_profile' %}
+    <!-- Остальной контент мессенджера -->
+    {% if mode == 'channel' %}
     <div class="tabs-bar">
-        {% for c in contacts %}
-        <a href="/im/{{ c.username }}" class="tab">
-            {% if c.avatar_data %}<img src="{{ c.avatar_data }}" class="sender-avatar">{% endif %}
-            {{ c.username|upper }}
-            {% if c.user_badge %}<img src="{{ c.user_badge }}" style="width:14px; height:14px; margin-right:4px;">{% endif %}
-            {% if c.verification_type == 1 %}<span class="verify-badge verify-white" onclick="showBadgeInfo(event, 'Подтверждённый', '')"></span>
-            {% elif c.verification_type == 2 %}<span class="verify-badge verify-green" onclick="showBadgeInfo(event, 'Сотрудник/Блогер', '')"></span>
-            {% elif c.verification_type == 3 %}<span class="verify-badge verify-premium-{{ premium.animation_type if premium else 1 }}" onclick="showBadgeInfo(event, 'Premium', '')"></span>{% endif %}
-            <span class="tab-close" onclick="deleteChat('{{ c.username }}')">&times;</span>
-        </a>
-        {% endfor %}
         {% for ch in channels %}
-        <a href="/channel/{{ ch.name }}" class="tab channel {{ 'active' if channel and channel.id == ch.id }}">
-            {% if ch.badge %}{% for b in channel_badges %}{% if b.url == ch.badge %}<img src="{{ b.url }}" style="width:14px; height:14px; margin-right:6px;">{% endif %}{% endfor %}{% endif %}
-            {{ ch.name }}
-            {% if ch.verification_type == 4 %}<span class="verify-badge verify-accent" onclick="showBadgeInfo(event, 'Верифицирован', 'Официальный канал')"></span>{% endif %}
-            <span class="tab-close" onclick="removeChannel('{{ ch.name }}', {{ ch.id }}, '{{ ch.created_by }}')">&times;</span>
-        </a>
+        <a href="/channel/{{ ch.name }}" class="tab channel {{ 'active' if channel and channel.id == ch.id }}">@{{ ch.name }}<span class="tab-close" onclick="removeChannel('{{ ch.name }}', {{ ch.id }}, '{{ ch.created_by }}')">&times;</span></a>
         {% endfor %}
     </div>
-    
-    <div id="messages">
-        {% if channel.created_by == user.username or user.username == 'wetmo' %}
-        <div style="margin-bottom:20px; padding: 0 5px;">
-            <button class="btn-header btn-accent" style="margin-left:0; padding:10px 16px; font-size:12px;" onclick="showGiveawayModal()">🎁 РОЗЫГРЫШ PREMIUM</button>
-        </div>
-        {% endif %}
-        
-        {% for item in posts_with_reactions %}
-        {% set m = item.msg %}
-        {% set s = item.sender %}
-        <div class="msg {% if m.sender == user.username %}me{% endif %}" id="post-{{ m.id }}">
-            <div class="sender channel-sender">
-                {% if s.avatar_data %}<img src="{{ s.avatar_data }}" class="sender-avatar">{% endif %}
-                {% if s.user_badge %}<img src="{{ s.user_badge }}" style="width:14px; height:14px; margin-right:6px;">{% endif %}
-                <a href="/profile/{{ m.sender }}" class="sender-name">
-                    <span class="{% if m.sender == user.username and premium %}premium-name-{{ premium.animation_type }}{% endif %}"
-                          style="{% if m.sender == user.username and premium and premium.animation_type == 11 %}background: linear-gradient(45deg, {{ user.custom_color1 }}, {{ user.custom_color2 }}); background-size: 300% 300%; -webkit-background-clip: text; background-clip: text; color: transparent; animation: premiumShine1 3s ease infinite;{% endif %}">{{ m.sender }}</span>
-                </a>
-                {% if s.verification_type == 1 %}<span class="verify-badge verify-white" onclick="showBadgeInfo(event, 'Подтверждённый', '')"></span>
-                {% elif s.verification_type == 2 %}<span class="verify-badge verify-green" onclick="showBadgeInfo(event, 'Сотрудник/Блогер', '')"></span>
-                {% elif s.verification_type == 3 %}<span class="verify-badge verify-premium-{{ item.sender_premium.animation_type if item.sender_premium else 1 }}" onclick="showBadgeInfo(event, 'Premium', '')"></span>{% endif %}
-                <span style="color:#666; margin-left:12px; font-weight:600; font-size:10px;">{{ m.timestamp.strftime('%H:%M') }}</span>
-                {% if m.sender == user.username or channel.created_by == user.username or user.username == 'wetmo' %}
-                <span style="margin-left:auto; cursor:pointer; font-size:14px; opacity:0.6;" onclick="deletePost({{ m.id }})" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.6">🗑️</span>
-                {% endif %}
-            </div>
-            <div class="msg-content" data-raw="{{ m.content }}"></div>
-            <div class="msg-actions">
-                <button onclick="reactToPost({{ m.id }}, 'like')" class="reaction-btn {% if item.user_reaction == 'like' %}active{% endif %}">👍 <span id="likes-{{ m.id }}">{{ item.likes }}</span></button>
-                <button onclick="reactToPost({{ m.id }}, 'dislike')" class="reaction-btn {% if item.user_reaction == 'dislike' %}active{% endif %}">👎 <span id="dislikes-{{ m.id }}">{{ item.dislikes }}</span></button>
-                <a href="/post/{{ m.id }}" class="comment-link">💬 Комментарии</a>
-                {% if 'РОЗЫГРЫШ' in m.content %}<button class="reaction-btn giveaway-btn" onclick="joinGiveawayFromPost({{ m.id }})">🎁</button>{% endif %}
-            </div>
-        </div>
-        {% endfor %}
-    </div>
-
-    <div class="input-wrap">
-        {% if channel.created_by == user.username or user.username == 'wetmo' %}
-        <button class="attach-btn" onclick="document.getElementById('file-input').click()" title="Прикрепить фото">📎</button>
-        <input type="file" id="file-input" accept="image/*" style="display:none;" onchange="attachFile(this)">
-        <input type="text" id="channel-m-in" placeholder="Написать в канал...">
-        <button onclick="sendChannelMsg()">→</button>
-        {% else %}
-        <button id="subscribe-btn" class="subscribe-btn" onclick="toggleSubscribe()">📢 ПОДПИСАТЬСЯ <span id="sub-count"></span></button>
-        {% endif %}
-    </div>
-
-    {% elif mode == 'post' %}
-    <div class="tabs-bar">
-        {% for c in contacts %}
-        <a href="/im/{{ c.username }}" class="tab">{{ c.username|upper }}{% if c.verification_type == 1 %}<span class="verify-badge verify-white"></span>{% elif c.verification_type == 2 %}<span class="verify-badge verify-green"></span>{% elif c.verification_type == 3 %}<span class="verify-badge verify-premium-1"></span>{% endif %}<span class="tab-close" onclick="deleteChat('{{ c.username }}')">&times;</span></a>
-        {% endfor %}
-        {% for ch in channels %}
-        <a href="/channel/{{ ch.name }}" class="tab channel">@{{ ch.name }}{% if ch.verification_type == 4 %}<span class="verify-badge verify-accent"></span>{% endif %}<span class="tab-close" onclick="removeChannel('{{ ch.name }}', {{ ch.id }}, '{{ ch.created_by }}')">&times;</span></a>
-        {% endfor %}
-    </div>
-
-    <div id="messages">
-        <a href="/channel/{{ channel.name }}" class="back-link">← {{ channel.name }}</a>
-        <div class="msg">
-            <div class="sender channel-sender">
-                {% if post_sender.avatar_data %}<img src="{{ post_sender.avatar_data }}" class="sender-avatar">{% endif %}
-                <a href="/profile/{{ post.sender }}" class="sender-name">{{ post.sender }}</a>
-                {% if post_sender.verification_type == 1 %}<span class="verify-badge verify-white"></span>
-                {% elif post_sender.verification_type == 2 %}<span class="verify-badge verify-green"></span>
-                {% elif post_sender.verification_type == 3 %}<span class="verify-badge verify-premium-{{ sender_premium.animation_type if sender_premium else 1 }}"></span>{% endif %}
-                <span style="color:#666; margin-left:12px; font-size:10px;">{{ post.timestamp.strftime('%H:%M') }}</span>
-            </div>
-            <div class="msg-content" data-raw="{{ post.content }}"></div>
-            <div class="msg-actions">
-                <button onclick="reactToPost({{ post.id }}, 'like')" class="reaction-btn {% if user_reaction == 'like' %}active{% endif %}">👍 {{ likes }}</button>
-                <button onclick="reactToPost({{ post.id }}, 'dislike')" class="reaction-btn {% if user_reaction == 'dislike' %}active{% endif %}">👎 {{ dislikes }}</button>
-            </div>
-        </div>
-        
-        <div class="comment-section">
-            <h3 style="color:var(--accent-white); font-size:16px; margin:25px 0 15px;">💬 Комментарии</h3>
-            <div id="comments-list">{% for c in comments %}<div class="comment"><div class="comment-header"><a href="/profile/{{ c.sender }}" class="sender-name" style="color:var(--accent-white);">{{ c.sender }}</a><span class="comment-time">{{ c.timestamp.strftime('%H:%M') }}</span></div><div class="comment-content">{{ c.content }}</div></div>{% endfor %}</div>
-        </div>
-    </div>
-    
-    <div class="input-wrap">
-        <input type="text" id="comment-input" placeholder="Комментарий...">
-        <button onclick="addComment()">→</button>
-    </div>
-
     {% else %}
     <div class="tabs-bar">
         {% for c in contacts %}
-        <a href="/im/{{ c.username }}" class="tab {% if target and target.username == c.username %}active{% endif %}">
-            {% if c.avatar_data %}<img src="{{ c.avatar_data }}" class="sender-avatar">{% endif %}
-            {{ c.username|upper }}{% if c.verification_type == 1 %}<span class="verify-badge verify-white"></span>{% elif c.verification_type == 2 %}<span class="verify-badge verify-green"></span>{% elif c.verification_type == 3 %}<span class="verify-badge verify-premium-1"></span>{% endif %}<span class="tab-close" onclick="deleteChat('{{ c.username }}')">&times;</span>
-        </a>
+        <a href="/im/{{ c.username }}" class="tab">{{ c.username|upper }}<span class="tab-close" onclick="deleteChat('{{ c.username }}')">&times;</span></a>
         {% endfor %}
         {% for ch in channels %}
-        <a href="/channel/{{ ch.name }}" class="tab channel">@{{ ch.name }}{% if ch.verification_type == 4 %}<span class="verify-badge verify-accent"></span>{% endif %}<span class="tab-close" onclick="removeChannel('{{ ch.name }}', {{ ch.id }}, '{{ ch.created_by }}')">&times;</span></a>
+        <a href="/channel/{{ ch.name }}" class="tab channel">@{{ ch.name }}<span class="tab-close" onclick="removeChannel('{{ ch.name }}', {{ ch.id }}, '{{ ch.created_by }}')">&times;</span></a>
+        {% endfor %}
+    </div>
+    {% endif %}
+    {% endif %}
+
+    {% if mode in ['chat', 'channel', 'post'] %}
+    <div id="messages">
+        {% if channel and channel.is_pinned_post %}
+        <div class="pinned-message">
+            <div>
+                <span class="pinned-label">📌 ЗАКРЕПЛЕНО</span>
+                <span>{{ channel.pinned_post_content[:100] }}...</span>
+            </div>
+        </div>
+        {% endif %}
+        {% for m in messages %}
+        <div class="msg {% if m.sender == user.username %}me{% endif %}" id="msg-{{ m.id }}">
+            <div class="sender">
+                <a href="/passport/{{ m.sender }}" class="sender-name">{{ m.sender }}</a>
+                <span style="color:#666; font-size:10px;">{{ m.timestamp.strftime('%H:%M') if m.timestamp else '' }}</span>
+                {% if m.is_edited %}<span style="color:#888; font-size:9px;">(изм.)</span>{% endif %}
+                {% if m.deleted_by %}
+                <div class="msg-deleted">🗑️ Сообщение удалено{% if m.deleted_by != m.sender %} модератором{% endif %}</div>
+                {% else %}
+                <span style="margin-left:auto; display:flex; gap:8px; opacity:0; transition:opacity 0.2s;" class="msg-tools">
+                    <span onclick="copyMessage('{{ m.content | e }}')" title="Копировать" style="cursor:pointer;">📋</span>
+                    <span onclick="forwardMessage({{ m.id }})" title="Переслать" style="cursor:pointer;">↗️</span>
+                    {% if m.sender == user.username or (user.is_admin and user.can_delete_messages) %}
+                    <span onclick="deleteMessageById({{ m.id }})" title="Удалить" style="cursor:pointer;">🗑️</span>
+                    {% endif %}
+                    {% if m.sender == user.username %}
+                    <span onclick="startEditMessage({{ m.id }}, '{{ m.content | e }}')" title="Редактировать" style="cursor:pointer;">✏️</span>
+                    {% endif %}
+                    {% if user.is_admin and user.can_pin_messages %}
+                    <span onclick="pinMessage({{ m.id }})" title="Закрепить" style="cursor:pointer;">📌</span>
+                    {% endif %}
+                </span>
+                {% endif %}
+            </div>
+            {% if not m.deleted_by %}
+            <div class="msg-content">{{ m.content }}</div>
+            {% endif %}
+        </div>
+        <script>
+            (function() {
+                var msgEl = document.getElementById('msg-{{ m.id }}');
+                var tools = msgEl?.querySelector('.msg-tools');
+                if (msgEl && tools) {
+                    msgEl.addEventListener('mouseenter', function() { tools.style.opacity = '1'; });
+                    msgEl.addEventListener('mouseleave', function() { tools.style.opacity = '0'; });
+                }
+            })();
+        </script>
         {% endfor %}
     </div>
     
-    <div id="messages">
-        {% if target %}
-            {% for m in messages %}
-            <div class="msg {% if m.sender.lower() == user.username.lower() %}me{% endif %}">
-                <div class="sender">
-                    {% if m.sender == user.username %}
-                        {% if user.avatar_data %}<img src="{{ user.avatar_data }}" class="sender-avatar">{% endif %}
-                        {% if user.user_badge %}<img src="{{ user.user_badge }}" style="width:14px; height:14px; margin-right:6px;">{% endif %}
-                        <span class="{% if premium %}premium-name-{{ premium.animation_type }}{% endif %}" style="{% if premium and premium.animation_type == 11 %}background: linear-gradient(45deg, {{ user.custom_color1 }}, {{ user.custom_color2 }}); background-size: 300% 300%; -webkit-background-clip: text; background-clip: text; color: transparent; animation: premiumShine1 3s ease infinite;{% endif %}">{{ user.username }}</span>
-                        {% if user.verification_type == 1 %}<span class="verify-badge verify-white" onclick="showBadgeInfo(event, 'Подтверждённый', '')"></span>
-                        {% elif user.verification_type == 2 %}<span class="verify-badge verify-green" onclick="showBadgeInfo(event, 'Сотрудник/Блогер', '')"></span>
-                        {% elif user.verification_type == 3 %}<span class="verify-badge verify-premium-{{ premium.animation_type if premium else 1 }}" onclick="showBadgeInfo(event, 'Premium', '')"></span>{% endif %}
-                    {% else %}
-                        {% if target.avatar_data %}<img src="{{ target.avatar_data }}" class="sender-avatar">{% endif %}
-                        {% if target.user_badge %}<img src="{{ target.user_badge }}" style="width:14px; height:14px; margin-right:6px;">{% endif %}
-                        <a href="/profile/{{ target.username }}" class="sender-name">{{ target.username }}</a>
-                        {% if target.verification_type == 1 %}<span class="verify-badge verify-white" onclick="showBadgeInfo(event, 'Подтверждённый', '')"></span>
-                        {% elif target.verification_type == 2 %}<span class="verify-badge verify-green" onclick="showBadgeInfo(event, 'Сотрудник/Блогер', '')"></span>
-                        {% elif target.verification_type == 3 %}<span class="verify-badge verify-premium-{{ premium.animation_type if premium else 1 }}" onclick="showBadgeInfo(event, 'Premium', '')"></span>{% endif %}
-                    {% endif %}
-                </div>
-                <div class="msg-content" data-raw="{{ m.content }}"></div>
-            </div>
-            {% endfor %}
-        {% endif %}
-    </div>
-    
-    {% if target %}
     <div class="input-wrap">
-        <button class="attach-btn" onclick="document.getElementById('file-input').click()" title="Прикрепить фото">📎</button>
-        <input type="file" id="file-input" accept="image/*" style="display:none;" onchange="attachFile(this)">
-        <input type="text" id="m-in" placeholder="Написать сообщение...">
-        <button onclick="send()">→</button>
+        <input type="text" id="msg-input" placeholder="Написать сообщение...">
+        <button onclick="sendMsg()">→</button>
     </div>
-    {% endif %}
     {% endif %}
 
     {% if mode in ['chat', 'channel', 'post'] and not premium %}
@@ -752,49 +685,21 @@
     {% endif %}
 
     <script>
-        // ============ ОСНОВНЫЕ ПЕРЕМЕННЫЕ ============
         const socket = io();
         const me = "{{ user.username if user else '' }}";
         marked.setOptions({ breaks: true, gfm: true });
         
-        // ============ IndexedDB ============
-        const DB_NAME = 'wetmo_files_v3';
-        let db;
-
-        function openDB() {
-            return new Promise((resolve, reject) => {
-                const request = indexedDB.open(DB_NAME, 1);
-                request.onupgradeneeded = (e) => {
-                    const db = e.target.result;
-                    if (!db.objectStoreNames.contains('files')) db.createObjectStore('files', { keyPath: 'id', autoIncrement: true });
-                    if (!db.objectStoreNames.contains('avatars')) db.createObjectStore('avatars', { keyPath: 'username' });
-                };
-                request.onsuccess = (e) => { db = e.target.result; resolve(db); };
-                request.onerror = (e) => reject(e.target.error);
-            });
-        }
-
-        function saveFileToDB(data) {
-            return new Promise(async (resolve) => {
-                await openDB();
-                const tx = db.transaction('files', 'readwrite');
-                const store = tx.objectStore('files');
-                const request = store.add({ ...data, timestamp: Date.now() });
-                request.onsuccess = () => resolve(request.result);
-            });
-        }
-
-        function getFileFromDB(id) {
-            return new Promise(async (resolve) => {
-                await openDB();
-                const tx = db.transaction('files', 'readonly');
-                const store = tx.objectStore('files');
-                const request = store.get(id);
-                request.onsuccess = () => resolve(request.result);
-            });
-        }
-
-        // ============ ВСПЛЫВАШКИ ============
+        let editingMessageId = null;
+        let updateInterval = null;
+        
+        // ============ ОСНОВНЫЕ ФУНКЦИИ ============
+        function toggleMobileMenu() { document.getElementById('mobile-menu').classList.toggle('active'); }
+        document.addEventListener('click', (e) => {
+            const menu = document.getElementById('mobile-menu');
+            const btn = document.querySelector('.mobile-menu-btn');
+            if (menu && btn && !menu.contains(e.target) && !btn.contains(e.target)) menu.classList.remove('active');
+        });
+        
         function showToast(text) {
             const toast = document.createElement('div');
             toast.className = 'toast';
@@ -802,99 +707,15 @@
             document.body.appendChild(toast);
             setTimeout(() => toast.remove(), 2500);
         }
-
+        
         function showBadgeInfo(event, title, description) {
             event.stopPropagation();
             document.getElementById('badge-title').textContent = title;
             document.getElementById('badge-description').textContent = description;
             document.getElementById('badge-info-modal').style.display = 'flex';
         }
-
         function closeBadgeInfoModal() { document.getElementById('badge-info-modal').style.display = 'none'; }
-
-        // ============ МОБИЛЬНОЕ МЕНЮ ============
-        function toggleMobileMenu() { document.getElementById('mobile-menu').classList.toggle('active'); }
-        document.addEventListener('click', (e) => {
-            const menu = document.getElementById('mobile-menu');
-            const btn = document.querySelector('.mobile-menu-btn');
-            if (menu && btn && !menu.contains(e.target) && !btn.contains(e.target)) menu.classList.remove('active');
-        });
-
-        // ============ АВАТАРКА ============
-        function uploadAvatar(input) {
-            const file = input.files[0];
-            if (!file) return;
-            if (file.size > 500 * 1024) { showToast('Максимальный размер 500KB'); return; }
-            const reader = new FileReader();
-            reader.onload = async (e) => {
-                const compressed = await compressImage(e.target.result, 200, 200, 0.6);
-                fetch('/api/user/avatar', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({avatar: compressed}) })
-                .then(() => location.reload());
-            };
-            reader.readAsDataURL(file);
-        }
-
-        // ============ ОТПРАВКА ФАЙЛОВ ============
-        function attachFile(input) {
-            const file = input.files[0];
-            if (!file) return;
-            if (!file.type.startsWith('image/')) { showToast('Только изображения'); return; }
-            const reader = new FileReader();
-            reader.onload = async (e) => {
-                const compressed = await compressImage(e.target.result, 800, 600, 0.5);
-                const fileId = await saveFileToDB({ name: file.name, type: file.type, data: compressed });
-                const msgInput = document.getElementById('m-in') || document.getElementById('channel-m-in');
-                if (msgInput) {
-                    msgInput.value += ` [IMG:${fileId}:${file.name}] `;
-                    msgInput.focus();
-                }
-            };
-            reader.readAsDataURL(file);
-        }
-
-        // ============ СЖАТИЕ ИЗОБРАЖЕНИЯ ============
-        function compressImage(base64, maxW, maxH, quality) {
-            return new Promise((resolve) => {
-                const img = new Image();
-                img.onload = () => {
-                    const canvas = document.createElement('canvas');
-                    let w = img.width, h = img.height;
-                    if (w > maxW) { h = h * (maxW / w); w = maxW; }
-                    if (h > maxH) { w = w * (maxH / h); h = maxH; }
-                    canvas.width = w; canvas.height = h;
-                    canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-                    resolve(canvas.toDataURL('image/jpeg', quality));
-                };
-                img.src = base64;
-            });
-        }
-
-        // ============ ОТОБРАЖЕНИЕ ФАЙЛОВ В СООБЩЕНИЯХ ============
-        async function renderFileContent(content) {
-            const imgMatch = content.match(/\[IMG:(\d+):(.*?)\]/g);
-            if (!imgMatch) return marked.parse(content);
-            let html = content;
-            for (const match of imgMatch) {
-                const [, id, name] = match.match(/\[IMG:(\d+):(.*?)\]/);
-                const file = await getFileFromDB(parseInt(id));
-                if (file && file.data) {
-                    html = html.replace(match, `<div style="margin-top:8px;"><img src="${file.data}" class="msg-image" onclick="window.open(this.src)"><div style="font-size:10px; color:#888; margin-top:4px;">📸 ${name}</div></div>`);
-                } else {
-                    html = html.replace(match, `<div style="color:#888; font-size:12px;">📎 ${name} (недоступен)</div>`);
-                }
-            }
-            return marked.parse(html);
-        }
-
-        async function parseMsgs() {
-            const msgs = document.querySelectorAll('.msg-content[data-raw]');
-            for (const el of msgs) {
-                el.innerHTML = await renderFileContent(el.dataset.raw);
-                delete el.dataset.raw;
-            }
-        }
-
-        // ============ МОДАЛКИ ============
+        
         function showCreateChannelModal() { document.getElementById('create-channel-modal').style.display = 'flex'; document.getElementById('mobile-menu')?.classList.remove('active'); }
         function closeCreateChannelModal() { document.getElementById('create-channel-modal').style.display = 'none'; }
         function showPremiumModal() { document.getElementById('premium-modal').style.display = 'flex'; }
@@ -903,22 +724,204 @@
         function closeCustomColorModal() { document.getElementById('custom-color-modal').style.display = 'none'; }
         function showGiveawayModal() { document.getElementById('giveaway-modal').style.display = 'flex'; }
         function closeGiveawayModal() { document.getElementById('giveaway-modal').style.display = 'none'; }
-
-        // ============ PREMIUM ============
-        function saveCustomColor() {
-            const c1 = document.getElementById('custom-color1').value;
-            const c2 = document.getElementById('custom-color2').value;
-            fetch('/api/premium/custom_color', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({color1: c1, color2: c2}) })
-            .then(r => r.json()).then(d => { if (d.status === 'ok') { closeCustomColorModal(); showToast('Цвет сохранён!'); location.reload(); } });
-        }
-
-        function selectAnimation(type) {
-            fetch(`/api/premium/animation/${type}`, {method: 'POST'}).then(r => r.json()).then(d => {
-                if (d.status === 'ok') { closePremiumModal(); showToast('Цвет обновлён!'); location.reload(); }
+        
+        // ============ СООБЩЕНИЯ ============
+        function sendMsg() {
+            const input = document.getElementById('msg-input');
+            if (!input || !input.value.trim()) return;
+            
+            if (editingMessageId) {
+                saveEditMessage(editingMessageId);
+                return;
+            }
+            
+            socket.emit('send_msg', { 
+                {% if channel %}channel_id: {{ channel.id }}, 
+                {% elif target %}target: "{{ target.username }}",
+                {% endif %}
+                message: input.value 
             });
+            input.value = '';
         }
-
-        // ============ КАНАЛЫ ============
+        
+        async function startEditMessage(msgId, currentText) {
+            editingMessageId = msgId;
+            const input = document.getElementById('msg-input');
+            if (input) {
+                input.value = currentText;
+                input.focus();
+                input.style.border = '2px solid #ffd700';
+            }
+        }
+        
+        async function saveEditMessage(msgId) {
+            const input = document.getElementById('msg-input');
+            if (!input) return;
+            const newText = input.value.trim();
+            if (!newText) return;
+            try {
+                await fetch(`/api/message/${msgId}/edit`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({content: newText})
+                });
+                input.value = '';
+                input.style.border = '';
+                editingMessageId = null;
+                location.reload();
+            } catch(e) {}
+        }
+        
+        async function deleteMessageById(msgId) {
+            if (!confirm('Удалить сообщение?')) return;
+            try {
+                await fetch(`/api/message/${msgId}/delete`, {method: 'DELETE'});
+                location.reload();
+            } catch(e) {}
+        }
+        
+        async function forwardMessage(msgId) {
+            const target = prompt('Кому переслать? (username или @канал)');
+            if (!target) return;
+            try {
+                await fetch(`/api/message/${msgId}/forward`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({target})
+                });
+                showToast('✅ Переслано!');
+            } catch(e) { showToast('❌ Ошибка'); }
+        }
+        
+        function copyMessage(text) {
+            navigator.clipboard.writeText(text).then(() => showToast('📋 Скопировано!'));
+        }
+        
+        async function pinMessage(msgId) {
+            try {
+                await fetch(`/api/message/${msgId}/pin`, {method: 'POST'});
+                location.reload();
+            } catch(e) {}
+        }
+        
+        // ============ МОДЕРАТОРЫ ============
+        function openModeratorModal(username, level, title, canDel, canBan, canMute, canPin, canInfo, canAdd, canAnn, isAnon) {
+            document.getElementById('mod-target').value = username;
+            document.getElementById('mod-title').value = title || '';
+            document.getElementById('mod-level').value = level;
+            document.getElementById('perm-delete').checked = canDel === true || canDel === 'true';
+            document.getElementById('perm-ban').checked = canBan === true || canBan === 'true';
+            document.getElementById('perm-mute').checked = canMute === true || canMute === 'true';
+            document.getElementById('perm-pin').checked = canPin === true || canPin === 'true';
+            document.getElementById('perm-info').checked = canInfo === true || canInfo === 'true';
+            document.getElementById('perm-addmod').checked = canAdd === true || canAdd === 'true';
+            document.getElementById('perm-announce').checked = canAnn === true || canAnn === 'true';
+            document.getElementById('perm-anonymous').checked = isAnon === true || isAnon === 'true';
+            document.getElementById('moderator-modal').style.display = 'flex';
+        }
+        
+        function closeModeratorModal() { document.getElementById('moderator-modal').style.display = 'none'; }
+        
+        async function saveModerator() {
+            const username = document.getElementById('mod-target').value;
+            const data = {
+                username: username,
+                moderator_title: document.getElementById('mod-title').value,
+                admin_level: parseInt(document.getElementById('mod-level').value),
+                can_delete_messages: document.getElementById('perm-delete').checked,
+                can_ban_users: document.getElementById('perm-ban').checked,
+                can_mute_users: document.getElementById('perm-mute').checked,
+                can_pin_messages: document.getElementById('perm-pin').checked,
+                can_change_info: document.getElementById('perm-info').checked,
+                can_add_moderators: document.getElementById('perm-addmod').checked,
+                can_announce: document.getElementById('perm-announce').checked,
+                is_anonymous: document.getElementById('perm-anonymous').checked
+            };
+            try {
+                await fetch('/api/admin/moderator/permissions', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(data)
+                });
+                closeModeratorModal();
+                location.reload();
+            } catch(e) {}
+        }
+        
+        async function addModerator() {
+            const username = document.getElementById('new-mod-username').value.trim();
+            if (!username) { alert('Введите username'); return; }
+            try {
+                const r = await fetch('/api/admin/moderator/add', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({username, admin_level: 1, moderator_title: 'Модератор', can_delete_messages: true, can_ban_users: true, can_mute_users: true})
+                });
+                const d = await r.json();
+                showToast(d.message || 'Готово');
+                location.reload();
+            } catch(e) {}
+        }
+        
+        async function removeModerator(username) {
+            if (!confirm(`Снять модератора ${username}?`)) return;
+            try {
+                await fetch('/api/admin/moderator/remove', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({username})
+                });
+                location.reload();
+            } catch(e) {}
+        }
+        
+        async function banUser(username) {
+            const reason = prompt('Причина бана:', 'Нарушение правил');
+            if (!reason) return;
+            const hours = prompt('На сколько часов? (0 = навсегда)', '0');
+            try {
+                await fetch('/admin/ban', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({target: username, reason, hours: parseInt(hours) || 0})
+                });
+                showToast(`Пользователь ${username} забанен`);
+                location.reload();
+            } catch(e) {}
+        }
+        
+        async function muteUser(username) {
+            const hours = prompt('На сколько часов мут?', '24');
+            if (!hours) return;
+            try {
+                await fetch('/admin/mute', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({target: username, hours: parseInt(hours) || 24})
+                });
+                showToast(`Пользователь ${username} получил мут`);
+                location.reload();
+            } catch(e) {}
+        }
+        
+        // ============ АДМИН-ОБЪЯВЛЕНИЯ ============
+        async function sendAnnouncement() {
+            const text = document.getElementById('announce-text').value.trim();
+            if (!text) { alert('Введите текст'); return; }
+            if (!confirm('Отправить объявление ВСЕМ пользователям?')) return;
+            try {
+                const r = await fetch('/api/admin/announce', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({text})
+                });
+                const d = await r.json();
+                if (d.status === 'ok') showToast(`✅ Отправлено ${d.recipients} пользователям!`);
+                location.reload();
+            } catch(e) {}
+        }
+        
+        // ============ ПРОЧЕЕ ============
         function createUserChannel() {
             const name = document.getElementById('modal-channel-name').value.trim();
             const desc = document.getElementById('modal-channel-desc').value.trim();
@@ -926,7 +929,20 @@
             fetch('/api/channel/create', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({name, description: desc}) })
             .then(r => r.json()).then(d => { if (d.status === 'ok') window.location.href = '/channel/' + d.name; });
         }
-
+        
+        function selectAnimation(type) {
+            fetch(`/api/premium/animation/${type}`, {method: 'POST'}).then(r => r.json()).then(d => {
+                if (d.status === 'ok') { closePremiumModal(); showToast('Цвет обновлён!'); location.reload(); }
+            });
+        }
+        
+        function saveCustomColor() {
+            const c1 = document.getElementById('custom-color1').value;
+            const c2 = document.getElementById('custom-color2').value;
+            fetch('/api/premium/custom_color', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({color1: c1, color2: c2}) })
+            .then(r => r.json()).then(d => { if (d.status === 'ok') { closeCustomColorModal(); showToast('Цвет сохранён!'); location.reload(); } });
+        }
+        
         function createGiveaway() {
             const end = document.getElementById('giveaway-end').value;
             const winners = document.getElementById('giveaway-winners').value;
@@ -934,103 +950,43 @@
             fetch(`/api/channel/{{ channel.id if channel else 1 }}/giveaway/create`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ends_at: end, winners: parseInt(winners)}) })
             .then(r => r.json()).then(d => { if (d.status === 'ok') { closeGiveawayModal(); location.reload(); } });
         }
-
+        
         function joinGiveaway(id) { fetch(`/api/giveaway/${id}/join`, {method: 'POST'}).then(r => r.json()).then(d => { if (d.status === 'ok') showToast('✅ Вы участвуете!'); else alert(d.error); }); }
-
-        // ============ АДМИНКА ============
-        function setChannelBadge(id, badge) { fetch(`/admin/channel/badge/${id}`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({badge}) }).then(() => location.reload()); }
+        
         function setUserBadge(username, url) { fetch(`/admin/give_user_badge/${username}`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({badge_url: url}) }).then(() => location.reload()); }
         function deleteChannel(id) { if (confirm('Удалить канал?')) fetch(`/admin/channel/delete/${id}`, {method: 'DELETE'}).then(() => location.reload()); }
-        function giveBadge(username, vtype, reason) { fetch(`/admin/give_badge/${username}`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({vtype, reason}) }).then(r => r.json()).then(d => { if (d.status === 'ok') { showToast('Галочка выдана!'); location.reload(); } }); }
-        function givePremiumUser(username) { if (confirm(`Выдать Premium ${username}?`)) fetch(`/admin/give_premium/${username}`, {method: 'POST'}).then(r => r.json()).then(d => { if (d.status === 'ok') location.reload(); }); }
         function removePremium(username) { if (confirm(`Забрать Premium у ${username}?`)) fetch(`/admin/remove_premium/${username}`, {method: 'DELETE'}).then(() => location.reload()); }
-
-        // ============ ПРОФИЛЬ ============
-        function copyReferralLink() { navigator.clipboard.writeText(document.getElementById('referral-link')?.textContent || '').then(() => showToast('Ссылка скопирована!')); }
-        function pinChannel() { const ch = document.getElementById('pin-select').value; fetch('/api/user/pin_channel', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({channel: ch}) }).then(r => r.json()).then(d => { if (d.status === 'ok') showToast(ch ? 'Закреплено!' : 'Снято'); }); }
-
-        // ============ СООБЩЕНИЯ ============
-        function sendChannelMsg() {
-            const input = document.getElementById('channel-m-in');
-            if (input && input.value.trim()) {
-                socket.emit('send_msg', { channel_id: {{ channel.id if channel else 'null' }}, message: input.value });
-                input.value = '';
-            }
-        }
-
-        function send() {
-            const input = document.getElementById('m-in');
-            if (input && input.value.trim()) {
-                socket.emit('send_msg', { target: "{{ target.username if target else '' }}", message: input.value });
-                input.value = '';
-            }
-        }
-
-        function reactToPost(id, type) {
-            fetch(`/api/post/${id}/react`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({type}) })
-            .then(r => r.json()).then(d => {
-                document.getElementById(`likes-${id}`).textContent = d.likes;
-                document.getElementById(`dislikes-${id}`).textContent = d.dislikes;
-            });
-        }
-
-        function deletePost(id) {
-            if (confirm('Удалить пост?')) fetch(`/api/post/${id}/delete`, {method: 'DELETE'}).then(r => r.json()).then(d => { if (d.status === 'ok') document.getElementById(`post-${id}`)?.remove(); });
-        }
-
-        function addComment() {
-            const input = document.getElementById('comment-input');
-            if (!input || !input.value.trim()) return;
-            fetch(`/api/post/{{ post.id if post else 0 }}/comment`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({content: input.value}) })
-            .then(() => { input.value = ''; /* reload comments */ });
-        }
-
         function deleteChat(target) { if (confirm(`Удалить чат с ${target}?`)) fetch(`/api/chat/delete/${target}`, {method: 'DELETE'}).then(() => location.href = '/'); return false; }
         function removeChannel(name, id, owner) { if (owner === me || me === 'wetmo') { if (confirm(`Удалить канал "${name}"?`)) fetch(`/api/channel/${id}/delete`, {method: 'DELETE'}).then(() => location.href = '/'); } else { if (confirm(`Отписаться от "${name}"?`)) fetch(`/api/channel/${id}/unsubscribe`, {method: 'POST'}).then(() => location.reload()); } return false; }
-        function toggleSubscribe() { fetch(`/api/channel/{{ channel.id if channel else 0 }}/subscribe`, {method: 'POST'}).then(r => r.json()).then(d => { const btn = document.getElementById('subscribe-btn'); if (btn) { btn.textContent = d.subscribed ? '✅ ВЫ ПОДПИСАНЫ' : '📢 ПОДПИСАТЬСЯ'; btn.className = d.subscribed ? 'subscribe-btn subscribed' : 'subscribe-btn'; document.getElementById('sub-count').textContent = ` (${d.count})`; if (d.subscribed) location.reload(); } }); }
-
-        // ============ SOCKET ============
+        
+        document.getElementById('msg-input')?.addEventListener('keypress', (e) => { if(e.key === 'Enter') sendMsg(); });
+        
+        // Socket
         {% if chat_id %} socket.emit('join', { chat_id: "{{ chat_id }}" }); {% endif %}
         {% if channel %} socket.emit('join', { channel_id: {{ channel.id }} }); {% endif %}
-
-        socket.on('receive_msg', async (d) => {
-            const div = document.createElement('div');
-            div.className = 'msg' + (d.sender.toLowerCase() === me.toLowerCase() ? ' me' : '');
-            const vtype = d.verification_type || 0;
-            let badge = '';
-            if (vtype === 1) badge = '<span class="verify-badge verify-white" onclick="showBadgeInfo(event, \'Подтверждённый\', \'\')"></span>';
-            else if (vtype === 2) badge = '<span class="verify-badge verify-green" onclick="showBadgeInfo(event, \'Сотрудник/Блогер\', \'\')"></span>';
-            else if (vtype === 3) badge = '<span class="verify-badge verify-premium-1" onclick="showBadgeInfo(event, \'Premium\', \'\')"></span>';
-            const avatar = d.avatar_data ? `<img src="${d.avatar_data}" class="sender-avatar">` : '';
-            const userBadge = d.user_badge ? `<img src="${d.user_badge}" style="width:14px; height:14px; margin-right:6px;">` : '';
-            div.innerHTML = `<div class="sender">${avatar}${userBadge}<a href="/profile/${d.sender}" class="sender-name">${d.sender}</a>${badge}</div><div class="msg-content">${await renderFileContent(d.message)}</div>`;
-            document.getElementById('messages').appendChild(div);
-            document.getElementById('messages').scrollTop = document.getElementById('messages').scrollHeight;
-        });
-
-        socket.on('receive_channel_msg', async (d) => {
-            if (d.channel_id === {{ channel.id if channel else 'null' }}) {
-                const div = document.createElement('div');
-                div.className = 'msg' + (d.sender === me ? ' me' : '');
-                div.id = 'post-' + d.id;
-                const vtype = d.verification_type || 0;
-                let badge = '';
-                if (vtype === 1) badge = '<span class="verify-badge verify-white" onclick="showBadgeInfo(event, \'Подтверждённый\', \'\')"></span>';
-                else if (vtype === 2) badge = '<span class="verify-badge verify-green" onclick="showBadgeInfo(event, \'Сотрудник/Блогер\', \'\')"></span>';
-                else if (vtype === 3) badge = '<span class="verify-badge verify-premium-1" onclick="showBadgeInfo(event, \'Premium\', \'\')"></span>';
-                const avatar = d.avatar_data ? `<img src="${d.avatar_data}" class="sender-avatar">` : '';
-                const canDelete = d.sender === me || '{{ channel.created_by if channel else '' }}' === me || me === 'wetmo';
-                div.innerHTML = `<div class="sender channel-sender">${avatar}<a href="/profile/${d.sender}" class="sender-name">${d.sender}</a>${badge}<span style="color:#666; margin-left:12px; font-size:10px;">${d.timestamp}</span>${canDelete ? '<span style="margin-left:auto; cursor:pointer; font-size:14px; opacity:0.6;" onclick="deletePost(' + d.id + ')" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.6">🗑️</span>' : ''}</div><div class="msg-content">${await renderFileContent(d.message)}</div><div class="msg-actions"><button onclick="reactToPost(${d.id}, \'like\')" class="reaction-btn">👍 0</button><button onclick="reactToPost(${d.id}, \'dislike\')" class="reaction-btn">👎 0</button>${d.giveaway_id ? `<button class="reaction-btn giveaway-btn" onclick="joinGiveaway(${d.giveaway_id})">🎁</button>` : ''}</div>`;
-                document.getElementById('messages').appendChild(div);
-                document.getElementById('messages').scrollTop = document.getElementById('messages').scrollHeight;
+        
+        socket.on('receive_msg', (d) => {
+            if (d.sender !== me) {
+                showToast(`💬 Новое сообщение от @${d.sender}`);
+                location.reload();
             }
         });
-
-        document.getElementById('m-in')?.addEventListener('keypress', (e) => { if(e.key === 'Enter') send(); });
-        document.getElementById('channel-m-in')?.addEventListener('keypress', (e) => { if(e.key === 'Enter') sendChannelMsg(); });
-        document.getElementById('comment-input')?.addEventListener('keypress', (e) => { if(e.key === 'Enter') addComment(); });
-
-        // ============ ПОИСК ============
+        
+        socket.on('receive_channel_msg', (d) => {
+            if (d.sender !== me) location.reload();
+        });
+        
+        socket.on('message_edited', () => location.reload());
+        socket.on('message_deleted', () => location.reload());
+        socket.on('channel_message_edited', () => location.reload());
+        socket.on('channel_message_deleted', () => location.reload());
+        socket.on('message_pinned', () => location.reload());
+        
+        socket.on('system_announcement', (d) => {
+            showToast(`📢 ОБЪЯВЛЕНИЕ: ${d.content.substring(0, 100)}...`);
+        });
+        
+        // Поиск
         const searchInput = document.getElementById('user-search');
         const searchResults = document.getElementById('search-results');
         let searchTimeout;
@@ -1051,28 +1007,6 @@
             });
             document.addEventListener('click', (e) => { if (!searchInput.contains(e.target) && !searchResults.contains(e.target)) searchResults.style.display = 'none'; });
         }
-
-        // ============ ИНИЦИАЛИЗАЦИЯ ============
-        openDB().then(() => parseMsgs());
     </script>
-
-    {% if mode == 'channel' or mode == 'post' %}
-    <script>
-        // Дополнительные скрипты для каналов и постов
-        {% if channel %} socket.emit('join', { channel_id: {{ channel.id }} }); {% endif %}
-        {% if post %} socket.emit('join', { post_id: {{ post.id }} }); {% endif %}
-        
-        let currentGiveawayId = null;
-        function joinGiveawayFromPost(postId) { if (currentGiveawayId) joinGiveaway(currentGiveawayId); else alert('Розыгрыш не найден'); }
-        
-        socket.on('new_comment', (d) => { if (d.post_id === {{ post.id if post else 0 }}) { /* reload comments */ } });
-        socket.on('reaction_update', (d) => {
-            if (d.post_id === {{ post.id if post else 0 }}) {
-                document.getElementById(`likes-${d.post_id}`).textContent = d.likes;
-                document.getElementById(`dislikes-${d.post_id}`).textContent = d.dislikes;
-            }
-        });
-    </script>
-    {% endif %}
 </body>
 </html>
