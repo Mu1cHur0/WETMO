@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WETMO — Авторизация</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Montserrat', sans-serif; background: #050505; color: #fff; display: flex; align-items: center; justify-content: center; height: 100vh; }
+        .consent-card { background: #111; border: 1px solid #222; border-radius: 20px; padding: 40px; width: 400px; text-align: center; }
+        h1 { font-size: 24px; margin-bottom: 10px; }
+        p { color: #888; font-size: 14px; margin-bottom: 25px; }
+        .app-name { color: #53fc18; font-weight: 700; }
+        .btn { padding: 14px 30px; border-radius: 10px; font-weight: 800; cursor: pointer; border: none; font-size: 14px; margin: 5px; }
+        .btn-accept { background: #53fc18; color: #000; }
+        .btn-cancel { background: #333; color: #fff; }
+    </style>
+</head>
+<body>
+    <div class="consent-card">
+        <h1>🔐 Авторизация</h1>
+        <p><span class="app-name">{{ app.name }}</span> запрашивает доступ к вашему аккаунту</p>
+        <p style="font-size:12px; color:#666;">Будут переданы: имя пользователя, статус верификации</p>
+        
+        <form method="POST" action="/oauth/consent">
+            <button type="submit" class="btn btn-accept">Разрешить</button>
+            <button type="button" class="btn btn-cancel" onclick="window.close()">Отмена</button>
+        </form>
+    </div>
+</body>
+</html>

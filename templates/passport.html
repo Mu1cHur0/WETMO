@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#53fc18">
+    <title>WETMO Passport — {{ profile_user.username }}</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%2353fc18'/%3E%3Ctext x='50' y='72' font-family='Montserrat, sans-serif' font-size='60' font-weight='900' fill='%23000000' text-anchor='middle'%3EW%3C/text%3E%3C/svg%3E">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg: #050505;
+            --bg-glass: rgba(5, 5, 5, 0.75);
+            --kick: #53fc18;
+            --border: #1a1a1a;
+            --danger: #ff4444;
+            --warning: #ff8800;
+            --accent-white: #ffffff;
+            --accent-silver: #cccccc;
+            --blue: #00d4ff;
+            --purple: #a855f7;
+            --pink: #ec4899;
+            --gold: #ffd700;
+        }
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; scrollbar-width: thin; scrollbar-color: #333 transparent; }
+        
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: var(--bg);
+            color: #fff;
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+        }
+        
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 6px; }
+        
+        .header {
+            background: var(--bg-glass);
+            backdrop-filter: blur(15px);
+            padding: 14px 25px;
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 900;
+            color: var(--kick);
+            text-decoration: none;
+            font-size: 20px;
+        }
+        
+        .logo-icon {
+            width: 28px;
+            height: 28px;
+            background: var(--kick);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .logo-icon span { color: #000; font-size: 18px; font-weight: 900; }
+        
+        .btn-header {
+            background: #111;
+            color: #fff;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: 700;
+            text-decoration: none;
+            border: 1px solid #222;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+        .btn-header:hover { background: #1a1a1a; border-color: #333; }
+        .btn-accent { background: var(--accent-white); color: #000; border-color: var(--accent-white); }
+        .btn-accent:hover { background: #e6e6e6; }
+        
+        .header-actions { display: flex; gap: 8px; margin-left: auto; flex-wrap: wrap; }
+        
+        .container { max-width: 1000px; margin: 0 auto; padding: 25px 20px; }
+        
+        /* Profile card */
+        .profile-card {
+            background: rgba(20,20,20,0.6);
+            backdrop-filter: blur(10px);
+            border: 1px solid #222;
+            border-radius: 24px;
+            padding: 30px;
+            margin-bottom: 25px;
+            display: flex;
+            gap: 25px;
+            align-items: center;
+            flex-wrap: wrap;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        
+        .avatar-large {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: var(--accent-white);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            font-weight: 900;
+            color: #000;
+            cursor: pointer;
+            position: relative;
+            flex-shrink: 0;
+            box-shadow: 0 10px 25px rgba(255,255,255,0.15);
+            transition: transform 0.2s;
+        }
+        .avatar-large:hover { transform: scale(1.05); }
+        .avatar-large img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
+        
+        .profile-info { flex: 1; min-width: 250px; }
+        
+        .username-line {
+            font-size: 26px;
+            font-weight: 900;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 8px;
+        }
+        
+        .verify-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .verify-white { background: #e0e0e0; color: #000; }
+        .verify-green { background: var(--kick); color: #000; }
+        .verify-gold { background: var(--gold); color: #000; }
+        .verify-premium { background: linear-gradient(45deg, #ff00ff, #00ffff); color: #000; }
+        .verify-badge::after { content: '✓'; }
+        
+        .badge-icon-img { width: 24px; height: 24px; }
+        
+        .badges-row {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+        
+        .badge-tag {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 10px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            border: 1px solid;
+        }
+        
+        /* Tabs */
+        .tabs-bar {
+            display: flex;
+            gap: 2px;
+            margin-bottom: 25px;
+            overflow-x: auto;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .tab-btn {
+            padding: 14px 20px;
+            background: transparent;
+            border: none;
+            color: #888;
+            font-weight: 700;
+            font-size: 12px;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            white-space: nowrap;
+            transition: all 0.2s;
+            font-family: 'Montserrat', sans-serif;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .tab-btn:hover { color: #fff; background: rgba(255,255,255,0.02); }
+        .tab-btn.active { color: var(--accent-white); border-bottom-color: var(--accent-white); }
+        
+        .tab-content { display: none; animation: fadeIn 0.3s ease; }
+        .tab-content.active { display: block; }
+        
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .card {
+            background: rgba(20,20,20,0.6);
+            border: 1px solid #1f1f1f;
+            border-radius: 16px;
+            padding: 25px;
+            margin-bottom: 20px;
+        }
+        
+        .card-title {
+            font-size: 16px;
+            font-weight: 800;
+            margin-bottom: 20px;
+            color: var(--accent-white);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .card-title i { color: var(--kick); }
+        
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        
+        .form-group { margin-bottom: 18px; }
+        .form-label {
+            display: block;
+            font-size: 10px;
+            font-weight: 700;
+            color: #888;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .form-input {
+            width: 100%;
+            padding: 13px 16px;
+            background: rgba(0,0,0,0.5);
+            border: 1px solid #333;
+            border-radius: 10px;
+            color: #fff;
+            font-size: 13px;
+            font-family: 'Montserrat', sans-serif;
+            outline: none;
+            transition: all 0.3s;
+            box-sizing: border-box;
+        }
+        .form-input:focus { border-color: var(--accent-white); background: rgba(255,255,255,0.05); }
+        textarea.form-input { resize: vertical; min-height: 80px; }
+        select.form-input { cursor: pointer; }
+        .form-input:disabled { opacity: 0.5; cursor: not-allowed; }
+        
+        /* Social rows */
+        .social-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 14px;
+            background: rgba(0,0,0,0.3);
+            border: 1px solid #1a1a1a;
+            border-radius: 10px;
+            margin-bottom: 8px;
+            transition: all 0.2s;
+        }
+        .social-row:hover { border-color: #333; }
+        .social-row i { font-size: 18px; width: 24px; text-align: center; }
+        .social-row input { flex: 1; background: transparent; border: none; color: #fff; font-size: 13px; outline: none; font-family: 'Montserrat', sans-serif; }
+        .social-row input:disabled { opacity: 0.5; }
+        
+        .fa-telegram { color: #0088cc; }
+        .fa-discord { color: #5865F2; }
+        .fa-github { color: #fff; }
+        .fa-youtube { color: #ff0000; }
+        .fa-twitter { color: #1DA1F2; }
+        .fa-instagram { color: #E1306C; }
+        .fa-tiktok { color: #fff; }
+        .fa-twitch { color: #9146FF; }
+        .fa-spotify { color: #1DB954; }
+        .fa-steam { color: #00adee; }
+        
+        .color-grid { display: flex; gap: 8px; flex-wrap: wrap; }
+        .color-swatch {
+            width: 36px; height: 36px; border-radius: 8px; cursor: pointer;
+            border: 2px solid transparent; transition: all 0.2s;
+        }
+        .color-swatch:hover { transform: scale(1.15); }
+        .color-swatch.selected { border-color: var(--accent-white); box-shadow: 0 0 10px currentColor; }
+        
+        .achieve-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; }
+        .achieve-item {
+            text-align: center; padding: 20px 10px; background: rgba(255,255,255,0.02);
+            border: 1px solid #1a1a1a; border-radius: 12px; transition: all 0.2s;
+        }
+        .achieve-item:hover { background: rgba(255,255,255,0.05); }
+        .achieve-item.locked { opacity: 0.3; filter: grayscale(1); }
+        .achieve-icon { font-size: 32px; margin-bottom: 6px; }
+        .achieve-name { font-size: 10px; font-weight: 700; }
+        .achieve-date { font-size: 9px; color: #888; margin-top: 3px; }
+        
+        .stat-cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+        .stat-item {
+            text-align: center; padding: 18px 12px; background: rgba(255,255,255,0.03);
+            border: 1px solid #1a1a1a; border-radius: 12px;
+        }
+        .stat-value { font-size: 22px; font-weight: 900; color: var(--kick); }
+        .stat-label { font-size: 9px; color: #888; font-weight: 600; margin-top: 4px; text-transform: uppercase; letter-spacing: 1px; }
+        
+        .chart-placeholder {
+            width: 100%; height: 180px; background: rgba(0,0,0,0.3);
+            border-radius: 10px; display: flex; align-items: flex-end;
+            justify-content: space-around; padding: 15px; gap: 8px;
+        }
+        .chart-bar {
+            flex: 1; background: linear-gradient(to top, var(--kick), #00cc44);
+            border-radius: 6px 6px 0 0; min-width: 15px; position: relative; transition: filter 0.2s;
+        }
+        .chart-bar:hover { filter: brightness(1.3); }
+        .chart-bar span { position: absolute; top: -18px; left: 50%; transform: translateX(-50%); font-size: 9px; font-weight: 700; color: var(--kick); }
+        
+        /* App items in passport */
+        .app-item {
+            background: rgba(0,0,0,0.3);
+            border: 1px solid #1a1a1a;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .app-item-name { font-weight: 700; font-size: 14px; color: var(--accent-white); }
+        .app-item-meta { font-size: 10px; color: #888; font-weight: 600; }
+        
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #fff;
+            color: #000;
+            padding: 12px 25px;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 12px;
+            z-index: 1000;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            animation: toastIn 0.3s ease, toastOut 0.3s ease 2.2s forwards;
+        }
+        @keyframes toastIn { from { opacity: 0; transform: translateX(-50%) translateY(15px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
+        @keyframes toastOut { from { opacity: 1; } to { opacity: 0; transform: translateX(-50%) translateY(-15px); } }
+        
+        @media (max-width: 768px) {
+            .grid-2 { grid-template-columns: 1fr; }
+            .stat-cards { grid-template-columns: repeat(2, 1fr); }
+            .achieve-grid { grid-template-columns: repeat(3, 1fr); }
+            .profile-card { flex-direction: column; text-align: center; }
+            .username-line { justify-content: center; }
+            .badges-row { justify-content: center; }
+            .header { flex-wrap: wrap; }
+            .header-actions { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <a href="/" class="logo">
+        <div class="logo-icon"><span>W</span></div>
+        <span>WETMO</span>
+    </a>
+    <span style="font-size: 16px; font-weight: 700; color: var(--accent-white);">Passport</span>
+    
+    <div class="header-actions">
+        <a href="/im/{{ profile_user.username }}" class="btn-header">
+            <i class="fas fa-comment"></i> Написать
+        </a>
+        {% if is_owner %}
+        <button class="btn-header btn-accent" onclick="saveAll()">
+            <i class="fas fa-save"></i> Сохранить
+        </button>
+        {% endif %}
+        <a href="/profile/{{ profile_user.username }}" class="btn-header">
+            <i class="fas fa-user"></i> Профиль
+        </a>
+        <a href="/" class="btn-header">
+            <i class="fas fa-arrow-left"></i> Назад
+        </a>
+    </div>
+</div>
+
+<div class="container">
+    <!-- Profile Card -->
+    <div class="profile-card">
+        <div class="avatar-large" {% if is_owner %}onclick="document.getElementById('avatar-input').click()" title="Сменить аватар"{% endif %}>
+            {% if profile_user.avatar_data %}
+            <img src="{{ profile_user.avatar_data }}" id="avatar-img">
+            {% else %}
+            <span id="avatar-text">{{ profile_user.username[0]|upper }}</span>
+            {% endif %}
+        </div>
+        {% if is_owner %}
+        <input type="file" id="avatar-input" accept="image/*" style="display:none;" onchange="uploadAvatar(this)">
+        {% endif %}
+        
+        <div class="profile-info">
+            <div class="username-line">
+                @{{ profile_user.username }}
+                
+                {% if profile_user.user_badge %}
+                <img src="{{ profile_user.user_badge }}" class="badge-icon-img" title="Эмблема">
+                {% endif %}
+                
+                {% if profile_user.verification_type == 1 %}
+                <span class="verify-badge verify-white" title="Подтверждённый"></span>
+                {% elif profile_user.verification_type == 2 %}
+                <span class="verify-badge verify-green" title="Модератор"></span>
+                {% elif profile_user.verification_type == 3 %}
+                <span class="verify-badge verify-gold" title="Администратор">⚡</span>
+                {% elif profile_user.verification_type == 4 %}
+                <span style="color: #00d4ff; font-size: 20px;" title="Разработчик">💻</span>
+                {% elif profile_user.verification_type == 5 %}
+                <span class="verify-badge verify-premium" title="Премиум"></span>
+                {% elif profile_user.verification_type == 6 %}
+                <span style="color: #ff8c00; font-size: 20px;" title="Партнёр">🤝</span>
+                {% elif profile_user.verification_type == 7 %}
+                <span style="color: #ff0000; font-size: 22px;" title="Основатель">👑</span>
+                {% elif profile_user.verification_type == 8 %}
+                <span style="color: #ffffff; font-size: 20px;" title="Легенда">⭐</span>
+                {% endif %}
+                
+                {% if premium %}
+                <span style="font-size: 18px;" title="Premium">💎</span>
+                {% endif %}
+                
+                <!-- ЗНАЧОК РАЗРАБОТЧИКА -->
+                {% if developer_apps_count and developer_apps_count > 0 or developer_bots_count and developer_bots_count > 0 %}
+                <span style="color: var(--blue); font-size: 18px; cursor: pointer;" title="Разработчик: {{ developer_apps_count }} прил., {{ developer_bots_count }} ботов" onclick="switchTab('developer')">
+                    🛠️
+                </span>
+                {% endif %}
+            </div>
+            
+            <div class="badges-row">
+                {% if profile_user.verification_type > 0 %}
+                <span class="badge-tag" style="background: rgba(255,255,255,0.05); border-color: #333; color: #ccc;">
+                    {{ VERIFICATION_TYPES[profile_user.verification_type].icon if profile_user.verification_type < VERIFICATION_TYPES|length else '✓' }}
+                    {{ VERIFICATION_TYPES[profile_user.verification_type].name if profile_user.verification_type < VERIFICATION_TYPES|length else 'Верифицирован' }}
+                </span>
+                {% endif %}
+                {% if premium %}
+                <span class="badge-tag" style="background: rgba(255,0,255,0.1); border-color: rgba(255,0,255,0.3); color: #ff00ff;">💎 Premium</span>
+                {% endif %}
+                {% if profile_user.is_admin %}
+                <span class="badge-tag" style="background: rgba(255,215,0,0.1); border-color: rgba(255,215,0,0.3); color: #ffd700;">👑 Admin {{ profile_user.admin_level }} ур.</span>
+                {% endif %}
+                {% if developer_apps_count and developer_apps_count > 0 or developer_bots_count and developer_bots_count > 0 %}
+                <span class="badge-tag" style="background: rgba(0,212,255,0.1); border-color: rgba(0,212,255,0.3); color: #00d4ff;">🛠️ Разработчик</span>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Tabs -->
+    <div class="tabs-bar">
+        <button class="tab-btn active" onclick="switchTab('info')"><i class="fas fa-user"></i> Информация</button>
+        <button class="tab-btn" onclick="switchTab('social')"><i class="fas fa-link"></i> Соцсети</button>
+        <button class="tab-btn" onclick="switchTab('appearance')"><i class="fas fa-palette"></i> Оформление</button>
+        {% if developer_apps_count or is_owner %}
+        <button class="tab-btn" onclick="switchTab('developer')">
+            <i class="fas fa-code"></i> Разработка
+            <span style="background: var(--blue); color: #000; font-size: 9px; padding: 2px 6px; border-radius: 8px; margin-left: 4px;">{{ developer_apps_count + developer_bots_count }}</span>
+        </button>
+        {% endif %}
+        <button class="tab-btn" onclick="switchTab('stats')"><i class="fas fa-chart-bar"></i> Статистика</button>
+        <button class="tab-btn" onclick="switchTab('achievements')"><i class="fas fa-trophy"></i> Достижения</button>
+    </div>
+    
+    <!-- Tab: Info -->
+    <div id="tab-info" class="tab-content active">
+        <div class="grid-2">
+            <div class="card">
+                <div class="card-title"><i class="fas fa-id-card"></i> Основное</div>
+                <div class="form-group"><label class="form-label">Имя</label><input type="text" class="form-input" id="first_name" value="{{ passport_data.first_name or '' }}" placeholder="Ваше имя" {% if not is_owner %}disabled{% endif %}></div>
+                <div class="form-group"><label class="form-label">Фамилия</label><input type="text" class="form-input" id="last_name" value="{{ passport_data.last_name or '' }}" placeholder="Ваша фамилия" {% if not is_owner %}disabled{% endif %}></div>
+                <div class="form-group"><label class="form-label">Отображаемое имя</label><input type="text" class="form-input" id="display_name" value="{{ passport_data.display_name or '' }}" placeholder="Как вас называть" {% if not is_owner %}disabled{% endif %}></div>
+                <div class="form-group"><label class="form-label">О себе</label><textarea class="form-input" id="bio" placeholder="Расскажите о себе..." {% if not is_owner %}disabled{% endif %}>{{ passport_data.bio or '' }}</textarea></div>
+                <div class="form-group"><label class="form-label">День рождения</label><input type="date" class="form-input" id="birthday" value="{{ passport_data.birthday or '' }}" {% if not is_owner %}disabled{% endif %}></div>
+                <div class="grid-2">
+                    <div class="form-group"><label class="form-label">Пол</label><select class="form-input" id="gender" {% if not is_owner %}disabled{% endif %}><option value="">Не указан</option><option value="male" {% if passport_data.gender=='male' %}selected{% endif %}>Мужской</option><option value="female" {% if passport_data.gender=='female' %}selected{% endif %}>Женский</option><option value="other" {% if passport_data.gender=='other' %}selected{% endif %}>Другой</option></select></div>
+                    <div class="form-group"><label class="form-label">Язык</label><select class="form-input" id="language" {% if not is_owner %}disabled{% endif %}><option value="ru" {% if passport_data.language=='ru' %}selected{% endif %}>🇷🇺 Русский</option><option value="en" {% if passport_data.language=='en' %}selected{% endif %}>🇬🇧 English</option></select></div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-title"><i class="fas fa-map-marker-alt"></i> Местоположение</div>
+                <div class="form-group"><label class="form-label">Страна</label><input type="text" class="form-input" id="country" value="{{ passport_data.country or '' }}" placeholder="Россия" {% if not is_owner %}disabled{% endif %}></div>
+                <div class="form-group"><label class="form-label">Город</label><input type="text" class="form-input" id="city" value="{{ passport_data.city or '' }}" placeholder="Москва" {% if not is_owner %}disabled{% endif %}></div>
+                <div class="form-group"><label class="form-label">Часовой пояс</label><select class="form-input" id="timezone" {% if not is_owner %}disabled{% endif %}><option value="UTC+3" {% if passport_data.timezone=='UTC+3' %}selected{% endif %}>UTC+3 (Москва)</option><option value="UTC+0" {% if passport_data.timezone=='UTC+0' %}selected{% endif %}>UTC+0 (Лондон)</option></select></div>
+                <div class="card-title" style="margin-top:20px;"><i class="fas fa-briefcase"></i> Работа / Учёба</div>
+                <div class="form-group"><label class="form-label">Место работы</label><input type="text" class="form-input" id="workplace" value="{{ passport_data.workplace or '' }}" placeholder="Компания" {% if not is_owner %}disabled{% endif %}></div>
+                <div class="form-group"><label class="form-label">Должность</label><input type="text" class="form-input" id="position" value="{{ passport_data.position or '' }}" placeholder="Разработчик" {% if not is_owner %}disabled{% endif %}></div>
+                <div class="form-group"><label class="form-label">Сайт</label><input type="url" class="form-input" id="website" value="{{ passport_data.website or '' }}" placeholder="https://..." {% if not is_owner %}disabled{% endif %}></div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Tab: Social -->
+    <div id="tab-social" class="tab-content">
+        <div class="card">
+            <div class="card-title"><i class="fas fa-link"></i> Социальные сети и контакты</div>
+            <div class="social-row"><i class="fab fa-telegram"></i><span style="color:#888;font-size:11px;min-width:70px;">Telegram</span><input type="text" id="social_telegram" value="{{ passport_data.social_telegram or '' }}" placeholder="@username" {% if not is_owner %}disabled{% endif %}></div>
+            <div class="social-row"><i class="fab fa-discord"></i><span style="color:#888;font-size:11px;min-width:70px;">Discord</span><input type="text" id="social_discord" value="{{ passport_data.social_discord or '' }}" placeholder="username" {% if not is_owner %}disabled{% endif %}></div>
+            <div class="social-row"><i class="fab fa-github"></i><span style="color:#888;font-size:11px;min-width:70px;">GitHub</span><input type="text" id="social_github" value="{{ passport_data.social_github or '' }}" placeholder="username" {% if not is_owner %}disabled{% endif %}></div>
+            <div class="social-row"><i class="fab fa-youtube"></i><span style="color:#888;font-size:11px;min-width:70px;">YouTube</span><input type="text" id="social_youtube" value="{{ passport_data.social_youtube or '' }}" placeholder="@channel" {% if not is_owner %}disabled{% endif %}></div>
+            <div class="social-row"><i class="fab fa-twitter"></i><span style="color:#888;font-size:11px;min-width:70px;">Twitter / X</span><input type="text" id="social_twitter" value="{{ passport_data.social_twitter or '' }}" placeholder="@username" {% if not is_owner %}disabled{% endif %}></div>
+            <div class="social-row"><i class="fab fa-instagram"></i><span style="color:#888;font-size:11px;min-width:70px;">Instagram</span><input type="text" id="social_instagram" value="{{ passport_data.social_instagram or '' }}" placeholder="@username" {% if not is_owner %}disabled{% endif %}></div>
+            <div class="social-row"><i class="fab fa-tiktok"></i><span style="color:#888;font-size:11px;min-width:70px;">TikTok</span><input type="text" id="social_tiktok" value="{{ passport_data.social_tiktok or '' }}" placeholder="@username" {% if not is_owner %}disabled{% endif %}></div>
+            <div class="social-row"><i class="fab fa-twitch"></i><span style="color:#888;font-size:11px;min-width:70px;">Twitch</span><input type="text" id="social_twitch" value="{{ passport_data.social_twitch or '' }}" placeholder="username" {% if not is_owner %}disabled{% endif %}></div>
+            <div class="social-row"><i class="fab fa-spotify"></i><span style="color:#888;font-size:11px;min-width:70px;">Spotify</span><input type="text" id="social_spotify" value="{{ passport_data.social_spotify or '' }}" placeholder="username" {% if not is_owner %}disabled{% endif %}></div>
+            <div class="social-row"><i class="fab fa-steam"></i><span style="color:#888;font-size:11px;min-width:70px;">Steam</span><input type="text" id="social_steam" value="{{ passport_data.social_steam or '' }}" placeholder="username" {% if not is_owner %}disabled{% endif %}></div>
+        </div>
+    </div>
+    
+    <!-- Tab: Appearance -->
+    <div id="tab-appearance" class="tab-content">
+        <div class="grid-2">
+            <div class="card">
+                <div class="card-title"><i class="fas fa-palette"></i> Цветовая схема</div>
+                <p style="color:#888;font-size:11px;margin-bottom:12px;">Цвет акцента</p>
+                <div class="color-grid">
+                    {% for color in ['#53fc18', '#00d4ff', '#a855f7', '#ec4899', '#ff8800', '#ffd700', '#ff4444', '#ffffff'] %}
+                    <div class="color-swatch {% if passport_data.accent_color == color %}selected{% endif %}" style="background: {{ color }};" onclick="selectColor('{{ color }}')" data-color="{{ color }}"></div>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-title"><i class="fas fa-shield-halved"></i> Приватность</div>
+                <div class="form-group"><label class="form-label">Кто видит соцсети</label><select class="form-input" id="privacy_social" {% if not is_owner %}disabled{% endif %}><option value="all">Все</option><option value="friends">Только друзья</option><option value="nobody">Никто</option></select></div>
+                <div class="form-group"><label class="form-label">Кто видит статистику</label><select class="form-input" id="privacy_stats" {% if not is_owner %}disabled{% endif %}><option value="all">Все</option><option value="friends">Только друзья</option><option value="nobody">Никто</option></select></div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Tab: Developer (НОВАЯ ВКЛАДКА) -->
+    <div id="tab-developer" class="tab-content">
+        <div class="grid-2">
+            <div class="card">
+                <div class="card-title"><i class="fas fa-code"></i> OAuth-приложения</div>
+                {% if developer_apps %}
+                {% for app in developer_apps %}
+                <div class="app-item">
+                    <div>
+                        <div class="app-item-name">{{ app.name }}</div>
+                        <div class="app-item-meta">Client ID: {{ app.client_id[:16] }}... • {{ app.created_at.strftime('%d.%m.%Y') }}</div>
+                    </div>
+                    {% if is_owner %}
+                    <a href="/developers" class="btn-header" style="padding:6px 12px; font-size:10px;">Управлять</a>
+                    {% endif %}
+                </div>
+                {% endfor %}
+                {% else %}
+                <p style="color:#888; font-size:12px; text-align:center; padding:20px;">Нет OAuth-приложений</p>
+                {% endif %}
+            </div>
+            <div class="card">
+                <div class="card-title"><i class="fas fa-robot"></i> Боты</div>
+                {% if developer_bots %}
+                {% for bot in developer_bots %}
+                <div class="app-item">
+                    <div>
+                        <div class="app-item-name">@{{ bot.username }}</div>
+                        <div class="app-item-meta">{{ bot.created_at.strftime('%d.%m.%Y') }}</div>
+                    </div>
+                    {% if is_owner %}
+                    <a href="/developers" class="btn-header" style="padding:6px 12px; font-size:10px;">Управлять</a>
+                    {% endif %}
+                </div>
+                {% endfor %}
+                {% else %}
+                <p style="color:#888; font-size:12px; text-align:center; padding:20px;">Нет ботов</p>
+                {% endif %}
+            </div>
+        </div>
+        {% if is_owner %}
+        <div style="text-align:center; margin-top:20px;">
+            <a href="/developers" class="btn-header btn-accent" style="display:inline-flex; padding:12px 24px;">
+                <i class="fas fa-external-link-alt"></i> Перейти в Dev Portal
+            </a>
+        </div>
+        {% endif %}
+    </div>
+    
+    <!-- Tab: Stats -->
+    <div id="tab-stats" class="tab-content">
+        <div class="stat-cards" style="margin-bottom:20px;">
+            <div class="stat-item"><div class="stat-value">{{ profile_user.msg_count }}</div><div class="stat-label">Сообщений</div></div>
+            <div class="stat-item"><div class="stat-value">{{ channels_count }}</div><div class="stat-label">Каналов</div></div>
+            <div class="stat-item"><div class="stat-value">{{ friends_count }}</div><div class="stat-label">Друзей</div></div>
+            <div class="stat-item"><div class="stat-value">{{ profile_user.created_at.strftime('%d.%m') if profile_user.created_at else '—' }}</div><div class="stat-label">С нами с</div></div>
+        </div>
+        <div class="card">
+            <div class="card-title"><i class="fas fa-chart-line"></i> Активность за неделю</div>
+            <div class="chart-placeholder">
+                {% for v in [30, 55, 40, 70, 50, 65, 45] %}
+                <div class="chart-bar" style="height: {{ v }}%;"><span>{{ v }}</span></div>
+                {% endfor %}
+            </div>
+            <div style="display:flex;justify-content:space-around;margin-top:8px;font-size:9px;color:#888;">
+                <span>Пн</span><span>Вт</span><span>Ср</span><span>Чт</span><span>Пт</span><span>Сб</span><span>Вс</span>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Tab: Achievements -->
+    <div id="tab-achievements" class="tab-content">
+        <div class="card">
+            <div class="card-title"><i class="fas fa-trophy"></i> Достижения</div>
+            <div class="achieve-grid">
+                <div class="achieve-item"><div class="achieve-icon">👋</div><div class="achieve-name">Новичок</div><div class="achieve-date">Получено</div></div>
+                <div class="achieve-item"><div class="achieve-icon">💬</div><div class="achieve-name">100 сообщений</div><div class="achieve-date">{{ 'Получено' if profile_user.msg_count >= 100 else 'Не получено' }}</div></div>
+                <div class="achieve-item"><div class="achieve-icon">🔥</div><div class="achieve-name">7 дней подряд</div><div class="achieve-date">Получено</div></div>
+                <div class="achieve-item"><div class="achieve-icon">👥</div><div class="achieve-name">10 друзей</div><div class="achieve-date">{{ 'Получено' if friends_count >= 10 else 'Не получено' }}</div></div>
+                <div class="achieve-item"><div class="achieve-icon">📢</div><div class="achieve-name">Канал создан</div><div class="achieve-date">{{ 'Получено' if channels_count > 0 else 'Не получено' }}</div></div>
+                <div class="achieve-item {{ 'locked' if not premium }}"><div class="achieve-icon">💎</div><div class="achieve-name">Premium</div><div class="achieve-date">{{ 'Получено' if premium else 'Не получено' }}</div></div>
+                <div class="achieve-item"><div class="achieve-icon">🛠️</div><div class="achieve-name">Разработчик</div><div class="achieve-date">{{ 'Получено' if developer_apps_count + developer_bots_count > 0 else 'Не получено' }}</div></div>
+                <div class="achieve-item {{ 'locked' if profile_user.verification_type < 7 }}"><div class="achieve-icon">👑</div><div class="achieve-name">Основатель</div><div class="achieve-date">{{ 'Получено' if profile_user.verification_type >= 7 else 'Не получено' }}</div></div>
+                <div class="achieve-item {{ 'locked' if profile_user.verification_type < 8 }}"><div class="achieve-icon">⭐</div><div class="achieve-name">Легенда</div><div class="achieve-date">{{ 'Получено' if profile_user.verification_type >= 8 else 'Не получено' }}</div></div>
+                <div class="achieve-item {{ 'locked' if profile_user.msg_count < 1000 }}"><div class="achieve-icon">🎯</div><div class="achieve-name">1000 сообщений</div><div class="achieve-date">{{ 'Получено' if profile_user.msg_count >= 1000 else 'Не получено' }}</div></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const profileUser = "{{ profile_user.username }}";
+    const currentUser = "{{ user.username }}";
+    const isOwner = "{{ 'true' if is_owner else 'false' }}" === "true";
+    let selectedColor = "{{ passport_data.accent_color or '#53fc18' }}";
+    
+    function switchTab(tabId) {
+        document.querySelectorAll('.tab-btn').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        event.target.closest('.tab-btn').classList.add('active');
+        document.getElementById('tab-' + tabId).classList.add('active');
+    }
+    
+    function selectColor(color) {
+        selectedColor = color;
+        document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('selected'));
+        document.querySelector(`[data-color="${color}"]`)?.classList.add('selected');
+    }
+    
+    async function saveAll() {
+        if (!isOwner) return;
+        
+        const data = {
+            first_name: document.getElementById('first_name')?.value || '',
+            last_name: document.getElementById('last_name')?.value || '',
+            display_name: document.getElementById('display_name')?.value || '',
+            bio: document.getElementById('bio')?.value || '',
+            birthday: document.getElementById('birthday')?.value || '',
+            gender: document.getElementById('gender')?.value || '',
+            language: document.getElementById('language')?.value || 'ru',
+            country: document.getElementById('country')?.value || '',
+            city: document.getElementById('city')?.value || '',
+            timezone: document.getElementById('timezone')?.value || 'UTC+3',
+            workplace: document.getElementById('workplace')?.value || '',
+            position: document.getElementById('position')?.value || '',
+            website: document.getElementById('website')?.value || '',
+            social_telegram: document.getElementById('social_telegram')?.value || '',
+            social_discord: document.getElementById('social_discord')?.value || '',
+            social_github: document.getElementById('social_github')?.value || '',
+            social_youtube: document.getElementById('social_youtube')?.value || '',
+            social_twitter: document.getElementById('social_twitter')?.value || '',
+            social_instagram: document.getElementById('social_instagram')?.value || '',
+            social_tiktok: document.getElementById('social_tiktok')?.value || '',
+            social_twitch: document.getElementById('social_twitch')?.value || '',
+            social_spotify: document.getElementById('social_spotify')?.value || '',
+            social_steam: document.getElementById('social_steam')?.value || '',
+            accent_color: selectedColor
+        };
+        
+        try {
+            const r = await fetch('/api/passport/save', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(data) });
+            const d = await r.json();
+            showToast(d.status === 'ok' ? '✅ Паспорт сохранён!' : '❌ Ошибка');
+        } catch(e) { showToast('❌ Ошибка соединения'); }
+    }
+    
+    function uploadAvatar(input) {
+        const file = input.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+            const compressed = await compressImage(e.target.result, 400, 400, 0.6);
+            fetch('/api/user/avatar', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({avatar: compressed}) })
+            .then(r => r.json()).then(d => { if (d.status === 'ok') location.reload(); });
+        };
+        reader.readAsDataURL(file);
+    }
+    
+    function compressImage(base64, maxW, maxH, quality) {
+        return new Promise((resolve) => {
+            const img = new Image();
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                let w = img.width, h = img.height;
+                if (w > maxW) { h = h * (maxW / w); w = maxW; }
+                if (h > maxH) { w = w * (maxH / h); h = maxH; }
+                canvas.width = w; canvas.height = h;
+                canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+                resolve(canvas.toDataURL('image/jpeg', quality));
+            };
+            img.src = base64;
+        });
+    }
+    
+    function showToast(msg) {
+        const t = document.createElement('div');
+        t.className = 'toast';
+        t.textContent = msg;
+        document.body.appendChild(t);
+        setTimeout(() => t.remove(), 2500);
+    }
+</script>
+</body>
+</html>

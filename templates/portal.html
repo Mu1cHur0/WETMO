@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#53fc18">
+    <title>WETMO Dev Portal</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%2353fc18'/%3E%3Ctext x='50' y='72' font-family='Montserrat, sans-serif' font-size='60' font-weight='900' fill='%23000000' text-anchor='middle'%3EW%3C/text%3E%3C/svg%3E">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg: #050505;
+            --bg-glass: rgba(5, 5, 5, 0.85);
+            --kick: #53fc18;
+            --border: #1a1a1a;
+            --accent-white: #ffffff;
+            --accent-silver: #cccccc;
+            --blue: #00d4ff;
+            --purple: #a855f7;
+            --pink: #ec4899;
+            --danger: #ff4444;
+            --warning: #ff8800;
+            --success: #22c55e;
+        }
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; scrollbar-width: thin; scrollbar-color: #333 transparent; }
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: var(--bg);
+            color: #fff;
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+        }
+        
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 6px; }
+        
+        /* Header */
+        .header {
+            background: var(--bg-glass);
+            backdrop-filter: blur(15px);
+            padding: 14px 25px;
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 900;
+            color: var(--kick);
+            text-decoration: none;
+            font-size: 20px;
+        }
+        
+        .logo-icon {
+            width: 28px;
+            height: 28px;
+            background: var(--kick);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .logo-icon span { color: #000; font-size: 18px; font-weight: 900; }
+        
+        .btn-header {
+            background: #111;
+            color: #fff;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: 700;
+            text-decoration: none;
+            border: 1px solid #222;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+        .btn-header:hover { background: #1a1a1a; border-color: #333; }
+        .btn-accent { background: var(--accent-white); color: #000; border-color: var(--accent-white); }
+        .btn-accent:hover { background: #e6e6e6; }
+        
+        .header-actions { display: flex; gap: 8px; margin-left: auto; flex-wrap: wrap; }
+        
+        /* Container */
+        .container { max-width: 1200px; margin: 0 auto; padding: 30px 20px; }
+        
+        /* Hero */
+        .hero {
+            background: linear-gradient(135deg, rgba(83,252,24,0.05), rgba(0,212,255,0.05));
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 40px 30px;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .hero h1 { font-size: 36px; font-weight: 900; color: var(--accent-white); margin-bottom: 10px; }
+        .hero p { color: #888; font-size: 14px; font-weight: 600; max-width: 600px; margin: 0 auto; }
+        
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 4px;
+            margin-bottom: 25px;
+            border-bottom: 1px solid var(--border);
+            overflow-x: auto;
+        }
+        .tab {
+            padding: 14px 22px;
+            background: transparent;
+            border: none;
+            color: #888;
+            font-weight: 700;
+            font-size: 12px;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            white-space: nowrap;
+            transition: all 0.2s;
+            font-family: 'Montserrat', sans-serif;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .tab:hover { color: #fff; }
+        .tab.active { color: var(--accent-white); border-bottom-color: var(--accent-white); }
+        .tab i { font-size: 14px; }
+        
+        .tab-content { display: none; animation: fadeIn 0.3s ease; }
+        .tab-content.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        
+        /* Cards */
+        .card {
+            background: rgba(20,20,20,0.6);
+            border: 1px solid #1f1f1f;
+            border-radius: 16px;
+            padding: 25px;
+            margin-bottom: 20px;
+        }
+        .card-title {
+            font-size: 18px;
+            font-weight: 800;
+            color: var(--accent-white);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .card-title i { color: var(--kick); font-size: 16px; }
+        
+        /* Grids */
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
+        
+        @media (max-width: 768px) {
+            .grid-2, .grid-3 { grid-template-columns: 1fr; }
+            .hero h1 { font-size: 26px; }
+            .header { flex-wrap: wrap; }
+            .header-actions { width: 100%; }
+        }
+        
+        /* Form elements */
+        .form-group { margin-bottom: 16px; }
+        .form-label {
+            display: block;
+            font-size: 11px;
+            font-weight: 700;
+            color: #888;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .form-input {
+            width: 100%;
+            padding: 12px 16px;
+            background: rgba(0,0,0,0.5);
+            border: 1px solid #333;
+            border-radius: 10px;
+            color: #fff;
+            font-size: 13px;
+            font-family: 'Montserrat', sans-serif;
+            outline: none;
+            transition: all 0.3s;
+            box-sizing: border-box;
+        }
+        .form-input:focus { border-color: var(--accent-white); background: rgba(255,255,255,0.05); }
+        textarea.form-input { resize: vertical; min-height: 80px; }
+        
+        .btn {
+            padding: 12px 20px;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 12px;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s;
+            font-family: 'Montserrat', sans-serif;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .btn-primary { background: var(--accent-white); color: #000; }
+        .btn-primary:hover { background: #e6e6e6; transform: translateY(-2px); }
+        .btn-danger { background: rgba(255,68,68,0.15); color: var(--danger); border: 1px solid rgba(255,68,68,0.3); }
+        .btn-danger:hover { background: var(--danger); color: #fff; }
+        .btn-outline { background: transparent; border: 1px solid #333; color: #fff; }
+        .btn-outline:hover { background: rgba(255,255,255,0.05); }
+        
+        /* App/Bot list */
+        .app-item {
+            background: rgba(0,0,0,0.3);
+            border: 1px solid #1a1a1a;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 12px;
+            transition: all 0.2s;
+        }
+        .app-item:hover { border-color: #333; }
+        
+        .app-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .app-name {
+            font-weight: 800;
+            font-size: 16px;
+            color: var(--accent-white);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .app-name .badge {
+            font-size: 9px;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-weight: 700;
+        }
+        .badge-verified { background: rgba(83,252,24,0.15); color: var(--kick); }
+        .badge-pending { background: rgba(255,136,0,0.15); color: var(--warning); }
+        
+        .app-meta {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            font-size: 11px;
+            color: #888;
+            font-weight: 600;
+        }
+        .app-meta span { display: flex; align-items: center; gap: 5px; }
+        
+        .code-block {
+            background: #000;
+            border: 1px solid #222;
+            border-radius: 10px;
+            padding: 20px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            color: var(--kick);
+            overflow-x: auto;
+            line-height: 1.6;
+            margin-top: 12px;
+        }
+        .code-block .keyword { color: #ff79c6; }
+        .code-block .string { color: #f1fa8c; }
+        .code-block .comment { color: #6272a4; }
+        .code-block .func { color: #50fa7b; }
+        .code-block .var { color: #8be9fd; }
+        
+        /* Stats */
+        .stat-cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+        .stat-item {
+            text-align: center;
+            padding: 20px 15px;
+            background: rgba(20,20,20,0.4);
+            border: 1px solid #1a1a1a;
+            border-radius: 12px;
+        }
+        .stat-value { font-size: 28px; font-weight: 900; color: var(--kick); }
+        .stat-label { font-size: 10px; color: #888; font-weight: 700; margin-top: 6px; text-transform: uppercase; letter-spacing: 1px; }
+        .stat-change { font-size: 10px; margin-top: 4px; font-weight: 600; }
+        .stat-up { color: var(--success); }
+        .stat-down { color: var(--danger); }
+        
+        @media (max-width: 768px) {
+            .stat-cards { grid-template-columns: repeat(2, 1fr); }
+        }
+        
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #fff;
+            color: #000;
+            padding: 12px 25px;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 12px;
+            z-index: 1000;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            animation: toastIn 0.3s ease, toastOut 0.3s ease 2.5s forwards;
+        }
+        @keyframes toastIn { from { opacity: 0; transform: translateX(-50%) translateY(15px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
+        @keyframes toastOut { from { opacity: 1; } to { opacity: 0; transform: translateX(-50%) translateY(-15px); } }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(8px);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal.active { display: flex; }
+        .modal-content {
+            background: #0a0a0a;
+            border: 1px solid #222;
+            padding: 30px;
+            border-radius: 20px;
+            width: 420px;
+            max-width: 90%;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.7);
+        }
+    </style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="header">
+    <a href="/" class="logo">
+        <div class="logo-icon"><span>W</span></div>
+        <span>WETMO</span>
+    </a>
+    <span style="font-size: 14px; font-weight: 700; color: var(--accent-silver);">🛠️ Developer Portal</span>
+    
+    <div class="header-actions">
+        <button class="btn-header btn-accent" onclick="showCreateAppModal()">
+            <i class="fas fa-plus"></i> Новое приложение
+        </button>
+        <button class="btn-header btn-accent" onclick="showCreateBotModal()">
+            <i class="fas fa-robot"></i> Новый бот
+        </button>
+        <a href="/" class="btn-header"><i class="fas fa-arrow-left"></i> Назад</a>
+    </div>
+</div>
+
+<div class="container">
+    <!-- Hero -->
+    <div class="hero">
+        <h1>🛠️ WETMO Developer Portal</h1>
+        <p>Создавайте OAuth-приложения, управляйте ботами и интегрируйте свои сервисы с WETMO</p>
+    </div>
+    
+    <!-- Stats -->
+    <div class="stat-cards" style="margin-bottom: 25px;">
+        <div class="stat-item">
+            <div class="stat-value">{{ apps|length }}</div>
+            <div class="stat-label">Приложений</div>
+            <div class="stat-change stat-up">OAuth</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-value">{{ bots|length }}</div>
+            <div class="stat-label">Ботов</div>
+            <div class="stat-change stat-up">Активных</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-value" id="total-requests">—</div>
+            <div class="stat-label">Запросов API</div>
+            <div class="stat-change stat-up">за 24ч</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-value" id="active-tokens">—</div>
+            <div class="stat-label">Активных токенов</div>
+            <div class="stat-change stat-up">сейчас</div>
+        </div>
+    </div>
+    
+    <!-- Tabs -->
+    <div class="tabs">
+        <button class="tab active" onclick="switchTab('apps')"><i class="fas fa-code"></i> Мои приложения</button>
+        <button class="tab" onclick="switchTab('bots')"><i class="fas fa-robot"></i> Мои боты</button>
+        <button class="tab" onclick="switchTab('docs')"><i class="fas fa-book"></i> Документация</button>
+        <button class="tab" onclick="switchTab('stats')"><i class="fas fa-chart-line"></i> Статистика</button>
+    </div>
+    
+    <!-- Tab: My Apps -->
+    <div id="tab-apps" class="tab-content active">
+        <div class="card">
+            <div class="card-title"><i class="fas fa-code"></i> OAuth-приложения</div>
+            
+            {% if apps %}
+            {% for app in apps %}
+            <div class="app-item" id="app-{{ app.client_id }}">
+                <div class="app-header">
+                    <div class="app-name">
+                        {{ app.name }}
+                        <span class="badge {% if app.is_verified %}badge-verified{% else %}badge-pending{% endif %}">
+                            {{ '✓ Проверено' if app.is_verified else '⏳ На проверке' }}
+                        </span>
+                    </div>
+                    <div>
+                        <button class="btn btn-outline" onclick="toggleDetails('details-{{ loop.index }}')" style="padding:6px 12px; font-size:10px;">
+                            <i class="fas fa-eye"></i> Детали
+                        </button>
+                        <button class="btn btn-danger" onclick="deleteApp('{{ app.client_id }}')" style="padding:6px 12px; font-size:10px;">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="app-meta">
+                    <span><i class="fas fa-key"></i> Client ID: <code style="color:var(--kick);">{{ app.client_id[:16] }}...</code></span>
+                    <span><i class="fas fa-calendar"></i> {{ app.created_at.strftime('%d.%m.%Y') }}</span>
+                    <span><i class="fas fa-link"></i> {{ app.redirect_uri[:30] }}{% if app.redirect_uri|length > 30 %}...{% endif %}</span>
+                </div>
+                <div id="details-{{ loop.index }}" style="display:none; margin-top:15px;">
+                    <div class="code-block">
+<span class="comment">// Client Secret (храните в безопасности!)</span>
+<span class="var">CLIENT_SECRET</span> = <span class="string">"{{ app.client_secret }}"</span>
+
+<span class="comment">// Пример авторизации:</span>
+<span class="keyword">GET</span> <span class="string">https://wetmo.app/oauth/authorize?client_id={{ app.client_id[:16] }}...&redirect_uri={{ app.redirect_uri }}</span>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+            {% else %}
+            <p style="color:#888; text-align:center; padding:30px; font-weight:600;">
+                У вас пока нет OAuth-приложений. Создайте первое!
+            </p>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- Tab: My Bots -->
+    <div id="tab-bots" class="tab-content">
+        <div class="card">
+            <div class="card-title"><i class="fas fa-robot"></i> Мои боты</div>
+            
+            {% if bots %}
+            {% for bot in bots %}
+            <div class="app-item">
+                <div class="app-header">
+                    <div class="app-name">
+                        {% if bot.avatar_url %}
+                        <img src="{{ bot.avatar_url }}" style="width:28px; height:28px; border-radius:8px;">
+                        {% endif %}
+                        @{{ bot.username }}
+                        {% if bot.is_public %}
+                        <span class="badge badge-verified">Публичный</span>
+                        {% endif %}
+                    </div>
+                    <button class="btn btn-danger" onclick="deleteBot('{{ bot.username }}')" style="padding:6px 12px; font-size:10px;">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+                {% if bot.description %}
+                <p style="color:#888; font-size:12px; margin-bottom:8px;">{{ bot.description }}</p>
+                {% endif %}
+                <div class="app-meta">
+                    <span><i class="fas fa-key"></i> Token: <code style="color:var(--kick);">{{ bot.token[:32] }}...</code></span>
+                    <span><i class="fas fa-calendar"></i> {{ bot.created_at.strftime('%d.%m.%Y') }}</span>
+                </div>
+                <div class="code-block" style="margin-top:12px;">
+<span class="comment">// Подключение бота через WebSocket:</span>
+<span class="keyword">const</span> <span class="var">socket</span> = <span class="func">io</span>(<span class="string">'https://wetmo.app'</span>, {
+    auth: { token: <span class="string">'{{ bot.token[:32] }}...'</span> }
+});
+                </div>
+            </div>
+            {% endfor %}
+            {% else %}
+            <p style="color:#888; text-align:center; padding:30px; font-weight:600;">
+                У вас пока нет ботов. Создайте первого!
+            </p>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- Tab: Documentation -->
+    <div id="tab-docs" class="tab-content">
+        <div class="card">
+            <div class="card-title"><i class="fas fa-book"></i> API Документация</div>
+            
+            <h3 style="color:var(--accent-white); font-size:16px; margin:20px 0 10px;">🔐 OAuth2 Авторизация</h3>
+            <p style="color:#888; font-size:12px; margin-bottom:15px;">WETMO использует стандартный протокол OAuth2 для безопасной авторизации.</p>
+            
+            <div class="code-block">
+<span class="comment">// Шаг 1: Редирект пользователя на страницу авторизации</span>
+<span class="keyword">GET</span> <span class="string">/oauth/authorize?client_id=YOUR_CLIENT_ID&redirect_uri=YOUR_REDIRECT_URI</span>
+
+<span class="comment">// Шаг 2: Обмен кода на access_token</span>
+<span class="keyword">POST</span> <span class="string">/oauth/token</span>
+{
+    <span class="string">"client_id"</span>: <span class="string">"YOUR_CLIENT_ID"</span>,
+    <span class="string">"client_secret"</span>: <span class="string">"YOUR_CLIENT_SECRET"</span>,
+    <span class="string">"code"</span>: <span class="string">"CODE_FROM_STEP_1"</span>
+}
+
+<span class="comment">// Шаг 3: Получение информации о пользователе</span>
+<span class="keyword">GET</span> <span class="string">/oauth/userinfo</span>
+<span class="keyword">Headers</span>: Authorization: Bearer YOUR_ACCESS_TOKEN
+            </div>
+            
+            <h3 style="color:var(--accent-white); font-size:16px; margin:25px 0 10px;">🤖 Bot API</h3>
+            <p style="color:#888; font-size:12px; margin-bottom:15px;">Боты подключаются через WebSocket и могут отправлять/получать сообщения.</p>
+            
+            <div class="code-block">
+<span class="comment">// Подключение бота</span>
+<span class="keyword">const</span> <span class="var">io</span> = <span class="func">require</span>(<span class="string">'socket.io-client'</span>);
+<span class="keyword">const</span> <span class="var">socket</span> = <span class="func">io</span>(<span class="string">'https://wetmo.app'</span>, {
+    auth: { token: <span class="string">'BOT_TOKEN'</span> }
+});
+
+<span class="comment">// Отправка сообщения</span>
+<span class="var">socket</span>.<span class="func">emit</span>(<span class="string">'send_msg'</span>, {
+    target: <span class="string">'username'</span>,
+    message: <span class="string">'Hello from bot!'</span>
+});
+
+<span class="comment">// Получение сообщений</span>
+<span class="var">socket</span>.<span class="func">on</span>(<span class="string">'receive_msg'</span>, (<span class="var">data</span>) => {
+    <span class="func">console</span>.<span class="func">log</span>(data.sender, data.message);
+});
+            </div>
+            
+            <h3 style="color:var(--accent-white); font-size:16px; margin:25px 0 10px;">📡 WebSocket события</h3>
+            <div class="code-block">
+<span class="comment">// Присоединение к чату</span>
+<span class="var">socket</span>.<span class="func">emit</span>(<span class="string">'join'</span>, { chat_id: <span class="string">'user1-user2'</span> });
+
+<span class="comment">// Присоединение к каналу</span>
+<span class="var">socket</span>.<span class="func">emit</span>(<span class="string">'join'</span>, { channel_id: <span class="var">123</span> });
+
+<span class="comment">// Получение сообщений чата</span>
+<span class="var">socket</span>.<span class="func">on</span>(<span class="string">'receive_msg'</span>, (data) => { ... });
+
+<span class="comment">// Получение сообщений канала</span>
+<span class="var">socket</span>.<span class="func">on</span>(<span class="string">'receive_channel_msg'</span>, (data) => { ... });
+            </div>
+        </div>
+    </div>
+    
+    <!-- Tab: Statistics -->
+    <div id="tab-stats" class="tab-content">
+        <div class="card">
+            <div class="card-title"><i class="fas fa-chart-line"></i> Статистика использования API</div>
+            
+            <div class="stat-cards">
+                <div class="stat-item">
+                    <div class="stat-value" id="stat-requests">0</div>
+                    <div class="stat-label">Запросов (24ч)</div>
+                    <div class="stat-change stat-up">▲ 12%</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="stat-tokens">0</div>
+                    <div class="stat-label">Активных токенов</div>
+                    <div class="stat-change stat-up">● активно</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="stat-errors">0</div>
+                    <div class="stat-label">Ошибок (24ч)</div>
+                    <div class="stat-change stat-down">▼ 3%</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="stat-uptime">99.9%</div>
+                    <div class="stat-label">Аптайм</div>
+                    <div class="stat-change stat-up">● стабильно</div>
+                </div>
+            </div>
+            
+            <div style="margin-top:25px; text-align:center;">
+                <p style="color:#888; font-size:12px; font-weight:600;">
+                    📊 Подробная аналитика появится в следующем обновлении
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Create App Modal -->
+<div id="create-app-modal" class="modal">
+    <div class="modal-content">
+        <h3 style="color:var(--accent-white); font-weight:900; margin-bottom:20px;">📱 Новое OAuth-приложение</h3>
+        <div class="form-group">
+            <label class="form-label">Название приложения</label>
+            <input type="text" id="new-app-name" class="form-input" placeholder="Моё приложение">
+        </div>
+        <div class="form-group">
+            <label class="form-label">Redirect URI</label>
+            <input type="url" id="new-app-redirect" class="form-input" placeholder="https://example.com/callback">
+        </div>
+        <div class="form-group">
+            <label class="form-label">Описание</label>
+            <textarea id="new-app-desc" class="form-input" placeholder="Краткое описание..." rows="2"></textarea>
+        </div>
+        <div style="display:flex; gap:10px; margin-top:15px;">
+            <button class="btn btn-primary" onclick="createApp()" style="flex:1;">Создать</button>
+            <button class="btn btn-outline" onclick="closeModal('create-app-modal')" style="flex:1;">Отмена</button>
+        </div>
+        <p id="create-app-error" style="color:var(--danger); font-size:12px; margin-top:10px; display:none;"></p>
+    </div>
+</div>
+
+<!-- Create Bot Modal -->
+<div id="create-bot-modal" class="modal">
+    <div class="modal-content">
+        <h3 style="color:var(--accent-white); font-weight:900; margin-bottom:20px;">🤖 Новый бот</h3>
+        <div class="form-group">
+            <label class="form-label">Имя бота (username)</label>
+            <input type="text" id="new-bot-name" class="form-input" placeholder="my_bot" pattern="[a-zA-Z0-9_]+">
+        </div>
+        <div class="form-group">
+            <label class="form-label">Описание</label>
+            <textarea id="new-bot-desc" class="form-input" placeholder="Что делает бот..." rows="2"></textarea>
+        </div>
+        <div style="display:flex; gap:10px; margin-top:15px;">
+            <button class="btn btn-primary" onclick="createBot()" style="flex:1;">Создать</button>
+            <button class="btn btn-outline" onclick="closeModal('create-bot-modal')" style="flex:1;">Отмена</button>
+        </div>
+        <p id="create-bot-error" style="color:var(--danger); font-size:12px; margin-top:10px; display:none;"></p>
+    </div>
+</div>
+
+<script>
+    function switchTab(tabId) {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        event.target.closest('.tab').classList.add('active');
+        document.getElementById('tab-' + tabId).classList.add('active');
+    }
+    
+    function toggleDetails(id) {
+        const el = document.getElementById(id);
+        el.style.display = el.style.display === 'none' ? 'block' : 'none';
+    }
+    
+    function showCreateAppModal() { document.getElementById('create-app-modal').classList.add('active'); }
+    function showCreateBotModal() { document.getElementById('create-bot-modal').classList.add('active'); }
+    function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+    
+    async function createApp() {
+        const name = document.getElementById('new-app-name').value.trim();
+        const redirect_uri = document.getElementById('new-app-redirect').value.trim();
+        const description = document.getElementById('new-app-desc').value.trim();
+        
+        if (!name || !redirect_uri) {
+            document.getElementById('create-app-error').textContent = 'Название и Redirect URI обязательны';
+            document.getElementById('create-app-error').style.display = 'block';
+            return;
+        }
+        
+        try {
+            const r = await fetch('/api/developers/app/create', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({name, redirect_uri, description})
+            });
+            const d = await r.json();
+            if (d.status === 'ok') {
+                location.reload();
+            } else {
+                document.getElementById('create-app-error').textContent = d.error || 'Ошибка';
+                document.getElementById('create-app-error').style.display = 'block';
+            }
+        } catch(e) {
+            document.getElementById('create-app-error').textContent = 'Ошибка соединения';
+            document.getElementById('create-app-error').style.display = 'block';
+        }
+    }
+    
+    async function createBot() {
+        const username = document.getElementById('new-bot-name').value.trim().toLowerCase();
+        const description = document.getElementById('new-bot-desc').value.trim();
+        
+        if (!username) {
+            document.getElementById('create-bot-error').textContent = 'Имя бота обязательно';
+            document.getElementById('create-bot-error').style.display = 'block';
+            return;
+        }
+        
+        try {
+            const r = await fetch('/api/developers/bot/create', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({username, description})
+            });
+            const d = await r.json();
+            if (d.status === 'ok') {
+                location.reload();
+            } else {
+                document.getElementById('create-bot-error').textContent = d.error || 'Ошибка';
+                document.getElementById('create-bot-error').style.display = 'block';
+            }
+        } catch(e) {
+            document.getElementById('create-bot-error').textContent = 'Ошибка соединения';
+            document.getElementById('create-bot-error').style.display = 'block';
+        }
+    }
+    
+    async function deleteApp(clientId) {
+        if (!confirm('Удалить приложение? Его нельзя будет восстановить.')) return;
+        try {
+            await fetch(`/api/developers/app/${clientId}`, {method: 'DELETE'});
+            location.reload();
+        } catch(e) {}
+    }
+    
+    async function deleteBot(username) {
+        if (!confirm(`Удалить бота @${username}?`)) return;
+        try {
+            await fetch(`/api/developers/bot/${username}`, {method: 'DELETE'});
+            location.reload();
+        } catch(e) {}
+    }
+    
+    // Load stats
+    fetch('/api/developers/stats')
+        .then(r => r.json())
+        .then(d => {
+            document.getElementById('stat-requests').textContent = d.requests || 0;
+            document.getElementById('stat-tokens').textContent = d.tokens || 0;
+            document.getElementById('stat-errors').textContent = d.errors || 0;
+            document.getElementById('total-requests').textContent = d.requests || 0;
+            document.getElementById('active-tokens').textContent = d.tokens || 0;
+        })
+        .catch(() => {});
+</script>
+
+</body>
+</html>
